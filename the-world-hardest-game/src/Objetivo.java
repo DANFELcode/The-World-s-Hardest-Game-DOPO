@@ -9,9 +9,7 @@ public abstract class Objetivo implements Colisionable {
     	this.x = x;
     	this.y = y;
     	this.obtenido = false;
-    }
-
-    public abstract void alContacto(Jugador jugador); // cada jugador reacciona diferente
+    } 
 
     public boolean isObtenido() {
     	return obtenido;
