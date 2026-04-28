@@ -8,9 +8,6 @@ public class Moneda extends Objetivo {
     }
 
     @Override
-    public void alContacto(Jugador jugador) {}
-
-    @Override
     public Rectangle getAreaColision() {return null;}
 
     @Override
