@@ -23,10 +23,7 @@ public abstract class ElementoMovil {
     //setters necesarios
     public void setX(int x) {};
     public void setY(int y) {};
-    public void setVelocidad(double velocidad) {
+    protected void setVelocidad(double velocidad) {
         this.velocidad = velocidad;
-    }
-    public void setColor(String color) {
-        this.color = color;
     }
 }
