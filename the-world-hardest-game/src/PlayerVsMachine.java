@@ -1,6 +1,7 @@
 package domain;
 
 public class PlayerVsMachine extends ModoDeJuego {
+	//implementar logica de ia
     public PlayerVsMachine() {
         super();
     }
