@@ -6,19 +6,19 @@ package domain;
  * <b>Inv:</b> velocidad > 0 
  */
 public abstract class ElementoMovil {
-    private int x;
-    private int y;
+    private double x;
+    private double y;
     private double velocidad;
     private String color;
 
     /**
      * Crea un elemento movil con una posición inicial, velocidad y color
-     * @param posición x horizontal inicial
-     * @param posición y vertical inicial
-     * @param velocidad del elemento movil debe ser mayor a 0
-     * @param color del jugador o enemigo
+     * @param x posición horizontal inicial
+     * @param y posición vertical inicial
+     * @param velocidad velocidad del elemento movil debe ser mayor a 0
+     * @param color color del jugador o enemigo
      */
-    public ElementoMovil(int x, int y, double velocidad, String color) {
+    public ElementoMovil(double x, double y, double velocidad, String color) {
         this.x = x;
         this.y = y;
         this.velocidad = velocidad;
@@ -29,7 +29,7 @@ public abstract class ElementoMovil {
      * Retorna la posición actual horizontal.
      * @return x
      */
-    public int getX() {
+    public double getX() {
         return x;
     }
 
@@ -37,7 +37,7 @@ public abstract class ElementoMovil {
      * Retorna la posición actual vertical.
      * @return y
      */
-    public int getY() {
+    public double getY() {
         return y;
     }
 
@@ -58,23 +58,24 @@ public abstract class ElementoMovil {
     }
 
     /**
-     * Actualiza la posición horizontal(disponible solo para subclases).
+     * Actualiza la posición horizontal (disponible solo para subclases).
      * @param x nueva coordenada x
      */
-    protected void setX(int x) {
+    protected void setX(double x) {
         this.x = x;
     }
 
     /**
-     * Actualiza la posición vertical(disponible solo para subclases).
-     * @param y new y coordinatey nueva coordenada y
-    protected void setY(int y) {
+     * Actualiza la posición vertical (disponible solo para subclases).
+     * @param y nueva coordenada y
+     */
+    protected void setY(double y) {
         this.y = y;
     }
 
     /**
      * Actualiza la velocidad del elemento.
-     * @param nueva velocidad debe ser mayor a 0
+     * @param velocidad nueva velocidad, debe ser mayor a 0
      */
     protected void setVelocidad(double velocidad) {
         this.velocidad = velocidad;
