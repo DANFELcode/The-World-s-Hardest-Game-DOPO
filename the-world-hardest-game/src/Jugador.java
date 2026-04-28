@@ -11,8 +11,8 @@ public abstract class Jugador extends ElementoMovil {
 	private int monedasRecolectadas;
 	private boolean estaVivo;
 	private boolean estaSeguro;
-	private int xInicio;
-	private int yInicio;
+	private double xInicio;
+	private double yInicio;
 
 	/**
 	 * Crea un jugador con nombre, velocidad y color definidos.
@@ -21,7 +21,7 @@ public abstract class Jugador extends ElementoMovil {
 	 * @param color color visual del jugador
 	 */
 	public Jugador(String nombre, double velocidad, String color) {
-	    super(0, 0, velocidad, color);
+	    super(0.0, 0.0, velocidad, color);
 	    this.nombre = nombre;
 	    this.muertes = 0;
 	    this.monedasRecolectadas = 0;
@@ -51,7 +51,7 @@ public abstract class Jugador extends ElementoMovil {
 	 * @param x coordenada horizontal del punto de inicio
 	 * @param y coordenada vertical del punto de inicio
 	 */
-	public void setPosicionInicio(int x, int y) {
+	public void setPosicionInicio(double x, double y) {
 		this.xInicio = x;
 		this.yInicio = y;
 	}
