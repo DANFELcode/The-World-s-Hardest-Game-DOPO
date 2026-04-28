@@ -2,9 +2,7 @@ package domain;
 
 public class JugadorRojo extends Jugador {
     public JugadorRojo(String nombre) {
-        super(nombre);
-        setVelocidad(1.0);
-        setColor("rojo");
+    	super(nombre, 1.5, "rojo");
     }
     
     //metodos de control de movimiento
