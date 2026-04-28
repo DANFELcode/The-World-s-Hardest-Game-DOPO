@@ -8,9 +8,6 @@ public class ZonaSeguraIntermedia extends Objetivo {
     }
 
     @Override
-    public void alContacto(Jugador jugador) {}
-
-    @Override
     public void alColisionar(Jugador jugador) {}
 
 	@Override
