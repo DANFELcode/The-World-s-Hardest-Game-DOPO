@@ -6,10 +6,12 @@ public abstract class Jugador extends ElementoMovil{
 	private int monedasRecolectadas;	
 	private boolean estaVivo;
 	private boolean estaSeguro;
+	private int xInicio;
+	private int yInicio;
 
 	
-	public Jugador(String nombre) {
-	    super(0, 0, 1.0, "default");
+	public Jugador(String nombre, double velocidad, String color) {
+	    super(0, 0, velocidad, color);
 	    this.nombre = nombre;
 	    this.muertes = 0;
 	    this.monedasRecolectadas = 0;
@@ -24,6 +26,12 @@ public abstract class Jugador extends ElementoMovil{
 	public void recolectarMoneda() {
 		
 	}
+	public void setPosicionInicio(int x, int y) {
+		this.xInicio = x; this.yInicio = y;
+		}
+	public void respawn() {
+		setX(xInicio); setY(yInicio);
+		}
 	
 	//metodos de control de movimiento	
 	public abstract void moverJugador(char dir);
@@ -36,6 +44,9 @@ public abstract class Jugador extends ElementoMovil{
 	public boolean estaSeguro() {
 		return true;
 	}
+	
+	
+	
 	
 	
 	//getters necesarios
