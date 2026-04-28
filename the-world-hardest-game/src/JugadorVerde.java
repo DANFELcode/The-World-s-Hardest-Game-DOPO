@@ -4,9 +4,7 @@ public class JugadorVerde extends Jugador {
     private boolean absorbioPrimerGolpe;
 
     public JugadorVerde(String nombre) {
-        super(nombre);
-        setVelocidad(1.0);
-        setColor("verde");
+    	super(nombre, 1.0, "verde");
         this.absorbioPrimerGolpe = false;
     }
     
