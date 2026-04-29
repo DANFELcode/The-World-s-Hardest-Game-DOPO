@@ -5,8 +5,4 @@ public class JugadorAzul extends Jugador {
 	    super(nombre, 1.5, "azul");
 	}
     
-    //metodos de control de movimiento
-    public void moverJugador(char dir) {
-
-    }
 }
