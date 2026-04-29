@@ -22,19 +22,19 @@ public class JugadorRojo extends Jugador {
     public void moverJugador(char dir) {
     	switch(dir) {
     	case 'N':
-    		int nuevoYN = getY() + 1;
+    		double nuevoYN = getY() + getVelocidad();
     		setY(nuevoYN);
     		break;
     	case 'S':
-    		int nuevoYS = getY() - 1;
+    		double nuevoYS = getY() - getVelocidad();
     		setY(nuevoYS);
     		break;
     	case 'W':
-    		int nuevoXW = getX() - 1;
+    		double nuevoXW = getX() - getVelocidad();
     		setX(nuevoXW);
     		break;
     	case 'E':
-    		int nuevoXE = getX() + 1;
+    		double nuevoXE = getX() + getVelocidad();
     		setX(nuevoXE);
     		break;
     	}
