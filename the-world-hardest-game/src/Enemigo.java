@@ -23,14 +23,16 @@ public abstract class Enemigo extends ElementoMovil implements Colisionable {
     /**
      * Desplaza al enemigo según su patrón de movimiento.
      */
-    public abstract void mover();
+    public abstract void mover(Mapa mapa);
 
     /**
      * Retorna el área de colisión del enemigo.
-     * @return rectángulo que representa el área de colisión
+     * @return rectángulo de 20x20 píxeles en la posición actual, pendiente ajustar al tamaño real
      */
     @Override
-    public abstract Rectangle getAreaColision();
+    public Rectangle getAreaColision() {
+        return new Rectangle((int) getX(), (int) getY(), 20, 20);
+    }
 
     /**
      * Define la reacción al colisionar con un jugador.
