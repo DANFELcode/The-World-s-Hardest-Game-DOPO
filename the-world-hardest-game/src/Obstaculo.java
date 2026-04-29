@@ -3,12 +3,12 @@ package domain;
 import java.awt.Rectangle;
 
 public class Obstaculo implements Colisionable {
-    private int x;
-    private int y;
-    private int ancho;
-    private int alto;
+    private double x;
+    private double y;
+    private double ancho;
+    private double alto;
 
-    public Obstaculo(int x, int y, int ancho, int alto) {
+    public Obstaculo(double x, double y, double ancho, double alto) {
         this.x = x;
         this.y = y;
         this.ancho = ancho;
@@ -21,8 +21,8 @@ public class Obstaculo implements Colisionable {
     @Override
     public void alColisionar(Jugador j) {}
 
-    public int getX() { return x; }
-    public int getY() { return y; }
-    public int getAncho() { return ancho; }
-    public int getAlto() { return alto; }
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public double getAncho() { return ancho; }
+    public double getAlto() { return alto; }
 }
