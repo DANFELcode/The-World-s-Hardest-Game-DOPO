@@ -1,7 +1,5 @@
 package domain;
 
-import java.awt.Rectangle;
-
 /**
  * Representa el enemigo básico del juego. <br>
  * <b>(x, y, velocidad=1.0, color="azul", horizontal, sentido)</b> <br>
@@ -41,22 +39,4 @@ public class PuntoAzulBasico extends Enemigo {
         }
     }
 
-    /**
-     * Retorna el área de colisión del enemigo.
-     * @return rectángulo de 20x20 píxeles en la posición actual
-     * pendiente por ajustar el 20x20
-     */
-    @Override
-    public Rectangle getAreaColision() {
-    	return new Rectangle((int) getX(), (int) getY(), 20, 20);
-    }
-
-    /**
-     * Al colisionar con un jugador, lo mata.
-     * @param jugador jugador con el que colisiona
-     */
-    @Override
-    public void alColisionar(Jugador jugador) {
-    	jugador.morir();
-    }
 }
