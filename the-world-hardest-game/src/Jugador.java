@@ -65,10 +65,17 @@ public abstract class Jugador extends ElementoMovil {
 	}
 
 	/**
-	 * Mueve al jugador en la dirección indicada.
-	 * @param dir dirección del movimiento: 'N', 'S', 'E', 'O'
+	 * Mueve al jugador en la dirección indicada según su velocidad.
+	 * @param dir dirección del movimiento: 'N' (norte), 'S' (sur), 'E' (este), 'W' (oeste)
 	 */
-	public abstract void moverJugador(char dir);
+	public void moverJugador(char dir) {
+		switch (dir) {
+		case 'N': setY(getY() + getVelocidad()); break;
+		case 'S': setY(getY() - getVelocidad()); break;
+		case 'W': setX(getX() - getVelocidad()); break;
+		case 'E': setX(getX() + getVelocidad()); break;
+		}
+	}
 
 	/**
 	 * Indica si el jugador está vivo.
