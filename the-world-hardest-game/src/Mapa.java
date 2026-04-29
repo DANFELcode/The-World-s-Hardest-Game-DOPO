@@ -11,8 +11,8 @@ public class Mapa {
         this.tablero = new int[alto][ancho];
     }
 
-    public boolean esPosicionValida(int x, int y) {	return false;}
-    public boolean hayPared(int x, int y) {return false;}
+    public boolean esPosicionValida(double x, double y) { return false; }
+    public boolean hayPared(double x, double y) { return false; }
 
     public int getAncho() {	return ancho;}
     public int getAlto() {return alto;}
