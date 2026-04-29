@@ -35,9 +35,11 @@ public abstract class Enemigo extends ElementoMovil implements Colisionable {
     }
 
     /**
-     * Define la reacción al colisionar con un jugador.
-     * @param j jugador con el que colisiona
+     * Al colisionar con un jugador, lo mata.
+     * @param jugador jugador con el que colisiona
      */
     @Override
-    public abstract void alColisionar(Jugador jugador);
+    public void alColisionar(Jugador jugador) {
+        jugador.morir();
+    }
 }
