@@ -8,11 +8,5 @@ public class PuntoAzulRapido extends Enemigo {
     }
 
     @Override
-    public void mover() {}
-
-    @Override
-    public Rectangle getAreaColision() {return null;}
-
-    @Override
-    public void alColisionar(Jugador j) {}
+    public void mover(Mapa mapa) {}
 }
