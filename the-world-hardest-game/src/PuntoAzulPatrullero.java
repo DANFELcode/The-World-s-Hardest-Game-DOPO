@@ -12,11 +12,6 @@ public class PuntoAzulPatrullero extends Enemigo {
     }
 
     @Override
-    public void mover() {}
+    public void mover(Mapa mapa) {}
 
-    @Override
-    public Rectangle getAreaColision() {return null;}
-
-    @Override
-    public void alColisionar(Jugador j) {}
 }
