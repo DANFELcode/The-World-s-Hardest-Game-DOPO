@@ -9,5 +9,5 @@ public interface Lethal {
      * Defines the effect on the player when contact occurs.
      * @param player the player that made contact with the lethal element
      */
-    void onDestroy(Jugador player);
+    void onDestroy(Player player);
 }
