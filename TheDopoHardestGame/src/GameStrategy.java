@@ -10,5 +10,5 @@ public interface GameStrategy {
      * @param machine the machine player
      * @param level the current level
      */
-    void execute(Maquina machine, Nivel level);
+    void execute(Machine machine, Level level);
 }
