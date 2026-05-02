@@ -2,10 +2,12 @@ package domain;
 
 /**
  * Represents a collectible coin in the game. <br>
- * <b>(x, y, width, height)</b> <br>
+ * <b>(x, y, width, height, collected)</b> <br>
  * <b>Inv:</b> width > 0 and height > 0
  */
 public class Coin extends StaticElement implements Collectible {
+
+    private boolean collected;
 
     /**
      * Creates a coin at the given position and size.
@@ -16,13 +18,27 @@ public class Coin extends StaticElement implements Collectible {
      */
     public Coin(double x, double y, double width, double height, String color) {
         super(x, y, width, height, color);
+        this.collected = false;
     }
 
     /**
      * Registers the coin collection on the player.
      * @param player the player that collected the coin
      */
+    /**
+     * Registers the coin collection on the player and marks it as collected.
+     * @param player the player that collected the coin
+     */
     public void onCollect(Player player) {
-        player.collectCoin();
+        player.addCoin();
+        this.collected = true;
+    }
+
+    /**
+     * Returns whether this coin has been collected.
+     * @return true if the coin has been collected
+     */
+    public boolean isCollected() {
+        return collected;
     }
 }
