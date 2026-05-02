@@ -10,5 +10,5 @@ public interface MovementStrategy {
      * @param enemy the enemy to move
      * @param map the current level map
      */
-    void move(Enemigo enemy, Mapa map);
+    void move(Enemy enemy, GameMap map);
 }
