@@ -14,8 +14,8 @@ public class Coin extends StaticElement implements Collectible {
      * @param width coin width, must be greater than 0
      * @param height coin height, must be greater than 0
      */
-    public Coin(double x, double y, double width, double height) {
-        super(x, y, width, height);
+    public Coin(double x, double y, double width, double height, String color) {
+        super(x, y, width, height, color);
     }
 
     /**
