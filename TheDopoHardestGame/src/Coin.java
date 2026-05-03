@@ -22,15 +22,10 @@ public class Coin extends StaticElement implements Collectible {
     }
 
     /**
-     * Registers the coin collection on the player.
-     * @param player the player that collected the coin
-     */
-    /**
-     * Registers the coin collection on the player and marks it as collected.
+     * Marks the coin as collected.
      * @param player the player that collected the coin
      */
     public void onCollect(Player player) {
-        player.addCoin();
         this.collected = true;
     }
 
