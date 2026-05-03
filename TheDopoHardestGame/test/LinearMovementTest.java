@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import domain.Direction;
 import domain.Enemy;
+import domain.LinearMovement.Direction;
 import domain.GameMap;
 import domain.Level;
 import domain.LinearMovement;
