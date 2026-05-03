@@ -1,43 +1,115 @@
 package domain;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
- * Represents an enemy in the game. Kills any player it contacts. <br>
- * <b>(x, y, width, height, speed, movement)</b> <br>
- * <b>Inv:</b> speed > 0 and movement != null
+ * Represents a game level. <br>
+ * <b>(number, gameTime, map, enemies, coins, staticElements, zones)</b> <br>
+ * <b>Inv:</b> number >= 0 and gameTime > 0 and map != null
  */
-public class Enemy extends MovableElement implements Lethal {
+public class Level {
 
-    private MovementStrategy movement;
-    
+    private int number;
+    private double gameTime;
+    private GameMap map;
+    private ArrayList<Enemy> enemies;
+    private ArrayList<Coin> coins;
+    private ArrayList<StaticElement> staticElements;
+    private HashMap<String, Zone> zones;
 
     /**
-     * Creates an enemy with a given position, size, speed and movement strategy.
-     * @param x initial horizontal position
-     * @param y initial vertical position
-     * @param width enemy width, must be greater than 0
-     * @param height enemy height, must be greater than 0
-     * @param speed movement speed, must be greater than 0
-     * @param movement strategy that defines how the enemy moves
+     * Creates a level with a number, time limit and map.
+     * @param number level identifier, must be >= 0
+     * @param gameTime time limit for the level, must be greater than 0
+     * @param map the level map
      */
-    public Enemy(double x, double y, double width, double height, double speed, MovementStrategy movement) {
-        super(x, y, width, height, speed);
-        this.movement = movement;
-        
+    public Level(int number, double gameTime, GameMap map) {
+        this.number = number;
+        this.gameTime = gameTime;
+        this.map = map;
+        this.enemies = new ArrayList<Enemy>();
+        this.coins = new ArrayList<Coin>();
+        this.staticElements = new ArrayList<StaticElement>();
+        this.zones = new HashMap<String, Zone>();
     }
 
     /**
-     * Kills the player on contact.
-     * @param player the player that made contact with the enemy
+     * Updates the level state: moves enemies, checks collisions and updates time.
      */
-    public void onDestroy(Player player) {
-        player.die();
+    public void updateLevel() {
+        // TODO: move enemies
+        // TODO: check collisions
+        // TODO: update time
     }
-    
+
     /**
-     * Moves the enemy according to its movement strategy.
-     * @param level the current level
+     * Returns whether the level is complete: final zone visited and all coins collected.
+     * @return true if the level is complete
      */
-    public void move(Level level) {
-        movement.move(this, level);
+    public boolean isLevelComplete() {
+        Zone fZone = zones.get("final");
+        return fZone != null && fZone.isVisited() && isCoinsCollected();
     }
+
+    /**
+     * Returns whether all coins in the level have been collected.
+     * @return true if all coins are collected
+     */
+    public boolean isCoinsCollected() {
+        for (Coin coin : coins) {
+            if (!coin.isCollected()) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Adds an enemy to the level.
+     * @param enemy the enemy to add
+     */
+    public void addEnemy(Enemy enemy) { enemies.add(enemy); }
+
+    /**
+     * Adds a static element to the level.
+     * @param sElement the static element to add
+     */
+    public void addStaticElement(StaticElement sElement) { staticElements.add(sElement); }
+
+    /**
+     * Adds a zone to the level.
+     * @param type zone type identifier (e.g. "initial", "intermediate", "final")
+     * @param zone the zone to add
+     */
+    public void addZone(String type, Zone zone) { zones.put(type, zone); }
+
+    /**
+     * Returns whether there is a SolidWall at the given position.
+     * @param x horizontal position
+     * @param y vertical position
+     * @return true if a SolidWall occupies that position
+     */
+    public boolean isWall(double x, double y) {
+        for (StaticElement e : staticElements) {
+            if (e.isBlocking() && e.getAreaColision().contains(x, y)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether the given position is walkable: within map bounds and no SolidWall.
+     * @param x horizontal position
+     * @param y vertical position
+     * @param width element width
+     * @param height element height
+     * @return true if the position is walkable
+     */
+    public boolean isWalkable(double x, double y, double width, double height) {
+        if (x < 0 || y < 0 || x + width > map.getWidth() || y + height > map.getHeight()) return false;
+        return !isWall(x, y);
+    }
+
+    public int getNumber() { return number; }
+    public GameMap getMap() { return map; }
+    public ArrayList<Enemy> getEnemies() { return enemies; }
+    public void setMap(GameMap map) { this.map = map; }
 }
