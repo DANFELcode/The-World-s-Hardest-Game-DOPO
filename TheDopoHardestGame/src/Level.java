@@ -13,6 +13,7 @@ public class Level {
     private int number;
     private double gameTime;
     private GameMap map;
+    private ArrayList<Player> players;
     private ArrayList<Enemy> enemies;
     private ArrayList<Coin> coins;
     private ArrayList<StaticElement> staticElements;
@@ -28,6 +29,7 @@ public class Level {
         this.number = number;
         this.gameTime = gameTime;
         this.map = map;
+        this.players = new ArrayList<Player>();
         this.enemies = new ArrayList<Enemy>();
         this.coins = new ArrayList<Coin>();
         this.staticElements = new ArrayList<StaticElement>();
@@ -62,6 +64,12 @@ public class Level {
         }
         return true;
     }
+
+    /**
+     * Adds a player to the level.
+     * @param player the player to add
+     */
+    public void addPlayer(Player player) { players.add(player); }
 
     /**
      * Adds a coin to the level.
@@ -120,6 +128,7 @@ public class Level {
 
     public int getNumber() { return number; }
     public GameMap getMap() { return map; }
+    public ArrayList<Player> getPlayers() { return players; }
     public ArrayList<Enemy> getEnemies() { return enemies; }
     public void setMap(GameMap map) { this.map = map; }
 }

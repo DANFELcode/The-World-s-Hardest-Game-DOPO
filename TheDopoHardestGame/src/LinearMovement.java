@@ -7,6 +7,8 @@ package domain;
  */
 public class LinearMovement implements MovementStrategy {
 
+    public enum Direction { HORIZONTAL, VERTICAL }
+
     private Direction direction;
     private int sign;
 
@@ -33,7 +35,7 @@ public class LinearMovement implements MovementStrategy {
         switch (direction) {
             case VERTICAL:
                 double newY = currentY + delta;
-                if (!level.isWall(currentX, newY)) {
+                if (!level.isWalkable(currentX, newY, enemy.getWidth(), enemy.getHeight())) {
                     enemy.setPosition(currentX, newY);
                 } else {
                     sign *= -1;
@@ -41,7 +43,7 @@ public class LinearMovement implements MovementStrategy {
                 break;
             case HORIZONTAL:
                 double newX = currentX + delta;
-                if (!level.isWall(newX, currentY)) {
+                if (!level.isWalkable(newX, currentY, enemy.getWidth(), enemy.getHeight())) {
                     enemy.setPosition(newX, currentY);
                 } else {
                     sign *= -1;

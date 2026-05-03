@@ -31,7 +31,7 @@ public class RedPlayer extends Player {
             this.speed = 1.5;
             this.width = 30.0;
             this.height = 30.0;
-        }
+        } 
     }
     
     
