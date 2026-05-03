@@ -23,9 +23,9 @@ public class LinearMovement implements MovementStrategy {
     /**
      * Moves the enemy along its axis. Reverses direction if a wall is found.
      * @param enemy the enemy to move
-     * @param map the current level map
+     * @param level the current level
      */
-    public void move(Enemy enemy, GameMap map) {
+    public void move(Enemy enemy, Level level) {
         double currentX = enemy.getX();
         double currentY = enemy.getY();
         double delta = sign * enemy.getSpeed();
@@ -33,7 +33,7 @@ public class LinearMovement implements MovementStrategy {
         switch (direction) {
             case VERTICAL:
                 double newY = currentY + delta;
-                if (!map.isWall(currentX, newY)) {
+                if (!level.isWall(currentX, newY)) {
                     enemy.setPosition(currentX, newY);
                 } else {
                     sign *= -1;
@@ -41,7 +41,7 @@ public class LinearMovement implements MovementStrategy {
                 break;
             case HORIZONTAL:
                 double newX = currentX + delta;
-                if (!map.isWall(newX, currentY)) {
+                if (!level.isWall(newX, currentY)) {
                     enemy.setPosition(newX, currentY);
                 } else {
                     sign *= -1;
