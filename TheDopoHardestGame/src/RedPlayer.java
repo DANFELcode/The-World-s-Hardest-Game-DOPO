@@ -6,6 +6,10 @@ package domain;
  * <b>Inv:</b> speed > 0 and width > 0 and height > 0
  */
 public class RedPlayer extends Player {
+	private static final double ORIGINAL_SPEED = 1.0;
+	private static final double ORIGINAL_WIDTH = 20.0;
+	private static final double ORIGINAL_HEIGHT = 20.0;
+	
 
     /**
      * Creates a red player at the given position with default size (20x20) and speed (1.0).
@@ -27,8 +31,14 @@ public class RedPlayer extends Player {
             this.speed = 1.5;
             this.width = 30.0;
             this.height = 30.0;
-        } else if (newSkin.equals("Green")) {
-            this.speed = 1.0;
         }
+    }
+    
+    
+    public void restoreSkin() {
+    	this.speed = ORIGINAL_SPEED;
+    	this.width = ORIGINAL_WIDTH;
+    	this.height = ORIGINAL_HEIGHT;
+    	
     }
 }
