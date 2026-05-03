@@ -20,7 +20,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
 	
 	//Panel inicio
     private JPanel panelInicio; 
-    private JLabel titulo;
+    private JLabel labelTitulo;
     private JButton playGame;
     private JButton settings;
     
@@ -41,9 +41,67 @@ public class TheDOPOHardestGameGUI extends JFrame {
     
     
     
-
+    public TheDOPOHardestGameGUI() {
+    	super("TheDOPOHardestGame");
+    	juego = new TheDOPOHardestGame();
+    	
+        cardLayout = new CardLayout();
+        panel = new JPanel(cardLayout);
+    	
+        prepareElements();
+        prepareActions();
+    	
+    }
+    
+    public static void main(String[] args) {
+        TheDOPOHardestGame ventana = new TheDOPOHardestGameGUI();
+    }
 
     
+
+    private void prepareActions() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void prepareElements() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setSize(screenSize.width / 2, screenSize.height / 2); 
+        this.setLocationRelativeTo(null);
+        this.setLayout(new BorderLayout());
+
+
+        prepareElementsPanelInicio();
+        prepareElementsPanelExp();
+        prepareElementsPanelJuego();
+        
+
+       
+    }
+
+	private void prepareElementsPanelJuego() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void prepareElementsPanelExp() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void prepareElementsPanelInicio() {
+        panelInicio = new JPanel(cardLayout);
+		
+        labelTitulo = new JLabel(" The DOPO Hardest Game");
+        playGame = new JButton("PLAY GAME");
+        settings = new JButton("CONFIGURACIÓN");
+        
+		this.add(labelTitulo, BorderLayout.CENTER);
+		this.add(playGame, BorderLayout.CENTER);
+		this.add(settings, BorderLayout.CENTER);
+	}
+    
+   
 
     
 
