@@ -8,7 +8,7 @@ public interface MovementStrategy {
     /**
      * Moves the enemy according to the strategy.
      * @param enemy the enemy to move
-     * @param map the current level map
+     * @param level the current level
      */
-    void move(Enemy enemy, GameMap map);
+    void move(Enemy enemy, Level level);
 }
