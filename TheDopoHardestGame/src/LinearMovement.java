@@ -35,7 +35,7 @@ public class LinearMovement implements MovementStrategy {
         switch (direction) {
             case VERTICAL:
                 double newY = currentY + delta;
-                if (!level.isWalkable(currentX, newY, enemy.getWidth(), enemy.getHeight())) {
+                if (level.isWalkable(currentX, newY, enemy.getWidth(), enemy.getHeight())) {
                     enemy.setPosition(currentX, newY);
                 } else {
                     sign *= -1;
@@ -43,7 +43,7 @@ public class LinearMovement implements MovementStrategy {
                 break;
             case HORIZONTAL:
                 double newX = currentX + delta;
-                if (!level.isWalkable(newX, currentY, enemy.getWidth(), enemy.getHeight())) {
+                if (level.isWalkable(newX, currentY, enemy.getWidth(), enemy.getHeight())) {
                     enemy.setPosition(newX, currentY);
                 } else {
                     sign *= -1;
