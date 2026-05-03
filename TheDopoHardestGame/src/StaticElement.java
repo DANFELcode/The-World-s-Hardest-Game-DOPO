@@ -1,6 +1,6 @@
 package domain;
 
-import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Represents a static element in the game. <br>
@@ -33,8 +33,8 @@ public abstract class StaticElement {
      * Returns the collision area of the element.
      * @return rectangle representing the collision bounds
      */
-    public Rectangle getAreaColision() {
-        return new Rectangle((int) x, (int) y, (int) width, (int) height);
+    public Rectangle2D getAreaColision() {
+        return new Rectangle2D.Double(x, y, width, height);
     }    
     /**
      * Returns whether this element blocks movement.
