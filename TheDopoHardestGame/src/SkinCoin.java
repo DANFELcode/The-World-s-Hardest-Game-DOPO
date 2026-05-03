@@ -26,5 +26,6 @@ public class SkinCoin extends Coin {
     @Override
     public void onCollect(Player player) {
         player.changeSkin(getColor());
+        super.onCollect(player);
     }
 }
