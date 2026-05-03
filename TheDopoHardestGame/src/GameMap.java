@@ -27,7 +27,7 @@ public class GameMap {
      * @param height element height
      * @return true if the position is walkable
      */
-    public static boolean isWalkable(double x, double y, double width, double height) {
+    public boolean isWalkable(double x, double y, double width, double height) {
         return false;
     }
 
