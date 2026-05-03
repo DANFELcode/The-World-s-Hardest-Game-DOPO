@@ -11,32 +11,34 @@ import domain.Level;
 import domain.LinearMovement;
 import domain.SolidWall;
 
-public class LinearMovementTest {
+// Tests for the LinearMovement strategy, verifying directional movement and wall bouncing.
+class LinearMovementTest {
 
     private Level level;
     private LinearMovement horizontal;
     private LinearMovement vertical;
 
+    // Initialises a Level and both movement strategies before each test.
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         GameMap map = new GameMap(500, 500);
         level = new Level(1, 60.0, map);
         horizontal = new LinearMovement(Direction.HORIZONTAL, 1);
         vertical = new LinearMovement(Direction.VERTICAL, 1);
     }
 
-    // Enemy should move right when no wall blocks the path
     @Test
-    public void moveShouldMoveHorizontallyWhenNoWall() {
+    // Enemy should move right when no wall blocks the path.
+    void moveShouldMoveHorizontallyWhenNoWall() {
         Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, horizontal);
         horizontal.move(enemy, level);
         assertEquals(102.0, enemy.getX(), 0.001);
         assertEquals(100.0, enemy.getY(), 0.001);
     }
 
-    // Enemy should reverse direction when hitting a horizontal wall
     @Test
-    public void moveShouldReverseDirectionWhenHitsWall() {
+    // Enemy should reverse direction when hitting a horizontal wall.
+    void moveShouldReverseDirectionWhenHitsWall() {
         SolidWall wall = new SolidWall(101, 100, 50, 50, "Gray");
         level.addStaticElement(wall);
         Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, horizontal);
@@ -45,18 +47,18 @@ public class LinearMovementTest {
         assertTrue(enemy.getX() <= 100.0);
     }
 
-    // Enemy should move down when no wall blocks the path
     @Test
-    public void moveShouldMoveVerticallyWhenNoWall() {
+    // Enemy should move down when no wall blocks the path.
+    void moveShouldMoveVerticallyWhenNoWall() {
         Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, vertical);
         vertical.move(enemy, level);
         assertEquals(100.0, enemy.getX(), 0.001);
         assertEquals(102.0, enemy.getY(), 0.001);
     }
 
-    // Enemy should reverse vertical direction when hitting a wall
     @Test
-    public void moveShouldReverseVerticalDirectionWhenHitsWall() {
+    // Enemy should reverse vertical direction when hitting a wall.
+    void moveShouldReverseVerticalDirectionWhenHitsWall() {
         SolidWall wall = new SolidWall(100, 101, 50, 50, "Gray");
         level.addStaticElement(wall);
         Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, vertical);
@@ -65,9 +67,9 @@ public class LinearMovementTest {
         assertTrue(enemy.getY() <= 100.0);
     }
 
-    // Speed should correctly affect distance moved per step
     @Test
-    public void moveShouldApplySpeedCorrectly() {
+    // Speed should correctly affect the distance moved per step.
+    void moveShouldApplySpeedCorrectly() {
         LinearMovement fast = new LinearMovement(Direction.HORIZONTAL, 1);
         Enemy enemy = new Enemy(100, 100, 10, 10, 5.0, fast);
         fast.move(enemy, level);
