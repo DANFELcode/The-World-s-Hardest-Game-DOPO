@@ -65,7 +65,8 @@ public class Level {
 
     /**
      * Adds a coin to the level.
-     * @param coin the coin to add
+     * @param coin the coin to add (also use this method for SkinCoin, since it extends Coin
+     *             and must be tracked by isCoinsCollected())
      */
     public void addCoin(Coin coin) { coins.add(coin); }
 
