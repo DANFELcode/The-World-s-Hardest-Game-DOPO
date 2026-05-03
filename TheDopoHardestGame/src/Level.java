@@ -64,15 +64,15 @@ public class Level {
     }
 
     /**
-     * Adds an enemy to the level.
-     * @param enemy the enemy to add
-     */
-    /**
      * Adds a coin to the level.
      * @param coin the coin to add
      */
     public void addCoin(Coin coin) { coins.add(coin); }
 
+    /**
+     * Adds an enemy to the level.
+     * @param enemy the enemy to add
+     */
     public void addEnemy(Enemy enemy) { enemies.add(enemy); }
 
     /**
