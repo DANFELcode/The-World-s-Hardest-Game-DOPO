@@ -1,7 +1,7 @@
 package domain;
 
 /**
- * Represents the game map. Defines boundaries and wall positions. <br>
+ * Represents the game map. Defines the boundaries of the level. <br>
  * <b>(width, height)</b> <br>
  * <b>Inv:</b> width > 0 and height > 0
  */
@@ -17,28 +17,6 @@ public class GameMap {
     public GameMap(int width, int height) {
         this.width = width;
         this.height = height;
-    }
-
-    /**
-     * Returns whether the given position and size fit within the map bounds without hitting a wall.
-     * @param x horizontal position
-     * @param y vertical position
-     * @param width element width
-     * @param height element height
-     * @return true if the position is walkable
-     */
-    public boolean isWalkable(double x, double y, double width, double height) {
-        return false;
-    }
-
-    /**
-     * Returns whether the given position contains a wall.
-     * @param x horizontal position
-     * @param y vertical position
-     * @return true if there is a wall at the position
-     */
-    public boolean isWall(double x, double y) {
-        return false;
     }
 
     public int getWidth() { return width; }
