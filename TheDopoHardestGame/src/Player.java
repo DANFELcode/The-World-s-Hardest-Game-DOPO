@@ -2,13 +2,12 @@ package domain;
 
 /**
  * Represents a player in the game. <br>
- * <b>(name, deaths, coinsCollected, spawnX, spawnY)</b> <br>
- * <b>Inv:</b> deaths >= 0 and coinsCollected >= 0
+ * <b>(name, deaths, spawnX, spawnY)</b> <br>
+ * <b>Inv:</b> deaths >= 0
  */
 public abstract class Player extends MovableElement {
     protected String name;
     protected int deaths;
-    protected int coinsCollected;
     protected double spawnX;
     protected double spawnY;
 
@@ -27,7 +26,6 @@ public abstract class Player extends MovableElement {
         this.spawnX = x;
         this.spawnY = y;
         this.deaths = 0;
-        this.coinsCollected = 0;
     }
 
     /**
@@ -36,10 +34,10 @@ public abstract class Player extends MovableElement {
      * @param dy vertical direction (-1, 0 or 1)
      * @param map the current level map
      */
-    public void move(double dx, double dy, GameMap map) {
+    public void move(double dx, double dy, Level level) {
         double nextX = this.x + (dx * this.speed);
         double nextY = this.y + (dy * this.speed);
-        if (GameMap.isWalkable(nextX, nextY, this.width, this.height)) {
+        if (level.isWalkable(nextX, nextY, this.width, this.height)) {
             this.setPosition(nextX, nextY);
         }
     }
@@ -50,13 +48,6 @@ public abstract class Player extends MovableElement {
     public void die() {
         this.deaths++;
         this.setPosition(spawnX, spawnY);
-    }
-
-    /**
-     * Increments the coin counter.
-     */
-    public void addCoin() {
-        this.coinsCollected++;
     }
 
     /**
@@ -76,6 +67,5 @@ public abstract class Player extends MovableElement {
     }
 
     public int getDeaths() { return deaths; }
-    public int getCoinsCollected() { return coinsCollected; }
     public String getName() { return name; }
 }
