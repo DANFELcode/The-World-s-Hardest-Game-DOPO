@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents a linear movement strategy. Moves the enemy in a straight line and bounces off walls. <br>
- * <b>(direction, sign)</b> <br>
- * <b>Inv:</b> sign == 1 or sign == -1
+ * Represents a linear movement strategy. Moves the enemy in a straight line and bounces off walls.
+ * (direction, sign)
+ * Inv: sign == 1 or sign == -1
  */
 public class LinearMovement implements MovementStrategy {
 

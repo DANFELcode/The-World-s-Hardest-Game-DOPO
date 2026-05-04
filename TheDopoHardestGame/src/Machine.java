@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents a player controlled by the machine, using a GameStrategy to decide moves. <br>
- * <b>(name, x, y, width, height, speed, strategy)</b> <br>
- * <b>Inv:</b> strategy != null
+ * Represents a player controlled by the machine, using a GameStrategy to decide moves.
+ * (name, x, y, width, height, speed, strategy)
+ * Inv: strategy != null
  */
 public class Machine extends Player {
 

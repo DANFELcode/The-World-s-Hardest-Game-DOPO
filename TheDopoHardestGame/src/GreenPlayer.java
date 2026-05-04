@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents the resilient player who can absorb the first hit before dying. <br>
- * <b>(name, x, y, width=20.0, height=20.0, speed=1.0, absorbedFirstHit)</b> <br>
- * <b>Inv:</b> speed > 0 and width > 0 and height > 0
+ * Represents the green player who can absorb the first hit before dying.
+ * (name, x, y, width=20.0, height=20.0, speed=1.0, absorbedFirstHit)
+ * Inv: speed > 0 and width > 0 and height > 0
  */
 public class GreenPlayer extends Player {
 

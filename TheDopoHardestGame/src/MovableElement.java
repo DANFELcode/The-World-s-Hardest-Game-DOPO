@@ -3,9 +3,9 @@ package domain;
 import java.awt.geom.Rectangle2D;
 
 /**
- * Represents a movable element in the game. <br>
- * <b>(x, y, width, height, speed)</b> <br>
- * <b>Inv:</b> speed > 0 and width > 0 and height > 0
+ * Represents a movable element in the game.
+ * (x, y, width, height, speed)
+ * Inv: speed > 0 and width > 0 and height > 0
  */
 public abstract class MovableElement {
     protected double x;

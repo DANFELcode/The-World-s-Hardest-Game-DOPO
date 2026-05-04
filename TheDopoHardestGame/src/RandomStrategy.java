@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents a random game strategy for the machine player. Picks moves at random. <br>
- * <b>()</b> <br>
- * <b>Inv:</b> true
+ * Represents a random game strategy for the machine player. Picks moves at random.
+ * ()
+ * Inv: true
  */
 public class RandomStrategy implements GameStrategy {
 

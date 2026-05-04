@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents the fast player with increased speed. <br>
- * <b>(name, x, y, width=20.0, height=20.0, speed=1.5)</b> <br>
- * <b>Inv:</b> speed > 0 and width > 0 and height > 0
+ * Represents the fast player with increased speed.
+ * (name, x, y, width=20.0, height=20.0, speed=1.5)
+ * Inv: speed > 0 and width > 0 and height > 0
  */
 public class BluePlayer extends Player {
 

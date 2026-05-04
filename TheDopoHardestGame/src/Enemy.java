@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents an enemy in the game. Kills any player it contacts. <br>
- * <b>(x, y, width, height, speed, movement)</b> <br>
- * <b>Inv:</b> speed > 0 and movement != null
+ * Represents an enemy in the game. Kills any player it contacts.
+ * (x, y, width, height, speed, movement)
+ * Inv: speed > 0 and movement != null
  */
 public class Enemy extends MovableElement implements Lethal {
 

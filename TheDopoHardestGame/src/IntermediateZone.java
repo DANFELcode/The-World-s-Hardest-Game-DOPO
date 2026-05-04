@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents an intermediate checkpoint zone within the level. <br>
- * <b>(x, y, width, height)</b> <br>
- * <b>Inv:</b> width > 0 and height > 0
+ * Represents an intermediate checkpoint zone within the level.
+ * (x, y, width, height)
+ * Inv: width > 0 and height > 0
  */
 public class IntermediateZone extends Zone {
 

@@ -2,8 +2,8 @@ package domain;
 
 /**
  * Represents a static collectible element that updates the player's spawn point on contact. <br>
- * <b>(x, y, width, height, color)</b> <br>
- * <b>Inv:</b> width > 0 and height > 0
+ * (x, y, width, height, color)
+ * Inv: width > 0 and height > 0
  */
 public class LifeSource extends StaticElement implements Collectible {
 

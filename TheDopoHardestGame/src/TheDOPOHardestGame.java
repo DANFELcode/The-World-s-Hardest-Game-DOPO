@@ -5,9 +5,9 @@ import java.util.List;
 
 /**
  * Main class that controls the game flow, manages the selected game mode
- * and acts as intermediary with the presentation layer. <br>
- * <b>(currentLevel, currentGameMode, isPaused)</b> <br>
- * <b>Inv:</b> currentGameMode != null
+ * and acts as intermediary with the presentation layer.
+ * (currentLevel, currentGameMode, isPaused)
+ * Inv: currentGameMode != null
  */
 public class TheDOPOHardestGame {
 

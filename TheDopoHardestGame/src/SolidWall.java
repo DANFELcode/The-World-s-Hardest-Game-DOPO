@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents a solid wall in the game. Blocks movement of all entities. <br>
- * <b>(x, y, width, height, color)</b> <br>
- * <b>Inv:</b> width > 0 and height > 0
+ * Represents a solid wall in the game. Blocks movement of all entities. 
+ * (x, y, width, height, color)
+ * Inv: width > 0 and height > 0
  */
 public class SolidWall extends StaticElement {
 

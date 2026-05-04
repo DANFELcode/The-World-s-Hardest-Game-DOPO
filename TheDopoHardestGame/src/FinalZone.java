@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents the final zone the player must reach after collecting all coins. <br>
- * <b>(x, y, width, height, visited)</b> <br>
- * <b>Inv:</b> width > 0 and height > 0
+ * Represents the final zone the player must reach after collecting all coins. 
+ * (x, y, width, height, visited)
+ * Inv: width > 0 and height > 0
  */
 public class FinalZone extends Zone {
 

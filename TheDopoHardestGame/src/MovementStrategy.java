@@ -1,7 +1,7 @@
 package domain;
 
 /**
- * Defines the movement behavior of an enemy. <br>
+ * Defines the movement behavior of an enemy.
  */
 public interface MovementStrategy {
 

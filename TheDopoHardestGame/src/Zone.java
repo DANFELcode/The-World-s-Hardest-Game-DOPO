@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents a specific area within the level map. <br>
- * <b>(x, y, width, height, visited)</b> <br>
- * <b>Inv:</b> width > 0 and height > 0
+ * Represents a specific area within the level map.
+ * (x, y, width, height, visited)
+ * Inv: width > 0 and height > 0
  */
 public abstract class Zone {
     protected double x;

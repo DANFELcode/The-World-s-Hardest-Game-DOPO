@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Represents a game level. <br>
- * <b>(number, gameTime, map, enemies, coins, staticElements, zones)</b> <br>
- * <b>Inv:</b> number >= 0 and gameTime > 0 and map != null
+ * Represents a game level.
+ * (number, gameTime, map, enemies, coins, staticElements, zones)
+ * Inv: number >= 0 and gameTime > 0 and map != null
  */
 public class Level {
 

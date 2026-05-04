@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents the standard player with normal speed and size. <br>
- * <b>(name, x, y, width=20.0, height=20.0, speed=1.0)</b> <br>
- * <b>Inv:</b> speed > 0 and width > 0 and height > 0
+ * Represents the standard player with normal speed and size.
+ * (name, x, y, width=20.0, height=20.0, speed=1.0)
+ * Inv:speed > 0 and width > 0 and height > 0
  */
 public class RedPlayer extends Player {
 	private static final double ORIGINAL_SPEED = 1.0;

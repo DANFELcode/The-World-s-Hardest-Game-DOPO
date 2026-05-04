@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents the game map. Defines the boundaries of the level. <br>
- * <b>(width, height)</b> <br>
- * <b>Inv:</b> width > 0 and height > 0
+ * Represents the game map. Defines the boundaries of the level.
+ * (width, height)
+ * Inv: width > 0 and height > 0
  */
 public class GameMap {
     private int width;
