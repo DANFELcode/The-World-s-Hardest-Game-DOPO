@@ -29,6 +29,7 @@ class LinearMovementTest {
 
     @Test
     // Enemy should move right when no wall blocks the path.
+    // Speed is 2.0, multiplied by SPEED_UNIT (7.0) = 14.0 pixels moved.
     void moveShouldMoveHorizontallyWhenNoWall() {
         Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, horizontal);
         horizontal.move(enemy, level);
@@ -49,6 +50,7 @@ class LinearMovementTest {
 
     @Test
     // Enemy should move down when no wall blocks the path.
+    // Speed is 2.0, multiplied by SPEED_UNIT (7.0) = 14.0 pixels moved.
     void moveShouldMoveVerticallyWhenNoWall() {
         Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, vertical);
         vertical.move(enemy, level);
@@ -69,6 +71,7 @@ class LinearMovementTest {
 
     @Test
     // Speed should correctly affect the distance moved per step.
+    // Speed is 5.0, multiplied by SPEED_UNIT (7.0) = 35.0 pixels moved.
     void moveShouldApplySpeedCorrectly() {
         LinearMovement fast = new LinearMovement(Direction.HORIZONTAL, 1);
         Enemy enemy = new Enemy(100, 100, 10, 10, 5.0, fast);
