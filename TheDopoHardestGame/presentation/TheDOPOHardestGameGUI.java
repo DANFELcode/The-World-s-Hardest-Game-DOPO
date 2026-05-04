@@ -71,9 +71,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
     }
 
     
-
-
-
 	public void prepareElements() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.setSize(screenSize.width / 2, screenSize.height / 2); 
@@ -88,10 +85,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
        
     }
-
-
-
-
 
 	private void prepareElementsPanelInicio() {
 	    panelInicio = new JPanel(new BorderLayout());
@@ -112,11 +105,11 @@ public class TheDOPOHardestGameGUI extends JFrame {
 	    JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
 	    panelBotones.setBackground(new Color(180, 180, 220));
 	    
-	    playGame = new JButton("PLAY GAME");
+	    playGame = new JButton("JUGAR");
 	    playGame.setFont(new Font("Arial", Font.BOLD, 20));
 	    playGame.setForeground(Color.RED);
 	    
-	    settings = new JButton("SETTINGS");
+	    settings = new JButton("CONFIGURACIONES");
 	    settings.setFont(new Font("Arial", Font.BOLD, 20));
 	    settings.setForeground(new Color(0, 150, 0));
 	    
@@ -136,16 +129,14 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
 	    // Descripción
 	    descripcion = new JLabel("<html><div style='text-align: justify; width: 400px'>"
-	        + "You are the <font color='red'><b>red</b></font> square. "
-	        + "Avoid the <font color='blue'><b>blue</b></font> circles and collect the "
-	        + "<font color='#DAA520'><b>yellow</b></font> circles. "
-	        + "Once you have collected all of the yellow circles, move to the "
-	        + "<font color='green'><b>green</b></font> beacon to complete the level. "
-	        + "Some levels consist of more than one beacon; the intermediary beacons act as check points. "
-	        + "You must complete all levels in order to submit your score. "
-	        + "Your score is a reflection of how many times you have died; the less, the better."
+	        + "Eres el cuadrado <font color='red'><b>rojo</b></font>. "
+	        + "Evita los circulos <font color='blue'><b>azules</b></font> y recolecta las "
+	        + "monedas <font color='#DAA520'><b>amarillas</b></font>. "
+	        + "Una vez recolectadas todas las monedas, ve hacia la  "
+	        + "zona <font color='green'><b>verde</b></font> antes de que se acabe el tiempo para completar el nivel. "
+	        + "Algunos niveles tienen mas de una zona verde, estas zonas son check points. "
 	        + "</div></html>");
-	    descripcion.setFont(new Font("Arial", Font.PLAIN, 16));
+	    descripcion.setFont(new Font("Arial", Font.PLAIN, 20));
 	    descripcion.setHorizontalAlignment(SwingConstants.CENTER);
 	    descripcion.setBorder(BorderFactory.createEmptyBorder(40, 60, 20, 60));
 
@@ -153,11 +144,11 @@ public class TheDOPOHardestGameGUI extends JFrame {
 	    JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
 	    panelBotones.setBackground(new Color(180, 180, 220));
 
-	    backInicio = new JButton("BACK TO MENU");
+	    backInicio = new JButton("VOLVER AL MENU");
 	    backInicio.setFont(new Font("Arial", Font.BOLD, 20));
 	    backInicio.setForeground(new Color(150, 0, 200));
 
-	    playGame2 = new JButton("PLAY GAME");
+	    playGame2 = new JButton("JUGAR");
 	    playGame2.setFont(new Font("Arial", Font.BOLD, 20));
 	    playGame2.setForeground(Color.RED);
 
@@ -174,7 +165,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
 	private void prepareElementsPanelJuego() {
 	    panelJuego = new JPanel(new BorderLayout());
 
-	    // Panel info superior estilo original
 	    JPanel panelInfo = new JPanel(new BorderLayout());
 	    panelInfo.setBackground(Color.BLACK);
 	    panelInfo.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
@@ -185,15 +175,15 @@ public class TheDOPOHardestGameGUI extends JFrame {
 	    menu.setFont(new Font("Arial", Font.BOLD, 14));
 	    menu.setBorderPainted(false);
 
-	    niveles = new JLabel("Levels: 1/1");
+	    niveles = new JLabel("Nivel: 1/1");
 	    niveles.setForeground(Color.WHITE);
 	    niveles.setFont(new Font("Arial", Font.BOLD, 14));
 
-	    monedas = new JLabel("Coins: 0/0");
+	    monedas = new JLabel("Monedas: 0/0");
 	    monedas.setForeground(Color.WHITE);
 	    monedas.setFont(new Font("Arial", Font.BOLD, 14));
 
-	    muertes = new JLabel("DEATHS: 0");
+	    muertes = new JLabel("MUERTES: 0");
 	    muertes.setForeground(Color.WHITE);
 	    muertes.setFont(new Font("Arial", Font.BOLD, 14));
 
