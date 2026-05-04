@@ -1,9 +1,14 @@
 package presentation;
 
+import domain.Level;
 import domain.TheDOPOHardestGame;
 import java.awt.*;
 import javax.swing.*;
 import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.awt.event.*;
+
 
 
 public class TheDOPOHardestGameGUI extends JFrame {
@@ -33,24 +38,31 @@ public class TheDOPOHardestGameGUI extends JFrame {
     
     //Panel Juego
     private JPanel panelJuego;
-    private JPanel tablero;
+    private GameLoop gameLoop;
+    private BoardPanel tablero;
     private JButton menu;
     private JLabel niveles;
     private JLabel muertes;
+    private JLabel monedas;
     private JLabel tiempo;
+
+    private final Set<Integer> keysDown = new HashSet<>();
+    private static final double PLAYER_STEP = 2.0;
+
     
     
     
     public TheDOPOHardestGameGUI() {
     	super("TheDOPOHardestGame");
     	juego = new TheDOPOHardestGame();
-    	
+
         cardLayout = new CardLayout();
         panel = new JPanel(cardLayout);
-    	
+
         prepareElements();
         prepareActions();
-    	
+        pack();
+        this.setLocationRelativeTo(null);
     }
     
     public static void main(String[] args) {
@@ -60,10 +72,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
     
 
-    private void prepareActions() {
-		// TODO Auto-generated method stub
-		
-	}
+
 
 	public void prepareElements() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -80,31 +89,238 @@ public class TheDOPOHardestGameGUI extends JFrame {
        
     }
 
-	private void prepareElementsPanelJuego() {
-		// TODO Auto-generated method stub
-		
+
+
+
+
+	private void prepareElementsPanelInicio() {
+	    panelInicio = new JPanel(new BorderLayout());
+	    panelInicio.setBackground(new Color(180, 180, 220));
+
+	    // Título arriba
+	    JPanel panelTitulo = new JPanel(new BorderLayout());
+	    panelTitulo.setBackground(new Color(180, 180, 220));
+	    
+	    labelTitulo = new JLabel("THE DOPO HARDEST GAME");
+	    labelTitulo.setFont(new Font("Arial", Font.BOLD, 40));
+	    labelTitulo.setForeground(new Color(30, 80, 180));
+	    labelTitulo.setHorizontalAlignment(SwingConstants.CENTER);
+	    
+	    panelTitulo.add(labelTitulo, BorderLayout.CENTER);
+	    
+	    // Botones abajo
+	    JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
+	    panelBotones.setBackground(new Color(180, 180, 220));
+	    
+	    playGame = new JButton("PLAY GAME");
+	    playGame.setFont(new Font("Arial", Font.BOLD, 20));
+	    playGame.setForeground(Color.RED);
+	    
+	    settings = new JButton("SETTINGS");
+	    settings.setFont(new Font("Arial", Font.BOLD, 20));
+	    settings.setForeground(new Color(0, 150, 0));
+	    
+	    panelBotones.add(playGame);
+	    panelBotones.add(settings);
+	    
+	    panelInicio.add(panelTitulo, BorderLayout.CENTER);
+	    panelInicio.add(panelBotones, BorderLayout.SOUTH);
+	    
+	    panel.add(panelInicio, "inicio");
+	    this.add(panel);
 	}
 
 	private void prepareElementsPanelExp() {
-		// TODO Auto-generated method stub
-		
+	    panelExp = new JPanel(new BorderLayout());
+	    panelExp.setBackground(new Color(180, 180, 220));
+
+	    // Descripción
+	    descripcion = new JLabel("<html><div style='text-align: justify; width: 400px'>"
+	        + "You are the <font color='red'><b>red</b></font> square. "
+	        + "Avoid the <font color='blue'><b>blue</b></font> circles and collect the "
+	        + "<font color='#DAA520'><b>yellow</b></font> circles. "
+	        + "Once you have collected all of the yellow circles, move to the "
+	        + "<font color='green'><b>green</b></font> beacon to complete the level. "
+	        + "Some levels consist of more than one beacon; the intermediary beacons act as check points. "
+	        + "You must complete all levels in order to submit your score. "
+	        + "Your score is a reflection of how many times you have died; the less, the better."
+	        + "</div></html>");
+	    descripcion.setFont(new Font("Arial", Font.PLAIN, 16));
+	    descripcion.setHorizontalAlignment(SwingConstants.CENTER);
+	    descripcion.setBorder(BorderFactory.createEmptyBorder(40, 60, 20, 60));
+
+	    // Botones
+	    JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
+	    panelBotones.setBackground(new Color(180, 180, 220));
+
+	    backInicio = new JButton("BACK TO MENU");
+	    backInicio.setFont(new Font("Arial", Font.BOLD, 20));
+	    backInicio.setForeground(new Color(150, 0, 200));
+
+	    playGame2 = new JButton("PLAY GAME");
+	    playGame2.setFont(new Font("Arial", Font.BOLD, 20));
+	    playGame2.setForeground(Color.RED);
+
+	    panelBotones.add(backInicio);
+	    panelBotones.add(playGame2);
+
+	    panelExp.add(descripcion, BorderLayout.CENTER);
+	    panelExp.add(panelBotones, BorderLayout.SOUTH);
+
+	    panel.add(panelExp, "explicacion");
+	}
+	
+
+	private void prepareElementsPanelJuego() {
+	    panelJuego = new JPanel(new BorderLayout());
+
+	    // Panel info superior estilo original
+	    JPanel panelInfo = new JPanel(new BorderLayout());
+	    panelInfo.setBackground(Color.BLACK);
+	    panelInfo.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+	    menu = new JButton("MENU");
+	    menu.setForeground(Color.WHITE);
+	    menu.setBackground(Color.BLACK);
+	    menu.setFont(new Font("Arial", Font.BOLD, 14));
+	    menu.setBorderPainted(false);
+
+	    niveles = new JLabel("Levels: 1/1");
+	    niveles.setForeground(Color.WHITE);
+	    niveles.setFont(new Font("Arial", Font.BOLD, 14));
+
+	    monedas = new JLabel("Coins: 0/0");
+	    monedas.setForeground(Color.WHITE);
+	    monedas.setFont(new Font("Arial", Font.BOLD, 14));
+
+	    muertes = new JLabel("DEATHS: 0");
+	    muertes.setForeground(Color.WHITE);
+	    muertes.setFont(new Font("Arial", Font.BOLD, 14));
+
+	    JPanel centerInfo = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 0));
+	    centerInfo.setBackground(Color.BLACK);
+	    centerInfo.add(niveles);
+	    centerInfo.add(monedas);
+
+	    panelInfo.add(menu, BorderLayout.WEST);
+	    panelInfo.add(centerInfo, BorderLayout.CENTER);
+	    panelInfo.add(muertes, BorderLayout.EAST);
+
+	    // Tablero
+	    tablero = new BoardPanel();
+
+	    // Panel inferior
+	    JPanel panelSur = new JPanel(new BorderLayout());
+	    panelSur.setBackground(Color.BLACK);
+	    panelSur.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+	    JLabel labelSuaMunar = new JLabel("SUA-MUNAR");
+	    labelSuaMunar.setForeground(Color.WHITE);
+	    labelSuaMunar.setFont(new Font("Arial", Font.BOLD, 14));	    
+
+
+	    panelSur.add(labelSuaMunar, BorderLayout.WEST);
+
+	    
+	    tiempo = new JLabel("Tiempo: 60");
+	    tiempo.setForeground(Color.WHITE);
+	    tiempo.setFont(new Font("Arial", Font.BOLD, 14));
+	    tiempo.setHorizontalAlignment(SwingConstants.CENTER);
+	    panelSur.add(tiempo, BorderLayout.CENTER);
+
+
+
+	    panelJuego.add(panelInfo, BorderLayout.NORTH);
+	    panelJuego.add(tablero, BorderLayout.CENTER);
+	    panelJuego.add(panelSur, BorderLayout.SOUTH);
+
+	    panel.add(panelJuego, "juego");
+	    gameLoop = new GameLoop(this);
+	}
+	
+	private void prepareActions() {
+	    this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+	    this.addWindowListener(new WindowAdapter() {
+	        @Override
+	        public void windowClosing(WindowEvent e) { exit(); }
+	    });
+
+	    menu.addActionListener(e -> {
+	        gameLoop.stop();
+	        cardLayout.show(panel, "inicio");
+	    });
+
+	    playGame.addActionListener(e -> cardLayout.show(panel, "explicacion"));
+	    backInicio.addActionListener(e -> cardLayout.show(panel, "inicio"));
+
+	    playGame2.addActionListener(e -> {
+	        juego.loadTestLevel();
+	        tablero.setLevel(juego.getCurrentLevel());
+	        cardLayout.show(panel, "juego");
+	        SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
+	        gameLoop.start();
+	    });
+
+	    tablero.addKeyListener(new KeyAdapter() {
+	        @Override
+	        public void keyPressed(KeyEvent e) {
+	            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+	                juego.togglePause();
+	                return;
+	            }
+	            keysDown.add(e.getKeyCode());
+	        }
+	        @Override
+	        public void keyReleased(KeyEvent e) {
+	            keysDown.remove(e.getKeyCode());
+	        }
+	    });
+	    tablero.setFocusable(true);
 	}
 
-	private void prepareElementsPanelInicio() {
-        panelInicio = new JPanel();
-		
-        labelTitulo = new JLabel(" The DOPO Hardest Game");
-        playGame = new JButton("PLAY GAME");
-        settings = new JButton("CONFIGURACIÓN");
-        
-        panelInicio.add(labelTitulo);
-        panelInicio.add(playGame);
-        panelInicio.add(settings);
-        
-        panel.add(panelInicio, "Inicio");
-        this.add(panel);
-        
+	public void update() {
+	    double dx = 0, dy = 0;
+	    if (keysDown.contains(KeyEvent.VK_UP)    || keysDown.contains(KeyEvent.VK_W)) dy -= PLAYER_STEP;
+	    if (keysDown.contains(KeyEvent.VK_DOWN)  || keysDown.contains(KeyEvent.VK_S)) dy += PLAYER_STEP;
+	    if (keysDown.contains(KeyEvent.VK_LEFT)  || keysDown.contains(KeyEvent.VK_A)) dx -= PLAYER_STEP;
+	    if (keysDown.contains(KeyEvent.VK_RIGHT) || keysDown.contains(KeyEvent.VK_D)) dx += PLAYER_STEP;
+	    if (dx != 0 || dy != 0) juego.movePlayer(0, dx, dy);
+	    juego.update();
 	}
+
+	public void refresh() {
+	    Level level = juego.getCurrentLevel();
+	    if (level != null) {
+	        if (!level.getPlayers().isEmpty()) {
+	            muertes.setText("DEATHS: " + level.getPlayers().get(0).getDeaths());
+	        }
+	        long collected = level.getCoins().stream().filter(c -> c.isCollected()).count();
+	        monedas.setText("Coins: " + collected + "/" + level.getCoins().size());
+	        niveles.setText("Levels: " + level.getNumber() + "/1");
+	        tiempo.setText("Tiempo: " + String.format("%.0f", level.getGameTime()));
+
+	        if (juego.isLevelComplete()) {
+	            gameLoop.stop();
+	            keysDown.clear();
+	            JOptionPane.showMessageDialog(this, "¡Nivel completado!");
+	            cardLayout.show(panel, "inicio");
+	        } else if (juego.isGameOver()) {
+	            gameLoop.stop();
+	            keysDown.clear();
+	            JOptionPane.showMessageDialog(this, "¡Tiempo agotado! Perdiste.");
+	            cardLayout.show(panel, "inicio");
+	        }
+	    }
+	    tablero.refresh();
+	}
+	
+	private void exit() {
+	    int option = JOptionPane.showConfirmDialog(this, "¿Desea cerrar la aplicación?", 
+	        "Confirmar salida", JOptionPane.YES_NO_OPTION);
+	    if (option == JOptionPane.YES_OPTION) System.exit(0);
+	}
+	
+	
     
    
 
