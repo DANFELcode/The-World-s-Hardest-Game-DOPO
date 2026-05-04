@@ -39,6 +39,15 @@ public class RedPlayer extends Player {
     	this.speed = ORIGINAL_SPEED;
     	this.width = ORIGINAL_WIDTH;
     	this.height = ORIGINAL_HEIGHT;
-    	
+
+    }
+
+    /**
+     * Restores the original skin and respawns at the spawn point.
+     */
+    @Override
+    public void die() {
+        restoreSkin();
+        super.die();
     }
 }

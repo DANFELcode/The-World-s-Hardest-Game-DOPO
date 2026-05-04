@@ -1,5 +1,6 @@
 package domain;
 
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -40,10 +41,42 @@ public class Level {
      * Updates the level state: moves enemies, checks collisions and updates time.
      */
     public void updateLevel() {
-        // TODO: move enemies
-        // TODO: check collisions
-        // TODO: update time
+        for (Enemy enemy : enemies) {
+            enemy.move(this);
+        }
+        // Colisiones enemigo-jugador
+        for (Enemy enemy : enemies) {
+            for (Player player : players) {
+                if (enemy.getAreaColision().intersects(player.getAreaColision())) {
+                    enemy.onDestroy(player);
+                }
+            }
+        }
+        // Colisiones moneda-jugador
+        for (Coin coin : coins) {
+            if (!coin.isCollected()) {
+                for (Player player : players) {
+                    if (coin.getAreaColision().intersects(player.getAreaColision())) {
+                        coin.onCollect(player);
+                    }
+                }
+            }
+        }
+        // Colisiones zona-jugador
+        for (Zone zone : zones.values()) {
+            for (Player player : players) {
+                Rectangle2D zoneRect = new Rectangle2D.Double(zone.getX(), zone.getY(), zone.getWidth(), zone.getHeight());
+                Rectangle2D playerRect = player.getAreaColision();
+                if (zoneRect.intersects(playerRect)) {
+                    zone.visit();
+                }
+            }
+        }
+        if (gameTime > 0) gameTime -= 1.0 / 60.0;
     }
+
+    public double getGameTime() { return gameTime; }    
+
 
     /**
      * Returns whether the level is complete: final zone visited and all coins collected.
@@ -131,4 +164,8 @@ public class Level {
     public ArrayList<Player> getPlayers() { return players; }
     public ArrayList<Enemy> getEnemies() { return enemies; }
     public void setMap(GameMap map) { this.map = map; }
+    
+    public ArrayList<Coin> getCoins() { return coins; }
+    public ArrayList<StaticElement> getStaticElements() { return staticElements; }
+    public HashMap<String, Zone> getZones() { return zones; }
 }

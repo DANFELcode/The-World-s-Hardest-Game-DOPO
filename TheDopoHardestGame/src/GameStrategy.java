@@ -1,4 +1,4 @@
-﻿package domain;
+package domain;
 
 /**
  * Defines the behavior strategy of the machine player. <br>

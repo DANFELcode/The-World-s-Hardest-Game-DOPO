@@ -1,4 +1,4 @@
-﻿package domain;
+package domain;
 
 /**
  * Represents an element that can destroy a player on contact. <br>

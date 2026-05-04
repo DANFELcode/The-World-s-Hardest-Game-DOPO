@@ -1,5 +1,7 @@
 package domain;
 
+import java.awt.geom.Rectangle2D;
+
 /**
  * Represents a movable element in the game. <br>
  * <b>(x, y, width, height, speed)</b> <br>
@@ -36,6 +38,10 @@ public abstract class MovableElement {
     public void setPosition(double newX, double newY) {
         this.x = newX;
         this.y = newY;
+    }
+    
+    public Rectangle2D getAreaColision() {
+        return new Rectangle2D.Double(x, y, width, height);
     }
 
     public double getX() { return x; }

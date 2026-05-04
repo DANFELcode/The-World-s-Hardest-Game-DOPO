@@ -1,4 +1,4 @@
-﻿package domain;
+package domain;
 
 /**
  * Represents the starting zone of the level. Players spawn here at the start or after dying. <br>

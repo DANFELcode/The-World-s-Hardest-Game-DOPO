@@ -1,4 +1,4 @@
-﻿package domain;
+package domain;
 
 /**
  * Defines the movement behavior of an enemy. <br>
