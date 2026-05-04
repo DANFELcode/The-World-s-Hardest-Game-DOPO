@@ -54,7 +54,8 @@ public class TheDOPOHardestGameGUI extends JFrame {
     }
     
     public static void main(String[] args) {
-        TheDOPOHardestGame ventana = new TheDOPOHardestGameGUI();
+        TheDOPOHardestGameGUI ventana = new TheDOPOHardestGameGUI();
+        ventana.setVisible(true);
     }
 
     
@@ -90,15 +91,19 @@ public class TheDOPOHardestGameGUI extends JFrame {
 	}
 
 	private void prepareElementsPanelInicio() {
-        panelInicio = new JPanel(cardLayout);
+        panelInicio = new JPanel();
 		
         labelTitulo = new JLabel(" The DOPO Hardest Game");
         playGame = new JButton("PLAY GAME");
         settings = new JButton("CONFIGURACIÓN");
         
-		this.add(labelTitulo, BorderLayout.CENTER);
-		this.add(playGame, BorderLayout.CENTER);
-		this.add(settings, BorderLayout.CENTER);
+        panelInicio.add(labelTitulo);
+        panelInicio.add(playGame);
+        panelInicio.add(settings);
+        
+        panel.add(panelInicio, "Inicio");
+        this.add(panel);
+        
 	}
     
    
