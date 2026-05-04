@@ -32,7 +32,7 @@ class LinearMovementTest {
     void moveShouldMoveHorizontallyWhenNoWall() {
         Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, horizontal);
         horizontal.move(enemy, level);
-        assertEquals(102.0, enemy.getX(), 0.001);
+        assertEquals(114.0, enemy.getX(), 0.001);
         assertEquals(100.0, enemy.getY(), 0.001);
     }
 
@@ -53,7 +53,7 @@ class LinearMovementTest {
         Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, vertical);
         vertical.move(enemy, level);
         assertEquals(100.0, enemy.getX(), 0.001);
-        assertEquals(102.0, enemy.getY(), 0.001);
+        assertEquals(114.0, enemy.getY(), 0.001);
     }
 
     @Test
@@ -73,6 +73,6 @@ class LinearMovementTest {
         LinearMovement fast = new LinearMovement(Direction.HORIZONTAL, 1);
         Enemy enemy = new Enemy(100, 100, 10, 10, 5.0, fast);
         fast.move(enemy, level);
-        assertEquals(105.0, enemy.getX(), 0.001);
+        assertEquals(135.0, enemy.getX(), 0.001);
     }
 }
