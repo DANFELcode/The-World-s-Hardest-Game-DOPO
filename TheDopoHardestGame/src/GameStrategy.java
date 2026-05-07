@@ -1,7 +1,7 @@
 package domain;
 
 /**
- * Defines the behavior strategy of the machine player. 
+ * Defines the behavior strategy of the machine player. <br>
  */
 public interface GameStrategy {
 

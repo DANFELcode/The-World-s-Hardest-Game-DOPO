@@ -1,5 +1,7 @@
 package domain;
 
+import java.awt.Color;
+
 /**
  * Represents a collectible coin in the game. <br>
  * <b>(x, y, width, height, collected)</b> <br>
@@ -35,5 +37,9 @@ public class Coin extends StaticElement implements Collectible {
      */
     public boolean isCollected() {
         return collected;
+    }
+    
+    public Color getDisplayColor() {
+        return new Color(218, 165, 32);   
     }
 }

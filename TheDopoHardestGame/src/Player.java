@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents a player in the game. 
- * (name, deaths, spawnX, spawnY)
- * Inv: deaths >= 0
+ * Represents a player in the game. <br>
+ * <b>(name, deaths, spawnX, spawnY)</b> <br>
+ * <b>Inv:</b> deaths >= 0
  */
 public abstract class Player extends MovableElement {
     protected String name;

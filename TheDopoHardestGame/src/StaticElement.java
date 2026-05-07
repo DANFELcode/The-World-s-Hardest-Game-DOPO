@@ -3,9 +3,9 @@ package domain;
 import java.awt.geom.Rectangle2D;
 
 /**
- * Represents a static element in the game.
- * (x, y, width, height)
- * Inv:</b> width > 0 and height > 0
+ * Represents a static element in the game. <br>
+ * <b>(x, y, width, height)</b> <br>
+ * <b>Inv:</b> width > 0 and height > 0
  */
 public abstract class StaticElement {
     private double x;

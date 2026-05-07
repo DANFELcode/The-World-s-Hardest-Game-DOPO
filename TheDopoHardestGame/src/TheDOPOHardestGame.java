@@ -5,9 +5,9 @@ import java.util.List;
 
 /**
  * Main class that controls the game flow, manages the selected game mode
- * and acts as intermediary with the presentation layer.
- * (currentLevel, currentGameMode, isPaused)
- * Inv: currentGameMode != null
+ * and acts as intermediary with the presentation layer. <br>
+ * <b>(currentLevel, currentGameMode, isPaused)</b> <br>
+ * <b>Inv:</b> currentGameMode != null
  */
 public class TheDOPOHardestGame {
 
@@ -123,7 +123,7 @@ public class TheDOPOHardestGame {
      * PLAYER: single player. PvsP: two players. PvsM: player vs machine.
      */
     
-    public void loadTestLevel() {
+    public void loadTestLevel() { //crea un nivel harcodeado
         GameMap map = new GameMap(800, 500);
         currentLevel = new Level(1, 90.0, map);
 

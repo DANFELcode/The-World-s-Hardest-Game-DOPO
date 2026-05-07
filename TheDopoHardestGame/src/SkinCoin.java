@@ -1,9 +1,11 @@
 package domain;
 
+import java.awt.Color;
+
 /**
- * Represents a skin coin in the game. When collected, temporarily changes the player's skin.
- * (x, y, width, height, color)
- * Inv: width > 0 and height > 0
+ * Represents a skin coin in the game. When collected, temporarily changes the player's skin. <br>
+ * <b>(x, y, width, height, color)</b> <br>
+ * <b>Inv:</b> width > 0 and height > 0
  */
 public class SkinCoin extends Coin {
 
@@ -27,5 +29,10 @@ public class SkinCoin extends Coin {
     public void onCollect(Player player) {
         player.changeSkin(getColor());
         super.onCollect(player);
+    }
+    
+    @Override
+    public Color getDisplayColor() {
+        return Color.BLUE;   
     }
 }

@@ -1,9 +1,9 @@
 package domain;
 
 /**
- * Represents a static lethal element that kills the player on contact. 
- * (x, y, width, height, color)
- * Inv: width > 0 and height > 0
+ * Represents a static lethal element that kills the player on contact. <br>
+ * <b>(x, y, width, height, color)</b> <br>
+ * <b>Inv:</b> width > 0 and height > 0
  */
 public class Bomb extends StaticElement implements Lethal {
 
