@@ -15,7 +15,7 @@ class SkinCoinTest {
         RedPlayer player = new RedPlayer("Felipe", 0, 0);
         SkinCoin coin = new SkinCoin(0, 0, 10, 10, "Blue");
         coin.onCollect(player);
-        assertEquals(1.5, player.getSpeed(), 0.001);
+        assertEquals(6.0, player.getSpeed(), 0.001);
     }
 
     @Test

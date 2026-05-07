@@ -29,7 +29,7 @@ class RedPlayerTest {
     void ChangeSkinShouldChangeAtributtesForANewBlueSkin() {
         RedPlayer player = new RedPlayer("Blinky", 50, 50);
         player.changeSkin("Blue");
-        assertEquals(1.5, player.getSpeed());
+        assertEquals(6.0, player.getSpeed());
         assertEquals(30.0, player.getWidth());
         assertEquals(30.0, player.getHeight());
     }
@@ -38,7 +38,7 @@ class RedPlayerTest {
     // Verifies that the Blue skin increases speed to 1.5 and size to 30x30
     void changeSkinBlueShouldIncreaseSpeedAndSize() {
         player.changeSkin("Blue");
-        assertEquals(1.5, player.getSpeed());
+        assertEquals(6.0, player.getSpeed());
         assertEquals(30.0, player.getWidth());
         assertEquals(30.0, player.getHeight());
     }
@@ -48,7 +48,7 @@ class RedPlayerTest {
     void restoreSkinShouldResetToOriginalValues() {
         player.changeSkin("Blue");
         player.restoreSkin();
-        assertEquals(1.0, player.getSpeed());
+        assertEquals(4.0, player.getSpeed());
         assertEquals(20.0, player.getWidth());
         assertEquals(20.0, player.getHeight());
     }
@@ -138,7 +138,7 @@ class RedPlayerTest {
         player.changeSkin("Blue");
         player.restoreSkin();
         player.changeSkin("Blue");
-        assertEquals(1.5, player.getSpeed());
+        assertEquals(6.0, player.getSpeed());
         assertEquals(30.0, player.getWidth());
         assertEquals(30.0, player.getHeight());
     }
