@@ -1,5 +1,7 @@
 package domain;
 
+import java.awt.Color;
+
 /**
  * Represents the fast player with increased speed. <br>
  * <b>(name, x, y, width=20.0, height=20.0, speed=1.5)</b> <br>
@@ -23,4 +25,7 @@ public class BluePlayer extends Player {
      */
     @Override
     public void changeSkin(String newSkin) {}
+
+    @Override
+    public Color getDisplayColor() { return Color.BLUE; }
 }

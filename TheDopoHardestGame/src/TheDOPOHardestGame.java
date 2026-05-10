@@ -154,7 +154,7 @@ public class TheDOPOHardestGame {
 
         // Enemies bouncing vertically inside corridors
         currentLevel.addEnemy(new Enemy(180, 60, 20, 20, 1.0,
-            new LinearMovement(LinearMovement.Direction.VERTICAL, 1)));
+            new LinearMovement(LinearMovement.Direction.VERTICAL, 1)));        
         currentLevel.addEnemy(new Enemy(330, 250, 20, 20, 1.0,
             new LinearMovement(LinearMovement.Direction.VERTICAL, -1)));
         currentLevel.addEnemy(new Enemy(480, 60, 20, 20, 1.0,
@@ -164,6 +164,7 @@ public class TheDOPOHardestGame {
 
         // Zones
         currentLevel.addZone("initial", new InitialZone(30, 200, 100, 100));
+        currentLevel.addZone("intermediate", new IntermediateZone(380, 380, 60, 60));
         currentLevel.addZone("final", new FinalZone(680, 200, 90, 100));
     }
 

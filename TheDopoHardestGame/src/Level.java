@@ -41,6 +41,7 @@ public class Level {
      * Updates the level state: moves enemies, checks collisions and updates time.
      */
     public void updateLevel() {
+    	// mover a cada enemigo
         for (Enemy enemy : enemies) {
             enemy.move(this);
         }
@@ -49,6 +50,9 @@ public class Level {
             for (Player player : players) {
                 if (enemy.getAreaColision().intersects(player.getAreaColision())) {
                     enemy.onDestroy(player);
+                    if (!player.hasCheckpoint()) {
+                        for (Coin coin : coins) coin.reset();
+                    }
                 }
             }
         }
@@ -68,7 +72,7 @@ public class Level {
                 Rectangle2D zoneRect = new Rectangle2D.Double(zone.getX(), zone.getY(), zone.getWidth(), zone.getHeight());
                 Rectangle2D playerRect = player.getAreaColision();
                 if (zoneRect.intersects(playerRect)) {
-                    zone.visit();
+                    zone.onPlayerEnter(player);
                 }
             }
         }
@@ -83,8 +87,15 @@ public class Level {
      * @return true if the level is complete
      */
     public boolean isLevelComplete() {
+        if (!isCoinsCollected()) return false;
         Zone fZone = zones.get("final");
-        return fZone != null && fZone.isVisited() && isCoinsCollected();
+        if (fZone == null) return false;
+        Rectangle2D fzRect = new Rectangle2D.Double(
+            fZone.getX(), fZone.getY(), fZone.getWidth(), fZone.getHeight());
+        for (Player p : players) {
+            if (fzRect.intersects(p.getAreaColision())) return true;
+        }
+        return false;
     }
 
     /**
@@ -102,7 +113,14 @@ public class Level {
      * Adds a player to the level.
      * @param player the player to add
      */
-    public void addPlayer(Player player) { players.add(player); }
+    public void addPlayer(Player player) {
+        Zone initial = zones.get("initial");
+        if (initial != null) {
+            player.setSpawnPoint(initial.getX(), initial.getY());
+            player.setPosition(initial.getX(), initial.getY());
+        }
+        players.add(player);
+    }
 
     /**
      * Adds a coin to the level.
@@ -128,7 +146,15 @@ public class Level {
      * @param type zone type identifier (e.g. "initial", "intermediate", "final")
      * @param zone the zone to add
      */
-    public void addZone(String type, Zone zone) { zones.put(type, zone); }
+    public void addZone(String type, Zone zone) {
+        zones.put(type, zone);
+        if ("initial".equals(type)) {
+            for (Player p : players) {
+                p.setSpawnPoint(zone.getX(), zone.getY());
+                p.setPosition(zone.getX(), zone.getY());
+            }
+        }
+    }
 
     /**
      * Returns whether there is a SolidWall at the given position.

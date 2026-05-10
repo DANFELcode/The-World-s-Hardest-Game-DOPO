@@ -1,5 +1,7 @@
 package domain;
 
+import java.awt.Color;
+
 /**
  * Represents a player controlled by the machine, using a GameStrategy to decide moves. <br>
  * <b>(name, x, y, width, height, speed, strategy)</b> <br>
@@ -30,4 +32,7 @@ public class Machine extends Player {
      */
     @Override
     public void changeSkin(String newSkin) {}
+
+    @Override
+    public Color getDisplayColor() { return Color.MAGENTA; }
 }

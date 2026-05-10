@@ -1,5 +1,7 @@
 package domain;
 
+import java.awt.Color;
+
 /**
  * Represents the final zone the player must reach after collecting all coins. <br>
  * <b>(x, y, width, height, visited)</b> <br>
@@ -10,4 +12,7 @@ public class FinalZone extends Zone {
     public FinalZone(double x, double y, double width, double height) {
         super(x, y, width, height);
     }
+
+    @Override
+    public Color getDisplayColor() { return new Color(60, 160, 60); }
 }

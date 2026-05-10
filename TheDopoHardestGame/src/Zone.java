@@ -1,11 +1,26 @@
 package domain;
 
+import java.awt.Color;
+
 /**
  * Represents a specific area within the level map. <br>
  * <b>(x, y, width, height, visited)</b> <br>
  * <b>Inv:</b> width > 0 and height > 0
  */
 public abstract class Zone {
+
+    public abstract Color getDisplayColor();
+
+    /**
+     * Hook invoked when a player intersects this zone. Default behaviour: mark the zone as visited.
+     * Subclasses can override to add custom behaviour.
+     * @param player the player entering the zone
+     */
+    public void onPlayerEnter(Player player) {
+        visit();
+    }
+
+
     protected double x;
     protected double y;
     protected double width;

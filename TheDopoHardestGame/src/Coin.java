@@ -38,6 +38,10 @@ public class Coin extends StaticElement implements Collectible {
     public boolean isCollected() {
         return collected;
     }
+
+    public void reset() {
+        this.collected = false;
+    }
     
     public Color getDisplayColor() {
         return new Color(218, 165, 32);   

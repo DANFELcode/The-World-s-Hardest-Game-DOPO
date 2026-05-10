@@ -1,5 +1,7 @@
 package domain;
 
+import java.awt.Color;
+
 /**
  * Represents the standard player with normal speed and size. <br>
  * <b>(name, x, y, width=20.0, height=20.0, speed=1.0)</b> <br>
@@ -10,6 +12,9 @@ public class RedPlayer extends Player {
 	private static final double ORIGINAL_SPEED = 1.0 * UNIT;
 	private static final double ORIGINAL_WIDTH = 20.0;
 	private static final double ORIGINAL_HEIGHT = 20.0;
+	private static final Color ORIGINAL_COLOR = Color.RED;
+
+	private Color currentColor = ORIGINAL_COLOR;
 	
 
     /**
@@ -32,15 +37,16 @@ public class RedPlayer extends Player {
             this.speed = 1.5*UNIT;
             this.width = 30.0;
             this.height = 30.0;
-        } 
+            this.currentColor = Color.BLUE;
+        }
     }
-    
-    
+
+
     public void restoreSkin() {
     	this.speed = ORIGINAL_SPEED;
     	this.width = ORIGINAL_WIDTH;
     	this.height = ORIGINAL_HEIGHT;
-
+    	this.currentColor = ORIGINAL_COLOR;
     }
 
     /**
@@ -51,4 +57,7 @@ public class RedPlayer extends Player {
         restoreSkin();
         super.die();
     }
+
+    @Override
+    public Color getDisplayColor() { return currentColor; }
 }

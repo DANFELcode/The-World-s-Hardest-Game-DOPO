@@ -1,5 +1,7 @@
 package domain;
 
+import java.awt.Color;
+
 /**
  * Represents the resilient player who can absorb the first hit before dying. <br>
  * <b>(name, x, y, width=20.0, height=20.0, speed=1.0, absorbedFirstHit)</b> <br>
@@ -47,4 +49,7 @@ public class GreenPlayer extends Player {
      */
     @Override
     public void changeSkin(String newSkin) {}
+
+    @Override
+    public Color getDisplayColor() { return Color.GREEN; }
 }

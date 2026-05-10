@@ -9,9 +9,6 @@ public class LinearMovement implements MovementStrategy {
 
     public enum Direction { HORIZONTAL, VERTICAL }
 
-    /** Pixel distance covered per frame when speed == 1.0. */
-    private static final double SPEED_UNIT = 7.0;
-
     private Direction direction;
     private int sign;
 
@@ -33,7 +30,7 @@ public class LinearMovement implements MovementStrategy {
     public void move(Enemy enemy, Level level) {
         double currentX = enemy.getX();
         double currentY = enemy.getY();
-        double delta = sign * enemy.getSpeed() * SPEED_UNIT;
+        double delta = sign * enemy.getSpeed() * MovableElement.UNIT;
 
         switch (direction) {
             case VERTICAL:

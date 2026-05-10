@@ -1,5 +1,7 @@
 package domain;
 
+import java.awt.Color;
+
 /**
  * Represents a player in the game. <br>
  * <b>(name, deaths, spawnX, spawnY)</b> <br>
@@ -9,7 +11,8 @@ public abstract class Player extends MovableElement {
     protected String name;
     protected int deaths;
     protected double spawnX;
-    protected double spawnY;    
+    protected double spawnY;
+    protected boolean hasCheckpoint;
 
 
     /**
@@ -27,6 +30,16 @@ public abstract class Player extends MovableElement {
         this.spawnX = x;
         this.spawnY = y;
         this.deaths = 0;
+        this.hasCheckpoint = false;
+    }
+
+    public void markCheckpoint(double x, double y) {
+        setSpawnPoint(x, y);
+        this.hasCheckpoint = true;
+    }
+
+    public boolean hasCheckpoint() {
+        return hasCheckpoint;
     }
 
     /**
@@ -56,6 +69,8 @@ public abstract class Player extends MovableElement {
      * @param newSkin the color of the new skin
      */
     public abstract void changeSkin(String newSkin);
+
+    public abstract Color getDisplayColor();
 
     /**
      * Updates the player's spawn point.

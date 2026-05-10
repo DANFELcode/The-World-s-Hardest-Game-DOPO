@@ -1,5 +1,6 @@
 package domain;
 
+import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -42,6 +43,10 @@ public abstract class StaticElement {
      */
     public boolean isBlocking() {
         return false;
+    }
+
+    public Color getDisplayColor() {
+        return Color.BLACK;
     }
 
     public double getX() {
