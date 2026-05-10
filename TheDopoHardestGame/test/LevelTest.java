@@ -49,8 +49,9 @@ class LevelTest {
         coin.onCollect(new RedPlayer("p", 0, 0));
         level.addCoin(coin);
         FinalZone finalZone = new FinalZone(0, 0, 50, 50);
-        finalZone.visit();
         level.addZone("final", finalZone);
+        RedPlayer player = new RedPlayer("p", 10, 10);
+        level.addPlayer(player);
         assertTrue(level.isLevelComplete());
     }
 
