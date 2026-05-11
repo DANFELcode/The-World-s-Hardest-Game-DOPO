@@ -33,6 +33,19 @@ public class SkinCoin extends Coin {
     
     @Override
     public Color getDisplayColor() {
-        return Color.BLUE;   
+        // Obtenemos el texto del color y lo pasamos a minúsculas para evitar errores (ej. "Green" vs "green")
+        String colorName = getColor().toLowerCase();
+        
+        switch (colorName) {
+            case "green":
+                return Color.GREEN;
+            case "blue":
+                return Color.BLUE;
+            case "red":
+                return Color.RED;
+            default:
+                // Color por defecto en caso de que escribas un color que no está en el switch
+                return Color.RED; 
+        }
     }
 }
