@@ -7,11 +7,6 @@ import javax.swing.JPanel;
 public class BoardPanel extends JPanel {
 
     private static final Color COLOR_BACKGROUND    = new Color(170, 190, 220);
-    private static final Color COLOR_ZONE_INITIAL  = new Color(170, 240, 170);
-    private static final Color COLOR_ZONE_FINAL    = new Color(60, 160, 60);
-    private static final Color COLOR_ZONE_OTHER    = new Color(255, 240, 150);
-    private static final Color COLOR_WALL          = Color.BLACK;
-    private static final Color COLOR_PLAYER        = Color.RED;
     private static final Color COLOR_PLAYER_BORDER = Color.BLACK;
 
     private Level level;
@@ -31,19 +26,15 @@ public class BoardPanel extends JPanel {
         super.paintComponent(g);
         if (level == null) return;
 
-        for (java.util.Map.Entry<String, Zone> entry : level.getZones().entrySet()) {
-            String type = entry.getKey();
-            Zone zone = entry.getValue();
-            if ("initial".equals(type))    g.setColor(COLOR_ZONE_INITIAL);
-            else if ("final".equals(type)) g.setColor(COLOR_ZONE_FINAL);
-            else                           g.setColor(COLOR_ZONE_OTHER);
+        for (Zone zone : level.getZones().values()) {
+            g.setColor(zone.getDisplayColor());
             g.fillRect((int) zone.getX(), (int) zone.getY(),
                 (int) zone.getWidth(), (int) zone.getHeight());
         }
 
         for (StaticElement e : level.getStaticElements()) {
             if (e.isBlocking()) {
-                g.setColor(COLOR_WALL);
+                g.setColor(e.getDisplayColor());
                 g.fillRect((int) e.getX(), (int) e.getY(),
                     (int) e.getWidth(), (int) e.getHeight());
             }
@@ -63,7 +54,7 @@ public class BoardPanel extends JPanel {
         }
 
         for (Player player : level.getPlayers()) {
-            g.setColor(COLOR_PLAYER);
+            g.setColor(player.getDisplayColor());
             g.fillRect((int) player.getX(), (int) player.getY(),
                 (int) player.getWidth(), (int) player.getHeight());
             g.setColor(COLOR_PLAYER_BORDER);
