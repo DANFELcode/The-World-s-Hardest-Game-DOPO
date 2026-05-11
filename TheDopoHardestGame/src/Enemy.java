@@ -21,10 +21,9 @@ public class Enemy extends MovableElement implements Lethal {
      * @param speed movement speed, must be greater than 0
      * @param movement strategy that defines how the enemy moves
      */
-    public Enemy(double x, double y, double width, double height, double speed, MovementStrategy movement) {
-        super(x, y, width, height, speed);
+    public Enemy(double x, double y, double width, double height, MovementStrategy movement) {
+        super(x, y, width, height, 1.0);
         this.movement = movement;
-        
     }
 
     /**

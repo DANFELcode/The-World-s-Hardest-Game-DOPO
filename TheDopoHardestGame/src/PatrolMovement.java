@@ -11,17 +11,20 @@ public class PatrolMovement implements MovementStrategy {
     
     private Point2D.Double[] route;
     private int currentTargetIndex;
+    private final double speedInUnits;
 
-    /**
-     * Creates a patrol movement with a specific route.
-     * @param route an array of waypoints the enemy will follow
-     */
-    public PatrolMovement(Point2D.Double[] route) {
+    private PatrolMovement(Point2D.Double[] route, double speedInUnits) {
         if (route == null || route.length == 0) {
             throw new IllegalArgumentException("The patrol route must have at least one waypoint.");
         }
         this.route = route;
         this.currentTargetIndex = 0;
+        this.speedInUnits = speedInUnits;
+    }
+
+    /** Basic patrol movement — 1 unidad por tick. */
+    public static PatrolMovement basic(Point2D.Double[] route) {
+        return new PatrolMovement(route, 1.0);
     }
 
     @Override
@@ -32,8 +35,7 @@ public class PatrolMovement implements MovementStrategy {
         double dy = target.y - enemy.getY();
         double distance = Math.sqrt(dx * dx + dy * dy);
         
-        // CORRECCIÓN: Usar la misma constante del compañero
-        double step = enemy.getSpeed() * MovableElement.UNIT; 
+        double step = speedInUnits * MovableElement.UNIT;
 
         if (distance <= step) {
             enemy.setPosition(target.x, target.y);

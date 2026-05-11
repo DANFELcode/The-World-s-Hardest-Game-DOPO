@@ -156,14 +156,14 @@ public class TheDOPOHardestGame {
 
         currentLevel.addCoin(new SkinCoin(380, 380, 15, 15, "Blue"));
 
-        currentLevel.addEnemy(new Enemy(180, 60, 20, 20, 1.0,
-            new LinearMovement(LinearMovement.Direction.VERTICAL, 1)));        
-        currentLevel.addEnemy(new Enemy(330, 250, 20, 20, 1.0,
-            new LinearMovement(LinearMovement.Direction.VERTICAL, -1)));
-        currentLevel.addEnemy(new Enemy(480, 60, 20, 20, 1.0,
-            new LinearMovement(LinearMovement.Direction.VERTICAL, 1)));
-        currentLevel.addEnemy(new Enemy(630, 250, 20, 20, 1.0,
-            new LinearMovement(LinearMovement.Direction.VERTICAL, -1)));
+        currentLevel.addEnemy(new Enemy(180, 60, 20, 20,
+            LinearMovement.basic(LinearMovement.Direction.VERTICAL, 1)));
+        currentLevel.addEnemy(new Enemy(330, 250, 20, 20,
+            LinearMovement.basic(LinearMovement.Direction.VERTICAL, -1)));
+        currentLevel.addEnemy(new Enemy(480, 60, 20, 20,
+            LinearMovement.basic(LinearMovement.Direction.VERTICAL, 1)));
+        currentLevel.addEnemy(new Enemy(630, 250, 20, 20,
+            LinearMovement.basic(LinearMovement.Direction.VERTICAL, -1)));
 
         currentLevel.addZone("initial", new InitialZone(30, 200, 100, 100));
         currentLevel.addZone("intermediate", new IntermediateZone(380, 380, 60, 60));
@@ -188,16 +188,16 @@ public class TheDOPOHardestGame {
         currentLevel.addStaticElement(new SolidWall(100, 20, 250, 170, "black"));
         currentLevel.addStaticElement(new SolidWall(100, 310, 250, 170, "black"));
 
-        currentLevel.addEnemy(new Enemy(140, 195, 20, 20, 1.2, new LinearMovement(LinearMovement.Direction.VERTICAL, 1)));
-        currentLevel.addEnemy(new Enemy(200, 285, 20, 20, 1.2, new LinearMovement(LinearMovement.Direction.VERTICAL, -1)));
-        currentLevel.addEnemy(new Enemy(260, 195, 20, 20, 1.2, new LinearMovement(LinearMovement.Direction.VERTICAL, 1)));
-        currentLevel.addEnemy(new Enemy(320, 285, 20, 20, 1.2, new LinearMovement(LinearMovement.Direction.VERTICAL, -1)));
+        currentLevel.addEnemy(new Enemy(140, 195, 20, 20, LinearMovement.basic(LinearMovement.Direction.VERTICAL, 1)));
+        currentLevel.addEnemy(new Enemy(200, 285, 20, 20, LinearMovement.basic(LinearMovement.Direction.VERTICAL, -1)));
+        currentLevel.addEnemy(new Enemy(260, 195, 20, 20, LinearMovement.basic(LinearMovement.Direction.VERTICAL, 1)));
+        currentLevel.addEnemy(new Enemy(320, 285, 20, 20, LinearMovement.basic(LinearMovement.Direction.VERTICAL, -1)));
 
         currentLevel.addCoin(new Coin(170, 245, 12, 12, "yellow"));
         currentLevel.addCoin(new Coin(290, 245, 12, 12, "yellow"));
 
         currentLevel.addZone("checkpoint", new IntermediateZone(360, 190, 70, 120));
-        currentLevel.addEnemy(new Enemy(385, 195, 20, 20, 1.8, new LinearMovement(LinearMovement.Direction.VERTICAL, 1)));
+        currentLevel.addEnemy(new Enemy(385, 195, 20, 20, LinearMovement.accelerated(LinearMovement.Direction.VERTICAL, 1)));
 
         currentLevel.addStaticElement(new SolidWall(690, 20, 20, 180, "black"));
         currentLevel.addStaticElement(new SolidWall(690, 300, 20, 180, "black"));
@@ -206,14 +206,14 @@ public class TheDOPOHardestGame {
             new Point2D.Double(450, 40), new Point2D.Double(650, 40),
             new Point2D.Double(650, 440), new Point2D.Double(450, 440)
         };
-        currentLevel.addEnemy(new Enemy(450, 40, 20, 20, 2.0, new PatrolMovement(routeOuter)));
+        currentLevel.addEnemy(new Enemy(450, 40, 20, 20, PatrolMovement.basic(routeOuter)));
 
         Point2D.Double[] routeSweeper = {
             new Point2D.Double(450, 240), new Point2D.Double(650, 240)
         };
-        currentLevel.addEnemy(new Enemy(450, 240, 20, 20, 2.0, new PatrolMovement(routeSweeper)));
+        currentLevel.addEnemy(new Enemy(450, 240, 20, 20, PatrolMovement.basic(routeSweeper)));
 
-        currentLevel.addEnemy(new Enemy(735, 30, 20, 20, 2.2, new LinearMovement(LinearMovement.Direction.VERTICAL, 1)));
+        currentLevel.addEnemy(new Enemy(735, 30, 20, 20, LinearMovement.accelerated(LinearMovement.Direction.VERTICAL, 1)));
 
         currentLevel.addCoin(new Coin(460, 50, 15, 15, "yellow"));
         currentLevel.addCoin(new Coin(640, 430, 15, 15, "yellow"));

@@ -11,15 +11,22 @@ public class LinearMovement implements MovementStrategy {
 
     private Direction direction;
     private int sign;
+    private final double speedInUnits;
 
-    /**
-     * Creates a linear movement strategy.
-     * @param direction axis of movement (HORIZONTAL or VERTICAL)
-     * @param sign direction of movement: 1 (forward) or -1 (backward)
-     */
-    public LinearMovement(Direction direction, int sign) {
+    private LinearMovement(Direction direction, int sign, double speedInUnits) {
         this.direction = direction;
         this.sign = sign;
+        this.speedInUnits = speedInUnits;
+    }
+
+    /** Basic linear movement — 1 unidad por tick. */
+    public static LinearMovement basic(Direction direction, int sign) {
+        return new LinearMovement(direction, sign, 1.0);
+    }
+
+    /** Accelerated linear movement — Tipo A, 2 unidades por tick. */
+    public static LinearMovement accelerated(Direction direction, int sign) {
+        return new LinearMovement(direction, sign, 2.0);
     }
 
     /**
@@ -30,7 +37,7 @@ public class LinearMovement implements MovementStrategy {
     public void move(Enemy enemy, Level level) {
         double currentX = enemy.getX();
         double currentY = enemy.getY();
-        double delta = sign * enemy.getSpeed() * MovableElement.UNIT;
+        double delta = sign * speedInUnits * MovableElement.UNIT;
 
         switch (direction) {
             case VERTICAL:
