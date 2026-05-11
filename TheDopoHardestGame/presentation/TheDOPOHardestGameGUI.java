@@ -5,9 +5,10 @@ import domain.TheDOPOHardestGame;
 import java.awt.*;
 import javax.swing.*;
 import java.io.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+
 import java.awt.event.*;
+
 
 
 
@@ -284,20 +285,32 @@ public class TheDOPOHardestGameGUI extends JFrame {
 	        if (!level.getPlayers().isEmpty()) {
 	            muertes.setText("DEATHS: " + level.getPlayers().get(0).getDeaths());
 	        }
-	        long collected = level.getCoins().stream().filter(c -> c.isCollected()).count();
-	        monedas.setText("Coins: " + collected + "/" + level.getCoins().size());
-	        niveles.setText("Levels: " + level.getNumber() + "/1");
+
+	        ArrayList<domain.Coin> coinsList = level.getCoins();
+	        long collected = coinsList.stream().filter(c -> c.isCollected()).count();
+	        monedas.setText("Coins: " + collected + "/" + coinsList.size());
+
+	        niveles.setText("Level: " + level.getNumber() + "/2");
 	        tiempo.setText("Tiempo: " + String.format("%.0f", level.getGameTime()));
 
 	        if (juego.isLevelComplete()) {
 	            gameLoop.stop();
 	            keysDown.clear();
-	            JOptionPane.showMessageDialog(this, "¡Nivel completado!");
-	            cardLayout.show(panel, "inicio");
+	            
+	            JOptionPane.showMessageDialog(this, "¡Nivel " + level.getNumber() + " Completado!");
+
+	            if (level.getNumber() == 1) {
+	                juego.advanceLevel(); // Esto llama a loadLevelTwo()
+	                tablero.setLevel(juego.getCurrentLevel()); // Sincroniza el tablero
+	                gameLoop.start();
+	            } else {
+	                JOptionPane.showMessageDialog(this, "¡HAS GANADO EL JUEGO!");
+	                cardLayout.show(panel, "inicio");
+	            }
 	        } else if (juego.isGameOver()) {
+	            // Lógica de Game Over
 	            gameLoop.stop();
-	            keysDown.clear();
-	            JOptionPane.showMessageDialog(this, "¡Tiempo agotado! Perdiste.");
+	            JOptionPane.showMessageDialog(this, "¡Tiempo agotado!");
 	            cardLayout.show(panel, "inicio");
 	        }
 	    }
@@ -309,18 +322,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
 	        "Confirmar salida", JOptionPane.YES_NO_OPTION);
 	    if (option == JOptionPane.YES_OPTION) System.exit(0);
 	}
-	
-	
-    
-   
-
-    
-
-
-
-   
-    
-
 	
 	
 }
