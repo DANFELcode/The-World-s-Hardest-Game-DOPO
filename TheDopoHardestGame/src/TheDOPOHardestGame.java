@@ -15,7 +15,7 @@ public class TheDOPOHardestGame {
     private Level currentLevel;
     private GameMode currentGameMode;
     private boolean isPaused;
-    private int currentLevelNumber = 1; // Necesario para la GUI
+    private int currentLevelNumber = 1; 
     
     public enum GameMode {
         PLAYER(1, false),
@@ -96,36 +96,30 @@ public class TheDOPOHardestGame {
         }
     }
     
-    public void loadTestLevel() { //crea un nivel harcodeado
+    public void loadTestLevel() { 
         GameMap map = new GameMap(800, 500);
         currentLevel = new Level(1, 90.0, map);
 
-        // Player
         RedPlayer player = new RedPlayer("Player", 60, 240);
         currentLevel.addPlayer(player);
 
-        // Border walls
         currentLevel.addStaticElement(new SolidWall(0, 0, 800, 20, "black"));
         currentLevel.addStaticElement(new SolidWall(0, 480, 800, 20, "black"));
         currentLevel.addStaticElement(new SolidWall(0, 0, 20, 500, "black"));
         currentLevel.addStaticElement(new SolidWall(780, 0, 20, 500, "black"));
 
-        // Inner obstacles forming corridors
         currentLevel.addStaticElement(new SolidWall(150, 100, 20, 200, "black"));
         currentLevel.addStaticElement(new SolidWall(300, 200, 20, 280, "black"));
         currentLevel.addStaticElement(new SolidWall(450, 20, 20, 280, "black"));
         currentLevel.addStaticElement(new SolidWall(600, 200, 20, 280, "black"));
 
-        // Coins
         currentLevel.addCoin(new Coin(220, 250, 15, 15, "yellow"));
         currentLevel.addCoin(new Coin(370, 100, 15, 15, "yellow"));
         currentLevel.addCoin(new Coin(520, 350, 15, 15, "yellow"));
         currentLevel.addCoin(new Coin(670, 100, 15, 15, "yellow"));
 
-        // SkinCoin (Blue power-up)
         currentLevel.addCoin(new SkinCoin(380, 380, 15, 15, "Blue"));
 
-        // Enemies bouncing vertically inside corridors
         currentLevel.addEnemy(new Enemy(180, 60, 20, 20, 1.0,
             new LinearMovement(LinearMovement.Direction.VERTICAL, 1)));        
         currentLevel.addEnemy(new Enemy(330, 250, 20, 20, 1.0,
@@ -135,7 +129,6 @@ public class TheDOPOHardestGame {
         currentLevel.addEnemy(new Enemy(630, 250, 20, 20, 1.0,
             new LinearMovement(LinearMovement.Direction.VERTICAL, -1)));
 
-        // Zones
         currentLevel.addZone("initial", new InitialZone(30, 200, 100, 100));
         currentLevel.addZone("intermediate", new IntermediateZone(380, 380, 60, 60));
         currentLevel.addZone("final", new FinalZone(680, 200, 90, 100));
