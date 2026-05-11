@@ -41,11 +41,20 @@ public class Level {
      * Updates the level state: moves enemies, checks collisions and updates time.
      */
     public void updateLevel() {
-    	// mover a cada enemigo
+        moveEnemies();
+        resolveEnemyPlayerCollisions();
+        resolveCoinPlayerCollisions();
+        resolveZonePlayerCollisions();
+        updateTime();
+    }
+
+    private void moveEnemies() {
         for (Enemy enemy : enemies) {
             enemy.move(this);
         }
-        // Colisiones enemigo-jugador
+    }
+
+    private void resolveEnemyPlayerCollisions() {
         for (Enemy enemy : enemies) {
             for (Player player : players) {
                 if (enemy.getAreaColision().intersects(player.getAreaColision())) {
@@ -56,7 +65,9 @@ public class Level {
                 }
             }
         }
-        // Colisiones moneda-jugador
+    }
+
+    private void resolveCoinPlayerCollisions() {
         for (Coin coin : coins) {
             if (!coin.isCollected()) {
                 for (Player player : players) {
@@ -66,7 +77,9 @@ public class Level {
                 }
             }
         }
-        // Colisiones zona-jugador
+    }
+
+    private void resolveZonePlayerCollisions() {
         for (Zone zone : zones.values()) {
             for (Player player : players) {
                 Rectangle2D zoneRect = new Rectangle2D.Double(zone.getX(), zone.getY(), zone.getWidth(), zone.getHeight());
@@ -76,6 +89,9 @@ public class Level {
                 }
             }
         }
+    }
+
+    private void updateTime() {
         if (gameTime > 0) gameTime -= 1.0 / 60.0;
     }
 

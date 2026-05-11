@@ -12,9 +12,16 @@ import java.util.List;
  */
 public class TheDOPOHardestGame {
 
+    private static TheDOPOHardestGame instance;
+
     private Level currentLevel;
     private GameMode currentGameMode;
     private boolean isPaused;
+
+    public static TheDOPOHardestGame getInstance() {
+        if (instance == null) instance = new TheDOPOHardestGame();
+        return instance;
+    }
     private int currentLevelNumber = 1; 
     
     public enum GameMode {
@@ -34,7 +41,7 @@ public class TheDOPOHardestGame {
         public boolean hasMachine() { return hasMachine; }
     }
 
-    public TheDOPOHardestGame() {
+    private TheDOPOHardestGame() {
         this.currentGameMode = GameMode.PLAYER;
         this.isPaused = false;
     }
@@ -81,6 +88,35 @@ public class TheDOPOHardestGame {
 
     public GameMode getGameMode() { return currentGameMode; }
     public Level getCurrentLevel() { return currentLevel; }
+
+    public int getPlayerDeaths(int playerIndex) {
+        if (currentLevel == null) return 0;
+        List<Player> players = currentLevel.getPlayers();
+        if (playerIndex < 0 || playerIndex >= players.size()) return 0;
+        return players.get(playerIndex).getDeaths();
+    }
+
+    public int getCollectedCoins() {
+        if (currentLevel == null) return 0;
+        int count = 0;
+        for (Coin c : currentLevel.getCoins()) if (c.isCollected()) count++;
+        return count;
+    }
+
+    public int getTotalCoins() {
+        if (currentLevel == null) return 0;
+        return currentLevel.getCoins().size();
+    }
+
+    public int getLevelNumber() {
+        if (currentLevel == null) return 0;
+        return currentLevel.getNumber();
+    }
+
+    public double getRemainingTime() {
+        if (currentLevel == null) return 0.0;
+        return currentLevel.getGameTime();
+    }
     public int getCurrentLevelNumber() { return currentLevelNumber; }
 
     /**
