@@ -23,16 +23,16 @@ class LinearMovementTest {
     void setUp() {
         GameMap map = new GameMap(500, 500);
         level = new Level(1, 60.0, map);
-        horizontal = new LinearMovement(Direction.HORIZONTAL, 1);
-        vertical = new LinearMovement(Direction.VERTICAL, 1);
+        horizontal = LinearMovement.basic(Direction.HORIZONTAL, 1);
+        vertical = LinearMovement.basic(Direction.VERTICAL, 1);
     }
 
     @Test
     // Enemy should move right when no wall blocks the path.
     void moveShouldMoveHorizontallyWhenNoWall() {
-        Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, horizontal);
+        Enemy enemy = new Enemy(100, 100, 10, 10, horizontal);
         horizontal.move(enemy, level);
-        assertEquals(108.0, enemy.getX(), 0.001);
+        assertEquals(104.0, enemy.getX(), 0.001);
         assertEquals(100.0, enemy.getY(), 0.001);
     }
 
@@ -41,7 +41,7 @@ class LinearMovementTest {
     void moveShouldReverseDirectionWhenHitsWall() {
         SolidWall wall = new SolidWall(101, 100, 50, 50, "Gray");
         level.addStaticElement(wall);
-        Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, horizontal);
+        Enemy enemy = new Enemy(100, 100, 10, 10, horizontal);
         horizontal.move(enemy, level);
         horizontal.move(enemy, level);
         assertTrue(enemy.getX() <= 100.0);
@@ -50,10 +50,10 @@ class LinearMovementTest {
     @Test
     // Enemy should move down when no wall blocks the path.
     void moveShouldMoveVerticallyWhenNoWall() {
-        Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, vertical);
+        Enemy enemy = new Enemy(100, 100, 10, 10, vertical);
         vertical.move(enemy, level);
         assertEquals(100.0, enemy.getX(), 0.001);
-        assertEquals(108.0, enemy.getY(), 0.001);
+        assertEquals(104.0, enemy.getY(), 0.001);
     }
 
     @Test
@@ -61,18 +61,18 @@ class LinearMovementTest {
     void moveShouldReverseVerticalDirectionWhenHitsWall() {
         SolidWall wall = new SolidWall(100, 101, 50, 50, "Gray");
         level.addStaticElement(wall);
-        Enemy enemy = new Enemy(100, 100, 10, 10, 2.0, vertical);
+        Enemy enemy = new Enemy(100, 100, 10, 10, vertical);
         vertical.move(enemy, level);
         vertical.move(enemy, level);
         assertTrue(enemy.getY() <= 100.0);
     }
 
     @Test
-    // Speed should correctly affect the distance moved per step.
-    void moveShouldApplySpeedCorrectly() {
-        LinearMovement fast = new LinearMovement(Direction.HORIZONTAL, 1);
-        Enemy enemy = new Enemy(100, 100, 10, 10, 5.0, fast);
+    // Accelerated factory moves at twice the basic step (×2 UNIT).
+    void acceleratedShouldMoveTwiceFaster() {
+        LinearMovement fast = LinearMovement.accelerated(Direction.HORIZONTAL, 1);
+        Enemy enemy = new Enemy(100, 100, 10, 10, fast);
         fast.move(enemy, level);
-        assertEquals(120.0, enemy.getX(), 0.001);
+        assertEquals(108.0, enemy.getX(), 0.001);
     }
 }

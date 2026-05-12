@@ -29,8 +29,8 @@ class EnemyTest {
     @Test
     // Verifies that onDestroy increments the player's death counter by one.
     void onDestroyShouldIncrementPlayerDeaths() {
-        Enemy enemy = new Enemy(0, 0, 10, 10, 1.0,
-                new LinearMovement(Direction.HORIZONTAL, 1));
+        Enemy enemy = new Enemy(0, 0, 10, 10,
+                LinearMovement.basic(Direction.HORIZONTAL, 1));
         enemy.onDestroy(player);
         assertEquals(1, player.getDeaths());
     }
@@ -39,8 +39,8 @@ class EnemyTest {
     // Verifies that onDestroy respawns the player at their initial spawn position.
     void onDestroyShouldRespawnPlayer() {
         player.setPosition(250, 300);
-        Enemy enemy = new Enemy(0, 0, 10, 10, 1.0,
-                new LinearMovement(Direction.HORIZONTAL, 1));
+        Enemy enemy = new Enemy(0, 0, 10, 10,
+                LinearMovement.basic(Direction.HORIZONTAL, 1));
         enemy.onDestroy(player);
         assertEquals(100.0, player.getX(), 0.001);
         assertEquals(100.0, player.getY(), 0.001);
@@ -51,7 +51,7 @@ class EnemyTest {
     void moveShouldDelegateToStrategy() {
         boolean[] called = {false};
         MovementStrategy strategy = (e, l) -> called[0] = true;
-        Enemy enemy = new Enemy(0, 0, 10, 10, 1.0, strategy);
+        Enemy enemy = new Enemy(0, 0, 10, 10, strategy);
         enemy.move(level);
         assertTrue(called[0]);
     }
