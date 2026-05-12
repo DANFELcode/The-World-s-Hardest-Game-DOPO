@@ -51,7 +51,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
         prepareElements();
         prepareActions();
-        // gameLoop va después de prepareElements: necesita que tablero y juego existan
         gameLoop = new GameLoop(this);
 
         pack();
@@ -243,7 +242,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
             juego.loadTestLevel();
             tablero.setLevel(juego.getCurrentLevel());
             cardLayout.show(panel, PANEL_JUEGO);
-            // invokeLater: espera a que el EDT termine la transición antes de pedir el foco
             SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
             gameLoop.start();
         });
@@ -261,7 +259,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
         guardarPartida.addActionListener(e -> JOptionPane.showMessageDialog(this, msg));
         abrirPartida.addActionListener(e -> JOptionPane.showMessageDialog(this, msg));
 
-        // JPanel no recibe foco del teclado por defecto
         tablero.setFocusable(true);
 
         tablero.addKeyListener(new KeyAdapter() {
