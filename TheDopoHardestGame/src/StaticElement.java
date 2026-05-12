@@ -31,7 +31,9 @@ public abstract class StaticElement {
     /**
      * Called when an enemy makes contact with this static element.
      */
-    public void onContact(Enemy enemy, Level level) { }
+    public void onContact(Enemy enemy, Level level) { 
+    	
+    }
 
     public Rectangle2D getAreaColision() {
         return new Rectangle2D.Double(x, y, width, height);
