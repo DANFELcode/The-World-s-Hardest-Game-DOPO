@@ -34,13 +34,12 @@ public class BoardPanel extends JPanel {
 
         for (StaticElement e : level.getStaticElements()) {
             g.setColor(e.getDisplayColor());
-            
+
             if (e.isBomb()) {
-                g.fillOval((int) e.getX(), (int) e.getY(), 
+                g.fillOval((int) e.getX(), (int) e.getY(),
                            (int) e.getWidth(), (int) e.getHeight());
-            } 
-            else {
-                g.fillRect((int) e.getX(), (int) e.getY(), 
+            } else {
+                g.fillRect((int) e.getX(), (int) e.getY(),
                            (int) e.getWidth(), (int) e.getHeight());
             }
         }
