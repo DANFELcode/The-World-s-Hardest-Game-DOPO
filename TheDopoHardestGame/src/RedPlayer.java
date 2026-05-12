@@ -60,7 +60,7 @@ public class RedPlayer extends Player {
 
         if (hasGreenSkin && !isWeakened) {
             this.isWeakened = true;
-            this.speed = ORIGINAL_SPEED * 0.5; 
+            this.speed = ORIGINAL_SPEED * 0.7; 
             this.currentColor = new Color(144, 238, 144); 
             
             this.lastHitTime = currentTime; 
