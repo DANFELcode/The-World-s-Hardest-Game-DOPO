@@ -20,12 +20,6 @@ public class Level {
     private ArrayList<StaticElement> staticElements;
     private HashMap<String, Zone> zones;
 
-    /**
-     * Creates a level with a number, time limit and map.
-     * @param number level identifier, must be >= 0
-     * @param gameTime time limit for the level, must be greater than 0
-     * @param map the level map
-     */
     public Level(int number, double gameTime, GameMap map) {
         this.number = number;
         this.gameTime = gameTime;
@@ -37,19 +31,16 @@ public class Level {
         this.zones = new HashMap<String, Zone>();
     }
 
-    /**
-     * Updates the level state: moves enemies, checks collisions and updates time.
-     */
     public void updateLevel() {
         moveEnemies();
         resolveEnemyPlayerCollisions();
         resolveCoinPlayerCollisions();
         resolveZonePlayerCollisions();
         resolveStaticCollisions();
-        
+
         enemies.removeIf(Enemy::isDead);
-        staticElements.removeIf(StaticElement::shouldBeRemoved); 
-        
+        staticElements.removeIf(StaticElement::shouldBeRemoved);
+
         updateTime();
     }
 
@@ -58,13 +49,13 @@ public class Level {
             enemy.move(this);
         }
     }
-    
+
     /**
      * Handles the penalty rules when a player dies in the level.
      * @param player the player that died
      */
     public void onPlayerDeath(Player player) {
-        boolean atSpawn = Math.abs(player.getX() - player.getSpawnX()) < 0.01 
+        boolean atSpawn = Math.abs(player.getX() - player.getSpawnX()) < 0.01
                        && Math.abs(player.getY() - player.getSpawnY()) < 0.01;
 
         if (atSpawn) {
@@ -73,7 +64,7 @@ public class Level {
                     coin.reset();
                 }
             }
-        } 
+        }
     }
 
     private void resolveEnemyPlayerCollisions() {
@@ -110,21 +101,21 @@ public class Level {
             }
         }
     }
-    
+
     private void resolveStaticCollisions() {
         for (StaticElement element : staticElements) {
-            if (!element.isBlocking()) { 
-                
+            if (!element.isBlocking()) {
+
                 for (Player player : players) {
                     if (element.getAreaColision().intersects(player.getAreaColision())) {
-                        element.onContact(player, this);                       
-                        this.onPlayerDeath(player); 
+                        element.onContact(player, this);
+                        this.onPlayerDeath(player);
                     }
                 }
 
                 for (Enemy enemy : enemies) {
                     if (element.getAreaColision().intersects(enemy.getAreaColision())) {
-                        element.onContact(enemy, this); 
+                        element.onContact(enemy, this);
                     }
                 }
             }
@@ -135,13 +126,8 @@ public class Level {
         if (gameTime > 0) gameTime -= 1.0 / 60.0;
     }
 
-    public double getGameTime() { return gameTime; }    
+    public double getGameTime() { return gameTime; }
 
-
-    /**
-     * Returns whether the level is complete: final zone visited and all coins collected.
-     * @return true if the level is complete
-     */
     public boolean isLevelComplete() {
         if (!isCoinsCollected()) return false;
         Zone fZone = zones.get("final");
@@ -154,10 +140,6 @@ public class Level {
         return false;
     }
 
-    /**
-     * Returns whether all coins in the level have been collected.
-     * @return true if all coins are collected
-     */
     public boolean isCoinsCollected() {
         for (Coin coin : coins) {
             if (!coin.isCollected()) return false;
@@ -165,10 +147,6 @@ public class Level {
         return true;
     }
 
-    /**
-     * Adds a player to the level.
-     * @param player the player to add
-     */
     public void addPlayer(Player player) {
         Zone initial = zones.get("initial");
         if (initial != null) {
@@ -178,30 +156,12 @@ public class Level {
         players.add(player);
     }
 
-    /**
-     * Adds a coin to the level.
-     * @param coin the coin to add (also use this method for SkinCoin, since it extends Coin
-     *             and must be tracked by isCoinsCollected())
-     */
     public void addCoin(Coin coin) { coins.add(coin); }
 
-    /**
-     * Adds an enemy to the level.
-     * @param enemy the enemy to add
-     */
     public void addEnemy(Enemy enemy) { enemies.add(enemy); }
 
-    /**
-     * Adds a static element to the level.
-     * @param sElement the static element to add
-     */
     public void addStaticElement(StaticElement sElement) { staticElements.add(sElement); }
 
-    /**
-     * Adds a zone to the level.
-     * @param type zone type identifier (e.g. "initial", "intermediate", "final")
-     * @param zone the zone to add
-     */
     public void addZone(String type, Zone zone) {
         zones.put(type, zone);
         if ("initial".equals(type)) {
@@ -212,12 +172,6 @@ public class Level {
         }
     }
 
-    /**
-     * Returns whether there is a SolidWall at the given position.
-     * @param x horizontal position
-     * @param y vertical position
-     * @return true if a SolidWall occupies that position
-     */
     public boolean isWall(double x, double y) {
         for (StaticElement e : staticElements) {
             if (e.isBlocking() && e.getAreaColision().contains(x, y)) return true;
@@ -225,30 +179,20 @@ public class Level {
         return false;
     }
 
-    /**
-     * Returns whether the given position is walkable: within map bounds and no SolidWall.
-     * @param x horizontal position
-     * @param y vertical position
-     * @param width element width
-     * @param height element height
-     * @return true if the position is walkable
-     */
     public boolean isWalkable(double x, double y, double width, double height) {
         if (x < 0 || y < 0 || x + width > map.getWidth() || y + height > map.getHeight()) return false;
         return !isWall(x, y)
-        		&& !isWall(x + width - 1, y)
-        		&& !isWall(x, y + height - 1)
-        		 && !isWall(x + width - 1, y + height - 1);
+                && !isWall(x + width - 1, y)
+                && !isWall(x, y + height - 1)
+                && !isWall(x + width - 1, y + height - 1);
     }
-    
-    
 
     public int getNumber() { return number; }
     public GameMap getMap() { return map; }
     public ArrayList<Player> getPlayers() { return players; }
     public ArrayList<Enemy> getEnemies() { return enemies; }
     public void setMap(GameMap map) { this.map = map; }
-    
+
     public ArrayList<Coin> getCoins() { return coins; }
     public ArrayList<StaticElement> getStaticElements() { return staticElements; }
     public HashMap<String, Zone> getZones() { return zones; }

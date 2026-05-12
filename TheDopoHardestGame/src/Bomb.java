@@ -4,7 +4,7 @@ import java.awt.Color;
 
 public class Bomb extends StaticElement implements Lethal {
 
-    private boolean exploded = false; 
+    private boolean exploded = false;
 
     public Bomb(double x, double y, double width, double height) {
         super(x, y, width, height, "Brown");
@@ -21,12 +21,12 @@ public class Bomb extends StaticElement implements Lethal {
             player.die();
         }
     }
-    
+
     @Override
     public Color getDisplayColor() {
         return new Color(160, 32, 240);
     }
-    
+
     @Override
     public void onContact(Enemy enemy, Level level) {
         if (!exploded) {
@@ -39,10 +39,10 @@ public class Bomb extends StaticElement implements Lethal {
     public void onDestroy(Player player) {
         player.die();
     }
-    
+
     @Override
     public boolean shouldBeRemoved() { return exploded; }
-    
+
     @Override
     public boolean isBomb() { return true; }
 }

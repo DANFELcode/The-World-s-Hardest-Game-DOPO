@@ -17,13 +17,13 @@ public class TheDOPOHardestGame {
     private Level currentLevel;
     private GameMode currentGameMode;
     private boolean isPaused;
+    private int currentLevelNumber = 1;
 
     public static TheDOPOHardestGame getInstance() {
         if (instance == null) instance = new TheDOPOHardestGame();
         return instance;
     }
-    private int currentLevelNumber = 1; 
-    
+
     public enum GameMode {
         PLAYER(1, false),
         PvsP(2, false),
@@ -117,6 +117,7 @@ public class TheDOPOHardestGame {
         if (currentLevel == null) return 0.0;
         return currentLevel.getGameTime();
     }
+
     public int getCurrentLevelNumber() { return currentLevelNumber; }
 
     /**
@@ -131,8 +132,8 @@ public class TheDOPOHardestGame {
             loadTestLevel();
         }
     }
-    
-    public void loadTestLevel() { 
+
+    public void loadTestLevel() {
         GameMap map = new GameMap(800, 500);
         currentLevel = new Level(1, 90.0, map);
 
@@ -168,7 +169,7 @@ public class TheDOPOHardestGame {
         currentLevel.addZone("initial", new InitialZone(30, 200, 100, 100));
         currentLevel.addZone("intermediate", new IntermediateZone(380, 380, 60, 60));
         currentLevel.addZone("final", new FinalZone(680, 200, 90, 100));
-        
+
         currentLevel.addStaticElement(new Bomb(40, 350, 20, 20));
         currentLevel.addStaticElement(new Bomb(180, 350, 20, 20));
     }

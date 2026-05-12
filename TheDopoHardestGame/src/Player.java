@@ -14,16 +14,6 @@ public abstract class Player extends MovableElement {
     protected double spawnY;
     protected boolean hasCheckpoint;
 
-
-    /**
-     * Creates a player with a name, initial position, size and speed.
-     * @param name player name
-     * @param x initial horizontal position
-     * @param y initial vertical position
-     * @param width player width, must be greater than 0
-     * @param height player height, must be greater than 0
-     * @param speed movement speed, must be greater than 0
-     */
     public Player(String name, double x, double y, double width, double height, double speed) {
         super(x, y, width, height, speed);
         this.name = name;
@@ -42,12 +32,6 @@ public abstract class Player extends MovableElement {
         return hasCheckpoint;
     }
 
-    /**
-     * Moves the player by the given direction vector, if the destination is walkable.
-     * @param dx horizontal direction (-1, 0 or 1)
-     * @param dy vertical direction (-1, 0 or 1)
-     * @param level the current level
-     */
     public void move(double dx, double dy, Level level) {
         double nextX = this.x + (dx * this.speed);
         double nextY = this.y + (dy * this.speed);
@@ -56,27 +40,15 @@ public abstract class Player extends MovableElement {
         }
     }
 
-    /**
-     * Increments the death counter and respawns the player at the spawn point.
-     */
     public void die() {
         this.deaths++;
         this.setPosition(spawnX, spawnY);
     }
 
-    /**
-     * Changes the player's skin to the given color.
-     * @param newSkin the color of the new skin
-     */
     public abstract void changeSkin(String newSkin);
 
     public abstract Color getDisplayColor();
 
-    /**
-     * Updates the player's spawn point.
-     * @param newSpawnX new horizontal spawn position
-     * @param newSpawnY new vertical spawn position
-     */
     public void setSpawnPoint(double newSpawnX, double newSpawnY) {
         this.spawnX = newSpawnX;
         this.spawnY = newSpawnY;
@@ -84,6 +56,6 @@ public abstract class Player extends MovableElement {
 
     public int getDeaths() { return deaths; }
     public String getName() { return name; }
-    public double getSpawnX() {return spawnX;}
-    public double getSpawnY() {return spawnY;}
+    public double getSpawnX() { return spawnX; }
+    public double getSpawnY() { return spawnY; }
 }

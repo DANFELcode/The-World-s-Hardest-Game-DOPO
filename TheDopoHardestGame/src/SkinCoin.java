@@ -13,16 +13,16 @@ public class SkinCoin extends Coin {
         player.changeSkin(getColor());
         super.onCollect(player);
     }
-    
+
     @Override
     public Color getDisplayColor() {
         String colorName = getColor().toLowerCase();
-        
+
         switch (colorName) {
             case "green": return Color.GREEN;
-            case "blue": return Color.BLUE;
-            case "red": return Color.RED;
-            default: return Color.YELLOW;
+            case "blue":  return Color.BLUE;
+            case "red":   return Color.RED;
+            default:      return Color.YELLOW;
         }
     }
 }

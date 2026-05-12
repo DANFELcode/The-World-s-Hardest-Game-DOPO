@@ -32,15 +32,12 @@ public abstract class StaticElement {
      * Called when an enemy makes contact with this static element.
      */
     public void onContact(Enemy enemy, Level level) { }
-    
-    
-    // -------------------------------------------------
 
     public Rectangle2D getAreaColision() {
         return new Rectangle2D.Double(x, y, width, height);
-    }    
-    
-    public boolean isBomb() {return false;}
+    }
+
+    public boolean isBomb() { return false; }
     public boolean shouldBeRemoved() { return false; }
     public boolean isBlocking() { return false; }
     public Color getDisplayColor() { return Color.BLACK; }
