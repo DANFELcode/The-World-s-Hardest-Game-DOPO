@@ -154,7 +154,7 @@ public class TheDOPOHardestGame {
         currentLevel.addCoin(new Coin(520, 350, 15, 15, "yellow"));
         currentLevel.addCoin(new Coin(670, 100, 15, 15, "yellow"));
 
-        currentLevel.addCoin(new SkinCoin(380, 380, 15, 15, "Blue"));
+        currentLevel.addCoin(new SkinCoin(380, 380, 15, 15, "Green"));
 
         currentLevel.addEnemy(new Enemy(180, 60, 20, 20,
             LinearMovement.basic(LinearMovement.Direction.VERTICAL, 1)));
@@ -168,6 +168,9 @@ public class TheDOPOHardestGame {
         currentLevel.addZone("initial", new InitialZone(30, 200, 100, 100));
         currentLevel.addZone("intermediate", new IntermediateZone(380, 380, 60, 60));
         currentLevel.addZone("final", new FinalZone(680, 200, 90, 100));
+        
+        currentLevel.addStaticElement(new Bomb(40, 350, 20, 20));
+        currentLevel.addStaticElement(new Bomb(180, 350, 20, 20));
     }
 
     /**
@@ -217,7 +220,7 @@ public class TheDOPOHardestGame {
 
         currentLevel.addCoin(new Coin(460, 50, 15, 15, "yellow"));
         currentLevel.addCoin(new Coin(640, 430, 15, 15, "yellow"));
-        currentLevel.addCoin(new SkinCoin(545, 240, 15, 15, "Blue"));
+        currentLevel.addCoin(new SkinCoin(545, 240, 15, 15, "Green"));
 
         currentLevel.addZone("initial", new InitialZone(30, 200, 60, 100));
         currentLevel.addZone("final", new FinalZone(720, 200, 50, 100));

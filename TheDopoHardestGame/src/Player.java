@@ -84,4 +84,6 @@ public abstract class Player extends MovableElement {
 
     public int getDeaths() { return deaths; }
     public String getName() { return name; }
+    public double getSpawnX() {return spawnX;}
+    public double getSpawnY() {return spawnY;}
 }

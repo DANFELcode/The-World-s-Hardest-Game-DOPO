@@ -15,7 +15,7 @@ public class IntermediateZone extends Zone {
 
     @Override
     public Color getDisplayColor() {
-        return new Color(144, 238, 144); // Un verde claro para distinguirlo de la meta
+        return new Color(144, 238, 144); 
     }
 
     /**
@@ -24,9 +24,8 @@ public class IntermediateZone extends Zone {
      */
     @Override
     public void onPlayerEnter(Player player) {
-        super.onPlayerEnter(player); // Cambia el estado a visited = true
+        super.onPlayerEnter(player); 
         
-        // Actualiza el spawn point al centro de esta zona y marca el flag
         double centerX = this.x + (this.width / 2.0);
         double centerY = this.y + (this.height / 2.0);
         player.markCheckpoint(centerX, centerY);

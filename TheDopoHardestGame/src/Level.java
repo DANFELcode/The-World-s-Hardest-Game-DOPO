@@ -45,6 +45,11 @@ public class Level {
         resolveEnemyPlayerCollisions();
         resolveCoinPlayerCollisions();
         resolveZonePlayerCollisions();
+        resolveStaticCollisions();
+        
+        enemies.removeIf(Enemy::isDead);
+        staticElements.removeIf(StaticElement::shouldBeRemoved); 
+        
         updateTime();
     }
 
@@ -53,15 +58,30 @@ public class Level {
             enemy.move(this);
         }
     }
+    
+    /**
+     * Handles the penalty rules when a player dies in the level.
+     * @param player the player that died
+     */
+    public void onPlayerDeath(Player player) {
+        boolean atSpawn = Math.abs(player.getX() - player.getSpawnX()) < 0.01 
+                       && Math.abs(player.getY() - player.getSpawnY()) < 0.01;
+
+        if (atSpawn) {
+            if (!player.hasCheckpoint()) {
+                for (Coin coin : coins) {
+                    coin.reset();
+                }
+            }
+        } 
+    }
 
     private void resolveEnemyPlayerCollisions() {
         for (Enemy enemy : enemies) {
             for (Player player : players) {
                 if (enemy.getAreaColision().intersects(player.getAreaColision())) {
                     enemy.onDestroy(player);
-                    if (!player.hasCheckpoint()) {
-                        for (Coin coin : coins) coin.reset();
-                    }
+                    this.onPlayerDeath(player);
                 }
             }
         }
@@ -86,6 +106,26 @@ public class Level {
                 Rectangle2D playerRect = player.getAreaColision();
                 if (zoneRect.intersects(playerRect)) {
                     zone.onPlayerEnter(player);
+                }
+            }
+        }
+    }
+    
+    private void resolveStaticCollisions() {
+        for (StaticElement element : staticElements) {
+            if (!element.isBlocking()) { 
+                
+                for (Player player : players) {
+                    if (element.getAreaColision().intersects(player.getAreaColision())) {
+                        element.onContact(player, this);                       
+                        this.onPlayerDeath(player); 
+                    }
+                }
+
+                for (Enemy enemy : enemies) {
+                    if (element.getAreaColision().intersects(enemy.getAreaColision())) {
+                        element.onContact(enemy, this); 
+                    }
                 }
             }
         }
@@ -200,6 +240,8 @@ public class Level {
         		&& !isWall(x, y + height - 1)
         		 && !isWall(x + width - 1, y + height - 1);
     }
+    
+    
 
     public int getNumber() { return number; }
     public GameMap getMap() { return map; }

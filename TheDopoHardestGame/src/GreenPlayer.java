@@ -2,54 +2,45 @@ package domain;
 
 import java.awt.Color;
 
-/**
- * Represents the resilient player who can absorb the first hit before dying. <br>
- * <b>(name, x, y, width=20.0, height=20.0, speed=1.0, absorbedFirstHit)</b> <br>
- * <b>Inv:</b> speed > 0 and width > 0 and height > 0
- */
 public class GreenPlayer extends Player {
 
-    private boolean absorbedFirstHit;
+    // Usamos el UNIT de MovableElement para mantener la escala del juego
+    private static final double INITIAL_SPEED = 1.0 * UNIT;
+    private boolean isWeakened = false;
 
-    /**
-     * Creates a green player with the shield active.
-     * @param name player name
-     * @param x initial horizontal position
-     * @param y initial vertical position
-     */
     public GreenPlayer(String name, double x, double y) {
-        super(name, x, y, 20.0, 20.0, 1.0);
-        this.absorbedFirstHit = false;
+        super(name, x, y, 20.0, 20.0, INITIAL_SPEED);
     }
 
-    /**
-     * On the first hit absorbs the impact and reduces speed; on the second hit dies and respawns.
-     */
     @Override
     public void die() {
-        if (!absorbedFirstHit) {
-            absorbedFirstHit = true;
-            this.speed *= 0.7;
+        if (!isWeakened) {
+            // PRIMER CONTACTO
+            this.isWeakened = true;
+            this.speed = INITIAL_SPEED * 0.5; 
+            // AL NO LLAMAR A super.die(), no aumenta muertes ni vuelve al spawn
         } else {
-            super.die();
+            // SEGUNDO CONTACTO
+            super.die(); // Aquí sí: deaths++ y setPosition(spawnX, spawnY)
+            restoreStatus();
         }
     }
 
-    /**
-     * Restores the shield and the original speed at the start of a new level.
-     */
-    public void restoreShield() {
-        absorbedFirstHit = false;
-        this.speed = 1.0;
+    @Override
+    public void changeSkin(String newSkin) {
+        // Si recoge la moneda verde, se cura
+        if ("Green".equalsIgnoreCase(newSkin)) {
+            restoreStatus();
+        }
     }
 
-    /**
-     * Changes the player's skin (no effect by default).
-     * @param newSkin the color of the new skin
-     */
-    @Override
-    public void changeSkin(String newSkin) {}
+    public void restoreStatus() {
+        this.isWeakened = false;
+        this.speed = INITIAL_SPEED;
+    }
 
     @Override
-    public Color getDisplayColor() { return Color.GREEN; }
+    public Color getDisplayColor() {
+        return isWeakened ? new Color(144, 238, 144) : new Color(0, 150, 0);
+    }
 }
