@@ -62,17 +62,17 @@ class LevelTest {
     }
 
     @Test
-    // Verifies that isWall returns true when a SolidWall occupies the queried position.
-    void isWallShouldReturnTrueWhenSolidWallAtPosition() {
+    // Verifies that isBlocking returns true when a SolidWall occupies the queried position.
+    void isBlockingShouldReturnTrueWhenSolidWallAtPosition() {
         SolidWall wall = new SolidWall(100, 100, 50, 50, "Gray");
         level.addStaticElement(wall);
-        assertTrue(level.isWall(110, 110));
+        assertTrue(level.isBlocking(110, 110));
     }
 
     @Test
-    // Verifies that isWall returns false when no wall exists at the queried position.
-    void isWallShouldReturnFalseWhenNoWallAtPosition() {
-        assertFalse(level.isWall(200, 200));
+    // Verifies that isBlocking returns false when no blocking element exists at the queried position.
+    void isBlockingShouldReturnFalseWhenNoBlockingElementAtPosition() {
+        assertFalse(level.isBlocking(200, 200));
     }
 
     @Test

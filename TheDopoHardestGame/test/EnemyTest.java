@@ -50,9 +50,9 @@ class EnemyTest {
     // Verifies that enemy.move delegates execution to the assigned movement strategy.
     void moveShouldDelegateToStrategy() {
         boolean[] called = {false};
-        MovementStrategy strategy = (e, l) -> called[0] = true;
+        MovementStrategy strategy = (e, l, dt) -> called[0] = true;
         Enemy enemy = new Enemy(0, 0, 10, 10, strategy);
-        enemy.move(level);
+        enemy.move(level, 1.0 / 60.0);
         assertTrue(called[0]);
     }
 }
