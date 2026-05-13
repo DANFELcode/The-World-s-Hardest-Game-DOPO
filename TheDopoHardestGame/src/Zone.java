@@ -1,13 +1,15 @@
 package domain;
 
 import java.awt.Color;
+import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
 
 /**
  * Represents a specific area within the level map. <br>
  * <b>(x, y, width, height, visited)</b> <br>
  * <b>Inv:</b> width > 0 and height > 0
  */
-public abstract class Zone {
+public abstract class Zone implements Interactable, Drawable, Serializable {
 
     public abstract Color getDisplayColor();
 
@@ -55,6 +57,21 @@ public abstract class Zone {
      */
     public boolean isVisited() {
         return visited;
+    }
+
+    @Override
+    public void onPlayerContact(Player player, Level level) {
+        onPlayerEnter(player);
+    }
+
+    @Override
+    public DrawCommand toDrawCommand() {
+        return new DrawCommand(getDisplayColor(), (int)x, (int)y, (int)width, (int)height, DrawCommand.Shape.RECT);
+    }
+
+    @Override
+    public Rectangle2D getAreaColision() {
+        return new Rectangle2D.Double(x, y, width, height);
     }
 
     public double getX() { return x; }

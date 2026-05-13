@@ -1,6 +1,8 @@
 package domain;
 
 import java.awt.geom.Point2D;
+import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +12,7 @@ import java.util.List;
  * <b>(currentLevel, currentGameMode, isPaused)</b> <br>
  * <b>Inv:</b> currentGameMode != null
  */
-public class TheDOPOHardestGame {
+public class TheDOPOHardestGame implements Serializable {
 
     private static TheDOPOHardestGame instance;
 
@@ -18,10 +20,50 @@ public class TheDOPOHardestGame {
     private GameMode currentGameMode;
     private boolean isPaused;
     private int currentLevelNumber = 1;
+    private transient GameDataAccess dataAccess = GameDataAccess.getInstance();
+   
 
     public static TheDOPOHardestGame getInstance() {
         if (instance == null) instance = new TheDOPOHardestGame();
         return instance;
+    }
+
+    public void startGame() {
+        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
+        currentLevelNumber = 1;
+        currentLevel = dataAccess.loadLevel("level" + currentLevelNumber + ".txt");
+    }
+
+    public void guardarPartida(File file) throws GameException {
+        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
+        dataAccess.guardarPartida(this, file);
+    }
+
+    public void abrirPartida(File file) throws GameException {
+        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
+        TheDOPOHardestGame loaded = dataAccess.abrirPartida(file);
+        this.currentLevel = loaded.currentLevel;
+        this.currentGameMode = loaded.currentGameMode;
+        this.isPaused = loaded.isPaused;
+        this.currentLevelNumber = loaded.currentLevelNumber;
+    }
+
+    public void exportarNivel(File file) throws GameException {
+        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
+        if (currentLevel != null) {
+            dataAccess.exportarNivel(currentLevel, file);
+        }
+    }
+
+    public void importarNivel(File file) throws GameException {
+        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
+        Level level = dataAccess.loadLevelAbsolute(file);
+        if (level != null) {
+            this.currentLevel = level;
+            this.currentLevelNumber = level.getNumber();
+        } else {
+            throw new GameException("No se pudo importar el nivel.");
+        }
     }
 
     public enum GameMode {
@@ -54,17 +96,17 @@ public class TheDOPOHardestGame {
         this.currentLevel = new Level(levelNumber, gameTime, map);
     }
 
-    public void update() {
+    public void update(double deltaTime) {
         if (!isPaused && currentLevel != null) {
-            currentLevel.updateLevel();
+            currentLevel.updateLevel(deltaTime);
         }
     }
 
-    public void movePlayer(int playerIndex, double dx, double dy) {
+    public void movePlayer(int playerIndex, double dx, double dy, double deltaTime) {
         if (!isPaused && currentLevel != null) {
             List<Player> players = currentLevel.getPlayers();
             if (playerIndex >= 0 && playerIndex < players.size()) {
-                players.get(playerIndex).move(dx, dy, currentLevel);
+                players.get(playerIndex).move(dx, dy, currentLevel, deltaTime);
             }
         }
     }
@@ -118,22 +160,52 @@ public class TheDOPOHardestGame {
         return currentLevel.getGameTime();
     }
 
+    public List<DrawCommand> getDrawCommands() {
+        List<DrawCommand> commands = new ArrayList<>();
+        if (currentLevel == null) return commands;
+        for (Zone zone : currentLevel.getZones().values())
+            commands.add(zone.toDrawCommand());
+        for (StaticElement e : currentLevel.getStaticElements())
+            commands.add(e.toDrawCommand());
+        for (Coin coin : currentLevel.getCoins())
+            if (!coin.isCollected()) commands.add(coin.toDrawCommand());
+        for (Enemy enemy : currentLevel.getEnemies())
+            commands.add(enemy.toDrawCommand());
+        for (Player player : currentLevel.getPlayers())
+            commands.add(player.toDrawCommand());
+        return commands;
+    }
+
     public int getCurrentLevelNumber() { return currentLevelNumber; }
 
     /**
      * Advances to the next logical level.
      */
     public void advanceLevel() {
-        if (currentLevelNumber == 1) {
-            currentLevelNumber = 2;
-            loadLevelTwo();
+        List<Player> players = currentLevel.getPlayers();
+        currentLevelNumber++;
+        Level next = dataAccess.loadLevel("level" + currentLevelNumber + ".txt");
+        if (next == null) {
+            // no hay más niveles entonces es victoria
         } else {
-            currentLevelNumber = 1;
-            loadTestLevel();
+            // descartar los players definidos en el archivo del nivel y transferir los actuales
+            next.getPlayers().clear();
+            Zone initialZone = next.getZones().get("initial");
+            for (Player p : players) {
+                if (initialZone != null) {
+                    p.setSpawnPoint(initialZone.getX(), initialZone.getY());
+                    p.setPosition(initialZone.getX(), initialZone.getY());
+                }
+                p.hasCheckpoint = false;
+                p.restoreSkin();
+                next.addPlayer(p);
+            }
+            currentLevel = next;
         }
     }
 
     public void loadTestLevel() {
+        currentLevelNumber = 1;
         GameMap map = new GameMap(800, 500);
         currentLevel = new Level(1, 90.0, map);
 

@@ -34,10 +34,11 @@ public class LinearMovement implements MovementStrategy {
      * @param enemy the enemy to move
      * @param level the current level
      */
-    public void move(Enemy enemy, Level level) {
+    @Override
+    public void move(Enemy enemy, Level level, double deltaTime) {
         double currentX = enemy.getX();
         double currentY = enemy.getY();
-        double delta = sign * speedInUnits * MovableElement.UNIT;
+        double delta = sign * speedInUnits * MovableElement.UNIT * MovableElement.TARGET_FPS * deltaTime;
 
         switch (direction) {
             case VERTICAL:
@@ -57,5 +58,11 @@ public class LinearMovement implements MovementStrategy {
                 }
                 break;
         }
+    }
+
+    @Override
+    public String toFileParams() {
+        String type = speedInUnits > 1.0 ? "accelerated" : "basic";
+        return "movement=" + type + ",direction=" + direction + ",sign=" + sign;
     }
 }

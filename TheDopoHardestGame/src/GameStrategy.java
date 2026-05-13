@@ -1,9 +1,11 @@
 package domain;
 
+import java.io.Serializable;
+
 /**
  * Defines the behavior strategy of the machine player. <br>
  */
-public interface GameStrategy {
+public interface GameStrategy extends Serializable {
 
     /**
      * Executes the strategy for the machine player.

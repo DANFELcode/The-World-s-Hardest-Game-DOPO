@@ -12,31 +12,26 @@ public class GreenPlayer extends Player {
     }
 
     @Override
-    public void die() {
+    public void onHit() {
         if (!isWeakened) {
             this.isWeakened = true;
-            this.speed = INITIAL_SPEED * 0.5;
-            // No llama a super.die(): no aumenta deaths ni vuelve al spawn
+            setSpeed(INITIAL_SPEED * 0.5);
         } else {
             super.die();
             restoreStatus();
         }
     }
 
-    @Override
-    public void changeSkin(String newSkin) {
-        if ("Green".equalsIgnoreCase(newSkin)) {
-            restoreStatus();
-        }
-    }
-
     public void restoreStatus() {
         this.isWeakened = false;
-        this.speed = INITIAL_SPEED;
+        setSpeed(INITIAL_SPEED);
     }
 
     @Override
     public Color getDisplayColor() {
         return isWeakened ? new Color(144, 238, 144) : new Color(0, 150, 0);
     }
+
+    @Override
+    public String getTypeName() { return "green"; }
 }

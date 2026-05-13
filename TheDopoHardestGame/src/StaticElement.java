@@ -2,13 +2,14 @@ package domain;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
 
 /**
  * Represents a static element in the game. <br>
  * <b>(x, y, width, height)</b> <br>
  * <b>Inv:</b> width > 0 and height > 0
  */
-public abstract class StaticElement {
+public abstract class StaticElement implements Interactable, Drawable, Serializable {
     private double x;
     private double y;
     private double width;
@@ -28,6 +29,17 @@ public abstract class StaticElement {
      */
     public void onContact(Player player, Level level) { }
 
+    @Override
+    public void onPlayerContact(Player player, Level level) {
+        if (!isBlocking()) {
+            onContact(player, level);
+            level.onPlayerDeath(player);
+        }
+    }
+
+    @Override
+    public boolean shouldRemove() { return shouldBeRemoved(); }
+
     /**
      * Called when an enemy makes contact with this static element.
      */
@@ -43,6 +55,14 @@ public abstract class StaticElement {
     public boolean shouldBeRemoved() { return false; }
     public boolean isBlocking() { return false; }
     public Color getDisplayColor() { return Color.BLACK; }
+
+    /** Returns the element's type identifier used in level files (e.g. "WALL", "BOMB"). */
+    public String getFileType() { return "WALL"; }
+
+    @Override
+    public DrawCommand toDrawCommand() {
+        return new DrawCommand(getDisplayColor(), (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(), DrawCommand.Shape.RECT);
+    }
 
     public double getX() { return x; }
     public double getY() { return y; }

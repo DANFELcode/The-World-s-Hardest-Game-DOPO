@@ -26,12 +26,8 @@ public class Machine extends Player {
         this.strategy = strategy;
     }
 
-    /**
-     * Changes the machine's skin (no effect by default).
-     * @param newSkin the color of the new skin
-     */
     @Override
-    public void changeSkin(String newSkin) {}
+    public String getTypeName() { return "machine"; }
 
     @Override
     public Color getDisplayColor() { return Color.MAGENTA; }

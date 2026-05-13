@@ -25,4 +25,7 @@ public class LifeSource extends StaticElement implements Collectible {
      */
     @Override
     public void onCollect(Player player) {}
+
+    @Override
+    public String getFileType() { return "LIFESOURCE"; }
 }

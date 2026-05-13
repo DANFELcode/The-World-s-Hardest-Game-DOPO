@@ -7,7 +7,7 @@ import java.awt.Color;
  * <b>(x, y, width, height, movement)</b> <br>
  * <b>Inv:</b> movement != null
  */
-public class Enemy extends MovableElement implements Lethal {
+public class Enemy extends MovableElement implements Lethal, Interactable, Drawable {
 
     private MovementStrategy movement;
     private boolean isDead;
@@ -31,14 +31,32 @@ public class Enemy extends MovableElement implements Lethal {
 
     @Override
     public void onDestroy(Player player) {
-        player.die();
+        player.onHit();
     }
 
-    public void move(Level level) {
-        movement.move(this, level);
+    @Override
+    public void onPlayerContact(Player player, Level level) {
+        if (!isDead) {
+            onDestroy(player);
+            level.onPlayerDeath(player);
+        }
     }
+
+    @Override
+    public boolean shouldRemove() { return isDead; }
+
+    public void move(Level level, double deltaTime) {
+        movement.move(this, level, deltaTime);
+    }
+
+    public MovementStrategy getMovement() { return movement; }
 
     public Color getDisplayColor() {
         return new Color(40, 60, 200);
+    }
+
+    @Override
+    public DrawCommand toDrawCommand() {
+        return new DrawCommand(getDisplayColor(), (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(), DrawCommand.Shape.OVAL);
     }
 }

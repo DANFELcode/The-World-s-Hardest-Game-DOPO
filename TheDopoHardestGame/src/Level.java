@@ -1,6 +1,6 @@
 package domain;
 
-import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -9,7 +9,7 @@ import java.util.HashMap;
  * <b>(number, gameTime, map, enemies, coins, staticElements, zones)</b> <br>
  * <b>Inv:</b> number >= 0 and gameTime > 0 and map != null
  */
-public class Level {
+public class Level implements Serializable {
 
     private int number;
     private double gameTime;
@@ -19,6 +19,7 @@ public class Level {
     private ArrayList<Coin> coins;
     private ArrayList<StaticElement> staticElements;
     private HashMap<String, Zone> zones;
+    private ArrayList<Interactable> interactables;
 
     public Level(int number, double gameTime, GameMap map) {
         this.number = number;
@@ -29,24 +30,23 @@ public class Level {
         this.coins = new ArrayList<Coin>();
         this.staticElements = new ArrayList<StaticElement>();
         this.zones = new HashMap<String, Zone>();
+        this.interactables = new ArrayList<Interactable>();
     }
 
-    public void updateLevel() {
-        moveEnemies();
-        resolveEnemyPlayerCollisions();
-        resolveCoinPlayerCollisions();
-        resolveZonePlayerCollisions();
-        resolveStaticCollisions();
+    public void updateLevel(double deltaTime) {
+        moveEnemies(deltaTime);
+        resolvePlayerCollisions();
 
+        interactables.removeIf(Interactable::shouldRemove);
         enemies.removeIf(Enemy::isDead);
         staticElements.removeIf(StaticElement::shouldBeRemoved);
 
-        updateTime();
+        updateTime(deltaTime);
     }
 
-    private void moveEnemies() {
+    private void moveEnemies(double deltaTime) {
         for (Enemy enemy : enemies) {
-            enemy.move(this);
+            enemy.move(this, deltaTime);
         }
     }
 
@@ -67,52 +67,16 @@ public class Level {
         }
     }
 
-    private void resolveEnemyPlayerCollisions() {
-        for (Enemy enemy : enemies) {
+    private void resolvePlayerCollisions() {
+        for (Interactable element : interactables) {
             for (Player player : players) {
-                if (enemy.getAreaColision().intersects(player.getAreaColision())) {
-                    enemy.onDestroy(player);
-                    this.onPlayerDeath(player);
+                if (element.getAreaColision().intersects(player.getAreaColision())) {
+                    element.onPlayerContact(player, this);
                 }
             }
         }
-    }
-
-    private void resolveCoinPlayerCollisions() {
-        for (Coin coin : coins) {
-            if (!coin.isCollected()) {
-                for (Player player : players) {
-                    if (coin.getAreaColision().intersects(player.getAreaColision())) {
-                        coin.onCollect(player);
-                    }
-                }
-            }
-        }
-    }
-
-    private void resolveZonePlayerCollisions() {
-        for (Zone zone : zones.values()) {
-            for (Player player : players) {
-                Rectangle2D zoneRect = new Rectangle2D.Double(zone.getX(), zone.getY(), zone.getWidth(), zone.getHeight());
-                Rectangle2D playerRect = player.getAreaColision();
-                if (zoneRect.intersects(playerRect)) {
-                    zone.onPlayerEnter(player);
-                }
-            }
-        }
-    }
-
-    private void resolveStaticCollisions() {
         for (StaticElement element : staticElements) {
             if (!element.isBlocking()) {
-
-                for (Player player : players) {
-                    if (element.getAreaColision().intersects(player.getAreaColision())) {
-                        element.onContact(player, this);
-                        this.onPlayerDeath(player);
-                    }
-                }
-
                 for (Enemy enemy : enemies) {
                     if (element.getAreaColision().intersects(enemy.getAreaColision())) {
                         element.onContact(enemy, this);
@@ -122,8 +86,8 @@ public class Level {
         }
     }
 
-    private void updateTime() {
-        if (gameTime > 0) gameTime -= 1.0 / 60.0;
+    private void updateTime(double deltaTime) {
+        if (gameTime > 0) gameTime -= deltaTime;
     }
 
     public double getGameTime() { return gameTime; }
@@ -132,10 +96,8 @@ public class Level {
         if (!isCoinsCollected()) return false;
         Zone fZone = zones.get("final");
         if (fZone == null) return false;
-        Rectangle2D fzRect = new Rectangle2D.Double(
-            fZone.getX(), fZone.getY(), fZone.getWidth(), fZone.getHeight());
         for (Player p : players) {
-            if (fzRect.intersects(p.getAreaColision())) return true;
+            if (fZone.getAreaColision().intersects(p.getAreaColision())) return true;
         }
         return false;
     }
@@ -156,14 +118,24 @@ public class Level {
         players.add(player);
     }
 
-    public void addCoin(Coin coin) { coins.add(coin); }
+    public void addCoin(Coin coin) {
+        coins.add(coin);
+        interactables.add(coin);
+    }
 
-    public void addEnemy(Enemy enemy) { enemies.add(enemy); }
+    public void addEnemy(Enemy enemy) {
+        enemies.add(enemy);
+        interactables.add(enemy);
+    }
 
-    public void addStaticElement(StaticElement sElement) { staticElements.add(sElement); }
+    public void addStaticElement(StaticElement sElement) {
+        staticElements.add(sElement);
+        interactables.add(sElement);
+    }
 
     public void addZone(String type, Zone zone) {
         zones.put(type, zone);
+        interactables.add(zone);
         if ("initial".equals(type)) {
             for (Player p : players) {
                 p.setSpawnPoint(zone.getX(), zone.getY());
@@ -172,7 +144,7 @@ public class Level {
         }
     }
 
-    public boolean isWall(double x, double y) {
+    public boolean isBlocking(double x, double y) {
         for (StaticElement e : staticElements) {
             if (e.isBlocking() && e.getAreaColision().contains(x, y)) return true;
         }
@@ -181,10 +153,10 @@ public class Level {
 
     public boolean isWalkable(double x, double y, double width, double height) {
         if (x < 0 || y < 0 || x + width > map.getWidth() || y + height > map.getHeight()) return false;
-        return !isWall(x, y)
-                && !isWall(x + width - 1, y)
-                && !isWall(x, y + height - 1)
-                && !isWall(x + width - 1, y + height - 1);
+        return !isBlocking(x, y)
+                && !isBlocking(x + width - 1, y)
+                && !isBlocking(x, y + height - 1)
+                && !isBlocking(x + width - 1, y + height - 1);
     }
 
     public int getNumber() { return number; }

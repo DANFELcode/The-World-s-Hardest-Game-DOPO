@@ -1,11 +1,13 @@
 package domain;
 
+import java.io.Serializable;
+
 /**
  * Represents the game map. Defines the boundaries of the level. <br>
  * <b>(width, height)</b> <br>
  * <b>Inv:</b> width > 0 and height > 0
  */
-public class GameMap {
+public class GameMap implements Serializable {
     private int width;
     private int height;
 

@@ -28,7 +28,12 @@ public class Coin extends StaticElement implements Collectible {
      * @param player the player that collected the coin
      */
     public void onCollect(Player player) {
-        this.collected = true;
+        if (!collected) this.collected = true;
+    }
+
+    @Override
+    public void onContact(Player player, Level level) {
+        onCollect(player);
     }
 
     /**
@@ -42,8 +47,16 @@ public class Coin extends StaticElement implements Collectible {
     public void reset() {
         this.collected = false;
     }
+
+    /** Returns the coin's type identifier used in level files (e.g. "yellow", "blue"). */
+    public String getCoinType() { return "yellow"; }
     
     public Color getDisplayColor() {
-        return new Color(218, 165, 32);   
+        return new Color(218, 165, 32);
+    }
+
+    @Override
+    public DrawCommand toDrawCommand() {
+        return new DrawCommand(getDisplayColor(), (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(), DrawCommand.Shape.OVAL);
     }
 }

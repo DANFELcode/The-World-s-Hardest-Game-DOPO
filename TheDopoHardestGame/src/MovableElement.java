@@ -1,21 +1,22 @@
 package domain;
 
 import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
 
 /**
  * Represents a movable element in the game. <br>
  * <b>(x, y, width, height, speed)</b> <br>
  * <b>Inv:</b> speed > 0 and width > 0 and height > 0
  */
-public abstract class MovableElement {
-    protected double x;
-    protected double y;
-    protected double width;
-    protected double height;
-    protected double speed;
+public abstract class MovableElement implements Serializable {
+    private double x;
+    private double y;
+    private double width;
+    private double height;
+    private double speed;
     
-    //unidad de velocidad
     protected static final double UNIT = 4.0;
+    protected static final double TARGET_FPS = 60.0;
 
     /**
      * Creates a movable element with an initial position, size and speed.
@@ -45,6 +46,18 @@ public abstract class MovableElement {
     
     public Rectangle2D getAreaColision() {
         return new Rectangle2D.Double(x, y, width, height);
+    }
+
+    protected void setSpeed(double speed) {
+        if (speed > 0) this.speed = speed;
+    }
+
+    protected void setWidth(double width) {
+        if (width > 0) this.width = width;
+    }
+
+    protected void setHeight(double height) {
+        if (height > 0) this.height = height;
     }
 
     public double getX() { return x; }

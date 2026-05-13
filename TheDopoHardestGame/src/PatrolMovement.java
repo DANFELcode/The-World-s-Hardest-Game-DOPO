@@ -28,14 +28,14 @@ public class PatrolMovement implements MovementStrategy {
     }
 
     @Override
-    public void move(Enemy enemy, Level level) {
+    public void move(Enemy enemy, Level level, double deltaTime) {
         Point2D.Double target = route[currentTargetIndex];
-        
+
         double dx = target.x - enemy.getX();
         double dy = target.y - enemy.getY();
         double distance = Math.sqrt(dx * dx + dy * dy);
-        
-        double step = speedInUnits * MovableElement.UNIT;
+
+        double step = speedInUnits * MovableElement.UNIT * MovableElement.TARGET_FPS * deltaTime;
 
         if (distance <= step) {
             enemy.setPosition(target.x, target.y);
@@ -43,15 +43,25 @@ public class PatrolMovement implements MovementStrategy {
         } else {
             double dirX = dx / distance;
             double dirY = dy / distance;
-            
+
             double newX = enemy.getX() + (dirX * step);
             double newY = enemy.getY() + (dirY * step);
-            
+
             if (level.isWalkable(newX, newY, enemy.getWidth(), enemy.getHeight())) {
                 enemy.setPosition(newX, newY);
             } else {
                 currentTargetIndex = (currentTargetIndex + 1) % route.length;
             }
         }
+    }
+
+    @Override
+    public String toFileParams() {
+        StringBuilder sb = new StringBuilder("movement=patrol,route=");
+        for (int i = 0; i < route.length; i++) {
+            sb.append(route[i].x).append(":").append(route[i].y);
+            if (i < route.length - 1) sb.append("|");
+        }
+        return sb.toString();
     }
 }
