@@ -1,15 +1,15 @@
 package presentation;
 
-import domain.*;
+import domain.DrawCommand;
+import domain.TheDOPOHardestGame;
 import java.awt.*;
 import javax.swing.JPanel;
 
 public class BoardPanel extends JPanel {
 
-    private static final Color COLOR_BACKGROUND    = new Color(170, 190, 220);
-    private static final Color COLOR_PLAYER_BORDER = Color.BLACK;
+    private static final Color COLOR_BACKGROUND = new Color(170, 190, 220);
 
-    private Level level;
+    private TheDOPOHardestGame game;
 
     public BoardPanel() {
         setBackground(COLOR_BACKGROUND);
@@ -17,53 +17,26 @@ public class BoardPanel extends JPanel {
         setFocusable(true);
     }
 
-    public void setLevel(Level level) {
-        this.level = level;
+    public void setGame(TheDOPOHardestGame game) {
+        this.game = game;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (level == null) return;
+        if (game == null) return;
 
-        for (Zone zone : level.getZones().values()) {
-            g.setColor(zone.getDisplayColor());
-            g.fillRect((int) zone.getX(), (int) zone.getY(),
-                (int) zone.getWidth(), (int) zone.getHeight());
-        }
-
-        for (StaticElement e : level.getStaticElements()) {
-            g.setColor(e.getDisplayColor());
-
-            if (e.isBomb()) {
-                g.fillOval((int) e.getX(), (int) e.getY(),
-                           (int) e.getWidth(), (int) e.getHeight());
+        for (DrawCommand cmd : game.getDrawCommands()) {
+            g.setColor(cmd.color);
+            if (cmd.shape == DrawCommand.Shape.OVAL) {
+                g.fillOval(cmd.x, cmd.y, cmd.width, cmd.height);
             } else {
-                g.fillRect((int) e.getX(), (int) e.getY(),
-                           (int) e.getWidth(), (int) e.getHeight());
+                g.fillRect(cmd.x, cmd.y, cmd.width, cmd.height);
             }
-        }
-
-        for (Coin coin : level.getCoins()) {
-            if (coin.isCollected()) continue;
-            g.setColor(coin.getDisplayColor());
-            g.fillOval((int) coin.getX(), (int) coin.getY(),
-                (int) coin.getWidth(), (int) coin.getHeight());
-        }
-
-        for (Enemy enemy : level.getEnemies()) {
-            g.setColor(enemy.getDisplayColor());
-            g.fillOval((int) enemy.getX(), (int) enemy.getY(),
-                (int) enemy.getWidth(), (int) enemy.getHeight());
-        }
-
-        for (Player player : level.getPlayers()) {
-            g.setColor(player.getDisplayColor());
-            g.fillRect((int) player.getX(), (int) player.getY(),
-                (int) player.getWidth(), (int) player.getHeight());
-            g.setColor(COLOR_PLAYER_BORDER);
-            g.drawRect((int) player.getX(), (int) player.getY(),
-                (int) player.getWidth(), (int) player.getHeight());
+            if (cmd.borderColor != null) {
+                g.setColor(cmd.borderColor);
+                g.drawRect(cmd.x, cmd.y, cmd.width, cmd.height);
+            }
         }
     }
 

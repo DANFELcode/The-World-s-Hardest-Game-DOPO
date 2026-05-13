@@ -13,7 +13,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
     private JMenuBar menuBar;
     private JMenu opciones, archivo;
     private JMenuItem nuevaPartida, pausar, salir, reiniciar;
-    private JMenuItem guardarPartida, abrirPartida;
+    private JMenuItem guardarPartida, abrirPartida, exportarNivel, importarNivel;
 
     private JPanel panel;
     private CardLayout cardLayout;
@@ -80,8 +80,13 @@ public class TheDOPOHardestGameGUI extends JFrame {
         archivo = new JMenu("Archivo");
         guardarPartida = new JMenuItem("Guardar Partida");
         abrirPartida = new JMenuItem("Abrir Partida");
+        exportarNivel = new JMenuItem("Exportar Nivel");
+        importarNivel = new JMenuItem("Importar Nivel");
         archivo.add(guardarPartida);
         archivo.add(abrirPartida);
+        archivo.addSeparator();
+        archivo.add(exportarNivel);
+        archivo.add(importarNivel);
 
         opciones = new JMenu("Opciones");
         nuevaPartida = new JMenuItem("Nueva Partida");
@@ -205,6 +210,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
         panelInfo.add(muertes, BorderLayout.EAST);
 
         tablero = new BoardPanel();
+        tablero.setGame(juego);
 
         JPanel panelSur = new JPanel(new BorderLayout());
         panelSur.setBackground(Color.BLACK);
@@ -239,8 +245,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
         backInicio.addActionListener(e -> cardLayout.show(panel, PANEL_INICIO));
 
         playGame2.addActionListener(e -> {
-            juego.loadTestLevel();
-            tablero.setLevel(juego.getCurrentLevel());
+            juego.startGame();
             cardLayout.show(panel, PANEL_JUEGO);
             SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
             gameLoop.start();
@@ -256,8 +261,69 @@ public class TheDOPOHardestGameGUI extends JFrame {
         nuevaPartida.addActionListener(e -> JOptionPane.showMessageDialog(this, msg));
         pausar.addActionListener(e -> JOptionPane.showMessageDialog(this, msg));
         reiniciar.addActionListener(e -> JOptionPane.showMessageDialog(this, msg));
-        guardarPartida.addActionListener(e -> JOptionPane.showMessageDialog(this, msg));
-        abrirPartida.addActionListener(e -> JOptionPane.showMessageDialog(this, msg));
+        guardarPartida.addActionListener(e -> {
+            gameLoop.stop();
+            JFileChooser fc = new JFileChooser();
+            if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    juego.guardarPartida(fc.getSelectedFile());
+                    JOptionPane.showMessageDialog(this, "Partida guardada exitosamente.");
+                } catch (domain.GameException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            if (panelJuego.isShowing()) gameLoop.start();
+        });
+
+        abrirPartida.addActionListener(e -> {
+            gameLoop.stop();
+            JFileChooser fc = new JFileChooser();
+            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    juego.abrirPartida(fc.getSelectedFile());
+                    cardLayout.show(panel, PANEL_JUEGO);
+                    SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
+                    gameLoop.start();
+                    JOptionPane.showMessageDialog(this, "Partida cargada exitosamente.");
+                    return;
+                } catch (domain.GameException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            if (panelJuego.isShowing()) gameLoop.start();
+        });
+
+        exportarNivel.addActionListener(e -> {
+            gameLoop.stop();
+            JFileChooser fc = new JFileChooser();
+            if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    juego.exportarNivel(fc.getSelectedFile());
+                    JOptionPane.showMessageDialog(this, "Nivel exportado exitosamente.");
+                } catch (domain.GameException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            if (panelJuego.isShowing()) gameLoop.start();
+        });
+
+        importarNivel.addActionListener(e -> {
+            gameLoop.stop();
+            JFileChooser fc = new JFileChooser();
+            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    juego.importarNivel(fc.getSelectedFile());
+                    cardLayout.show(panel, PANEL_JUEGO);
+                    SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
+                    gameLoop.start();
+                    JOptionPane.showMessageDialog(this, "Nivel importado exitosamente.");
+                    return;
+                } catch (domain.GameException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            if (panelJuego.isShowing()) gameLoop.start();
+        });
 
         tablero.setFocusable(true);
 
@@ -277,14 +343,14 @@ public class TheDOPOHardestGameGUI extends JFrame {
         });
     }
 
-    public void update() {
+    public void update(double deltaTime) {
         double dx = 0, dy = 0;
         if (keysDown.contains(KeyEvent.VK_UP)    || keysDown.contains(KeyEvent.VK_W)) dy -= 1;
         if (keysDown.contains(KeyEvent.VK_DOWN)  || keysDown.contains(KeyEvent.VK_S)) dy += 1;
         if (keysDown.contains(KeyEvent.VK_LEFT)  || keysDown.contains(KeyEvent.VK_A)) dx -= 1;
         if (keysDown.contains(KeyEvent.VK_RIGHT) || keysDown.contains(KeyEvent.VK_D)) dx += 1;
-        if (dx != 0 || dy != 0) juego.movePlayer(0, dx, dy);
-        juego.update();
+        if (dx != 0 || dy != 0) juego.movePlayer(0, dx, dy, deltaTime);
+        juego.update(deltaTime);
     }
 
     public void refresh() {
@@ -297,7 +363,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
             if (juego.isLevelComplete()) {
                 if (juego.getLevelNumber() == 1) {
                     juego.advanceLevel();
-                    tablero.setLevel(juego.getCurrentLevel());
                 } else {
                     gameLoop.stop();
                     keysDown.clear();

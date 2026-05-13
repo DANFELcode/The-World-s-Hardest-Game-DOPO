@@ -13,6 +13,9 @@ public class GameLoop {
     private TheDOPOHardestGameGUI gui;
     private static final int FPS = 60;
     private static final int DELAY = 1000 / FPS;
+    private static final double MAX_DELTA = 1.0 / FPS;
+
+    private long lastTime;
 
     /**
      * Creates a game loop bound to the given GUI.
@@ -24,17 +27,26 @@ public class GameLoop {
     }
 
     /**
-     * Performs one tick: update game state and refresh the view.
+     * Performs one tick: computes elapsed time, updates game state, and refreshes the view.
      */
     private void tick() {
-        gui.update();
+        long now = System.nanoTime();
+        double deltaTime = (now - lastTime) / 1_000_000_000.0;
+        lastTime = now;
+
+        if (deltaTime > MAX_DELTA) deltaTime = MAX_DELTA;
+
+        gui.update(deltaTime);
         gui.refresh();
     }
 
     /**
      * Starts the game loop.
      */
-    public void start() { timer.start(); }
+    public void start() {
+        lastTime = System.nanoTime();
+        timer.start();
+    }
 
     /**
      * Stops the game loop.
