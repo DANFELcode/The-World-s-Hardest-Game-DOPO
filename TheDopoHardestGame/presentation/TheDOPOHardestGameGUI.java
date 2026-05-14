@@ -47,7 +47,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
     public TheDOPOHardestGameGUI() {
         super("TheDOPOHardestGame");
-        juego = TheDOPOHardestGame.getInstance();
+        juego = new TheDOPOHardestGame();
 
         prepareElements();
         prepareActions();
@@ -256,11 +256,36 @@ public class TheDOPOHardestGameGUI extends JFrame {
             cardLayout.show(panel, PANEL_INICIO);
         });
 
-        String msg = "En implementación, próximamente.";
         salir.addActionListener(e -> exit());
-        nuevaPartida.addActionListener(e -> JOptionPane.showMessageDialog(this, msg));
-        pausar.addActionListener(e -> JOptionPane.showMessageDialog(this, msg));
-        reiniciar.addActionListener(e -> JOptionPane.showMessageDialog(this, msg));
+
+        nuevaPartida.addActionListener(e -> {
+            gameLoop.stop();
+            int confirm = JOptionPane.showConfirmDialog(this, "¿Iniciar una nueva partida?",
+                "Nueva Partida", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                keysDown.clear();
+                juego.startGame();
+                cardLayout.show(panel, PANEL_JUEGO);
+                SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
+                gameLoop.start();
+            } else if (panelJuego.isShowing()) {
+                gameLoop.start();
+            }
+        });
+
+        pausar.addActionListener(e -> {
+            juego.togglePause();
+            pausar.setText(juego.isPaused() ? "Reanudar" : "Pausar");
+        });
+
+        reiniciar.addActionListener(e -> {
+            gameLoop.stop();
+            keysDown.clear();
+            juego.restartLevel();
+            cardLayout.show(panel, PANEL_JUEGO);
+            SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
+            gameLoop.start();
+        });
         guardarPartida.addActionListener(e -> {
             gameLoop.stop();
             JFileChooser fc = new JFileChooser();
@@ -330,8 +355,9 @@ public class TheDOPOHardestGameGUI extends JFrame {
         tablero.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                     juego.togglePause();
+                    pausar.setText(juego.isPaused() ? "Reanudar" : "Pausar");
                     return;
                 }
                 keysDown.add(e.getKeyCode());
@@ -343,14 +369,14 @@ public class TheDOPOHardestGameGUI extends JFrame {
         });
     }
 
-    public void update(double deltaTime) {
+    public void update() {
         double dx = 0, dy = 0;
         if (keysDown.contains(KeyEvent.VK_UP)    || keysDown.contains(KeyEvent.VK_W)) dy -= 1;
         if (keysDown.contains(KeyEvent.VK_DOWN)  || keysDown.contains(KeyEvent.VK_S)) dy += 1;
         if (keysDown.contains(KeyEvent.VK_LEFT)  || keysDown.contains(KeyEvent.VK_A)) dx -= 1;
         if (keysDown.contains(KeyEvent.VK_RIGHT) || keysDown.contains(KeyEvent.VK_D)) dx += 1;
-        if (dx != 0 || dy != 0) juego.movePlayer(0, dx, dy, deltaTime);
-        juego.update(deltaTime);
+        if (dx != 0 || dy != 0) juego.movePlayer(0, dx, dy);
+        juego.update();
     }
 
     public void refresh() {

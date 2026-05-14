@@ -3,53 +3,54 @@ package presentation;
 import javax.swing.Timer;
 
 /**
- * Drives the game ticks at a fixed FPS, calling update and refresh on the GUI on each tick. <br>
- * <b>(timer, gui, FPS, DELAY)</b> <br>
- * <b>Inv:</b> FPS > 0 and gui != null
+ * Drives the game using a fixed-step accumulator pattern.
+ * Domain ticks are dispatched at a fixed rate regardless of real-frame timing,
+ * which keeps game speed deterministic across hardware. <br>
+ * <b>Inv:</b> gui != null and TICKS_PER_SECOND > 0
  */
 public class GameLoop {
 
-    private Timer timer;
-    private TheDOPOHardestGameGUI gui;
-    private static final int FPS = 60;
-    private static final int DELAY = 1000 / FPS;
-    private static final double MAX_DELTA = 1.0 / FPS;
+    private static final int TICKS_PER_SECOND = 60;
+    private static final double SECONDS_PER_TICK = 1.0 / TICKS_PER_SECOND;
+    private static final int MAX_TICKS_PER_FRAME = 5; // spiral-of-death cap
+
+    /** Visual frame poll rate. Doesn't affect game speed — only smoothness of rendering. */
+    private static final int FRAME_DELAY_MS = 1000 / TICKS_PER_SECOND;
+
+    private final Timer timer;
+    private final TheDOPOHardestGameGUI gui;
 
     private long lastTime;
+    private double accumulator;
 
-    /**
-     * Creates a game loop bound to the given GUI.
-     * @param gui the GUI to update on each tick
-     */
     public GameLoop(TheDOPOHardestGameGUI gui) {
         this.gui = gui;
-        timer = new Timer(DELAY, e -> tick());
+        this.timer = new Timer(FRAME_DELAY_MS, e -> tick());
     }
 
-    /**
-     * Performs one tick: computes elapsed time, updates game state, and refreshes the view.
-     */
     private void tick() {
         long now = System.nanoTime();
-        double deltaTime = (now - lastTime) / 1_000_000_000.0;
+        double elapsed = (now - lastTime) / 1_000_000_000.0;
         lastTime = now;
 
-        if (deltaTime > MAX_DELTA) deltaTime = MAX_DELTA;
+        accumulator += elapsed;
+        int ticksRun = 0;
+        while (accumulator >= SECONDS_PER_TICK && ticksRun < MAX_TICKS_PER_FRAME) {
+            gui.update();
+            accumulator -= SECONDS_PER_TICK;
+            ticksRun++;
+        }
+        // If we hit the cap, drop the backlog instead of trying to catch up.
+        if (ticksRun == MAX_TICKS_PER_FRAME) accumulator = 0;
 
-        gui.update(deltaTime);
         gui.refresh();
     }
 
-    /**
-     * Starts the game loop.
-     */
     public void start() {
         lastTime = System.nanoTime();
+        accumulator = 0;
         timer.start();
     }
 
-    /**
-     * Stops the game loop.
-     */
     public void stop() { timer.stop(); }
 }
