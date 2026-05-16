@@ -40,8 +40,8 @@ public class TheDOPOHardestGameGUI extends JFrame {
     private Color selectedBorder1 = Color.BLACK;
     private Color selectedBorder2 = Color.WHITE;
 
-    private static final String[] BORDER_NAMES = {"NEGRO", "BLANCO", "AMARILLO", "CYAN", "MAGENTA"};
-    private static final Color[] BORDER_COLORS = {Color.BLACK, Color.WHITE, Color.YELLOW, Color.CYAN, Color.MAGENTA};
+    private static final String[] BORDER_NAMES = { "NEGRO", "BLANCO", "AMARILLO", "CYAN", "MAGENTA" };
+    private static final Color[] BORDER_COLORS = { Color.BLACK, Color.WHITE, Color.YELLOW, Color.CYAN, Color.MAGENTA };
 
     private JPanel panelJuego;
     private BoardPanel tablero;
@@ -55,13 +55,16 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
     private final Set<Integer> keysDownPlayer1 = new HashSet<>();
     private final Set<Integer> keysDownPlayer2 = new HashSet<>();
-    
 
-    private static final Color COLOR_FONDO        = new Color(180, 180, 220);
-    private static final String PANEL_INICIO      = "inicio";
+    private static final Color COLOR_FONDO = new Color(180, 180, 220);
+    private static final String PANEL_INICIO = "inicio";
     private static final String PANEL_EXPLICACION = "explicacion";
-    private static final String PANEL_SELECCION   = "seleccion";
-    private static final String PANEL_JUEGO       = "juego";
+    private static final String PANEL_SELECCION = "seleccion";
+    private static final String PANEL_JUEGO = "juego";
+
+    private static final Set<Integer> PVP_KEYS = new HashSet<>(java.util.Arrays.asList(
+        KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT
+    ));
 
     public TheDOPOHardestGameGUI() {
         super("TheDOPOHardestGame");
@@ -163,13 +166,13 @@ public class TheDOPOHardestGameGUI extends JFrame {
         panelExp.setBackground(COLOR_FONDO);
 
         descripcion = new JLabel("<html><div style='text-align: justify; width: 400px'>"
-            + "Eres el cuadrado <font color='red'><b>rojo</b></font>. "
-            + "Evita los circulos <font color='blue'><b>azules</b></font> y recolecta las "
-            + "monedas <font color='#DAA520'><b>amarillas</b></font>. "
-            + "Una vez recolectadas todas las monedas, ve hacia la "
-            + "zona <font color='green'><b>verde</b></font> antes de que se acabe el tiempo para completar el nivel. "
-            + "Algunos niveles tienen mas de una zona verde, estas zonas son check points. "
-            + "</div></html>");
+                + "Eres el cuadrado <font color='red'><b>rojo</b></font>. "
+                + "Evita los circulos <font color='blue'><b>azules</b></font> y recolecta las "
+                + "monedas <font color='#DAA520'><b>amarillas</b></font>. "
+                + "Una vez recolectadas todas las monedas, ve hacia la "
+                + "zona <font color='green'><b>verde</b></font> antes de que se acabe el tiempo para completar el nivel. "
+                + "Algunos niveles tienen mas de una zona verde, estas zonas son check points. "
+                + "</div></html>");
         descripcion.setFont(new Font("Arial", Font.PLAIN, 20));
         descripcion.setHorizontalAlignment(SwingConstants.CENTER);
         descripcion.setBorder(BorderFactory.createEmptyBorder(40, 60, 20, 60));
@@ -215,9 +218,9 @@ public class TheDOPOHardestGameGUI extends JFrame {
         JLabel labelModo = new JLabel("Modo:  ");
         labelModo.setFont(new Font("Arial", Font.BOLD, 16));
         btnModePlayer = new JButton("PLAYER");
-        btnModePvsP   = new JButton("PvsP");
-        btnModePvsM   = new JButton("PvsM");
-        for (JButton b : new JButton[]{btnModePlayer, btnModePvsP, btnModePvsM}) {
+        btnModePvsP = new JButton("PvsP");
+        btnModePvsM = new JButton("PvsM");
+        for (JButton b : new JButton[] { btnModePlayer, btnModePvsP, btnModePvsM }) {
             b.setFont(new Font("Arial", Font.BOLD, 16));
         }
         filaModos.add(labelModo);
@@ -230,13 +233,13 @@ public class TheDOPOHardestGameGUI extends JFrame {
         filaSkins.setBackground(COLOR_FONDO);
         JLabel labelSkin = new JLabel("Skin:  ");
         labelSkin.setFont(new Font("Arial", Font.BOLD, 16));
-        btnSkinRojo  = new JButton("ROJO");
-        btnSkinAzul  = new JButton("AZUL");
+        btnSkinRojo = new JButton("ROJO");
+        btnSkinAzul = new JButton("AZUL");
         btnSkinVerde = new JButton("VERDE");
         btnSkinRojo.setForeground(Color.RED);
         btnSkinAzul.setForeground(Color.BLUE);
         btnSkinVerde.setForeground(new Color(0, 150, 0));
-        for (JButton b : new JButton[]{btnSkinRojo, btnSkinAzul, btnSkinVerde}) {
+        for (JButton b : new JButton[] { btnSkinRojo, btnSkinAzul, btnSkinVerde }) {
             b.setFont(new Font("Arial", Font.BOLD, 16));
         }
         filaSkins.add(labelSkin);
@@ -328,7 +331,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
         panelInfo.add(muertes, BorderLayout.EAST);
 
         tablero = new BoardPanel();
-        tablero.setGame(juego);
 
         JPanel panelSur = new JPanel(new BorderLayout());
         panelSur.setBackground(Color.BLACK);
@@ -356,7 +358,9 @@ public class TheDOPOHardestGameGUI extends JFrame {
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(WindowEvent e) { exit(); }
+            public void windowClosing(WindowEvent e) {
+                exit();
+            }
         });
 
         playGame.addActionListener(e -> cardLayout.show(panel, PANEL_EXPLICACION));
@@ -382,7 +386,10 @@ public class TheDOPOHardestGameGUI extends JFrame {
             filaBorde2.setVisible(true);
             if (selectedBorder1.equals(selectedBorder2)) {
                 for (Color c : BORDER_COLORS) {
-                    if (!c.equals(selectedBorder1)) { selectedBorder2 = c; break; }
+                    if (!c.equals(selectedBorder1)) {
+                        selectedBorder2 = c;
+                        break;
+                    }
                 }
             }
             refreshBorderButtonStates();
@@ -393,7 +400,10 @@ public class TheDOPOHardestGameGUI extends JFrame {
             filaBorde2.setVisible(true);
             if (selectedBorder1.equals(selectedBorder2)) {
                 for (Color c : BORDER_COLORS) {
-                    if (!c.equals(selectedBorder1)) { selectedBorder2 = c; break; }
+                    if (!c.equals(selectedBorder1)) {
+                        selectedBorder2 = c;
+                        break;
+                    }
                 }
             }
             refreshBorderButtonStates();
@@ -406,7 +416,10 @@ public class TheDOPOHardestGameGUI extends JFrame {
                 if (selectedBorder1.equals(selectedBorder2)) {
                     // P2 también tenía este color, hay que cambiarle el de P2 al primer disponible
                     for (Color c : BORDER_COLORS) {
-                        if (!c.equals(selectedBorder1)) { selectedBorder2 = c; break; }
+                        if (!c.equals(selectedBorder1)) {
+                            selectedBorder2 = c;
+                            break;
+                        }
                     }
                 }
                 refreshBorderButtonStates();
@@ -415,7 +428,10 @@ public class TheDOPOHardestGameGUI extends JFrame {
                 selectedBorder2 = BORDER_COLORS[idx];
                 if (selectedBorder1.equals(selectedBorder2)) {
                     for (Color c : BORDER_COLORS) {
-                        if (!c.equals(selectedBorder2)) { selectedBorder1 = c; break; }
+                        if (!c.equals(selectedBorder2)) {
+                            selectedBorder1 = c;
+                            break;
+                        }
                     }
                 }
                 refreshBorderButtonStates();
@@ -460,7 +476,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
         nuevaPartida.addActionListener(e -> {
             gameLoop.stop();
             int confirm = JOptionPane.showConfirmDialog(this, "¿Iniciar una nueva partida?",
-                "Nueva Partida", JOptionPane.YES_NO_OPTION);
+                    "Nueva Partida", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 keysDownPlayer1.clear();
                 keysDownPlayer2.clear();
@@ -481,7 +497,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
         reiniciar.addActionListener(e -> {
             gameLoop.stop();
             keysDownPlayer1.clear();
-                keysDownPlayer2.clear();
+            keysDownPlayer2.clear();
             juego.restartLevel();
             cardLayout.show(panel, PANEL_JUEGO);
             SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
@@ -498,7 +514,8 @@ public class TheDOPOHardestGameGUI extends JFrame {
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
-            if (panelJuego.isShowing()) gameLoop.start();
+            if (panelJuego.isShowing())
+                gameLoop.start();
         });
 
         abrirPartida.addActionListener(e -> {
@@ -516,7 +533,8 @@ public class TheDOPOHardestGameGUI extends JFrame {
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
-            if (panelJuego.isShowing()) gameLoop.start();
+            if (panelJuego.isShowing())
+                gameLoop.start();
         });
 
         exportarNivel.addActionListener(e -> {
@@ -530,7 +548,8 @@ public class TheDOPOHardestGameGUI extends JFrame {
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
-            if (panelJuego.isShowing()) gameLoop.start();
+            if (panelJuego.isShowing())
+                gameLoop.start();
         });
 
         importarNivel.addActionListener(e -> {
@@ -548,16 +567,13 @@ public class TheDOPOHardestGameGUI extends JFrame {
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
-            if (panelJuego.isShowing()) gameLoop.start();
+            if (panelJuego.isShowing())
+                gameLoop.start();
         });
 
         tablero.setFocusable(true);
 
         tablero.addKeyListener(new KeyAdapter() {
-            private static final Set<Integer> PVP_KEYS = new HashSet<>(java.util.Arrays.asList(
-                KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT
-            ));
-
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
@@ -581,32 +597,38 @@ public class TheDOPOHardestGameGUI extends JFrame {
     }
 
     public void update() {
-    	updatePlayer(0, keysDownPlayer1, KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D);
-    	if (juego.getGameMode() == TheDOPOHardestGame.GameMode.PvsP)
-    	    updatePlayer(1, keysDownPlayer2, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT);
+        updatePlayer(0, keysDownPlayer1, KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D);
+        if (juego.getGameMode() == TheDOPOHardestGame.GameMode.PvsP)
+            updatePlayer(1, keysDownPlayer2, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT);
         juego.update();
     }
-    
+
     private void updatePlayer(int index, Set<Integer> keys, int up, int down, int left, int right) {
         double dx = 0, dy = 0;
-        if (keys.contains(up))    dy -= 1;
-        if (keys.contains(down))  dy += 1;
-        if (keys.contains(left))  dx -= 1;
-        if (keys.contains(right)) dx += 1;
-        if (dx != 0 || dy != 0) juego.movePlayer(index, dx, dy);
+        if (keys.contains(up))
+            dy -= 1;
+        if (keys.contains(down))
+            dy += 1;
+        if (keys.contains(left))
+            dx -= 1;
+        if (keys.contains(right))
+            dx += 1;
+        if (dx != 0 || dy != 0)
+            juego.movePlayer(index, dx, dy);
     }
 
     public void refresh() {
         if (juego.getCurrentLevel() != null) {
             boolean pvsp = juego.getGameMode() == TheDOPOHardestGame.GameMode.PvsP;
             if (pvsp) {
-                muertes.setText("P1: " + juego.getPlayerDeaths(0) + " muertes  |  P2: " + juego.getPlayerDeaths(1) + " muertes");
+                muertes.setText("P1: " + juego.getPlayerDeaths(0) + " muertes  |  P2: " + juego.getPlayerDeaths(1)
+                        + " muertes");
             } else {
                 muertes.setText("MUERTES: " + juego.getPlayerDeaths(0));
             }
             if (pvsp) {
                 monedas.setText("P1: " + juego.getPlayerCoins(0) + "/" + juego.getPlayerTotalCoins(0)
-                    + "  |  P2: " + juego.getPlayerCoins(1) + "/" + juego.getPlayerTotalCoins(1));
+                        + "  |  P2: " + juego.getPlayerCoins(1) + "/" + juego.getPlayerTotalCoins(1));
             } else {
                 monedas.setText("Monedas: " + juego.getPlayerCoins(0) + "/" + juego.getPlayerTotalCoins(0));
             }
@@ -635,6 +657,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
                 cardLayout.show(panel, PANEL_INICIO);
             }
         }
+        tablero.setDrawCommands(juego.getDrawCommands());
         tablero.refresh();
     }
 
@@ -644,13 +667,13 @@ public class TheDOPOHardestGameGUI extends JFrame {
         int wonP2 = levelsWon.getOrDefault("Player2", 0);
         String ganador = wonP1 > wonP2 ? "Player1" : wonP2 > wonP1 ? "Player2" : "Empate";
         String msg = "=== RESULTADO FINAL ===\n"
-            + "Player1 — Niveles ganados: " + wonP1
-            + "  |  Muertes: " + juego.getPlayerDeaths(0)
-            + "  |  Monedas: " + juego.getPlayerLifetimeCoins(0) + "\n"
-            + "Player2 — Niveles ganados: " + wonP2
-            + "  |  Muertes: " + juego.getPlayerDeaths(1)
-            + "  |  Monedas: " + juego.getPlayerLifetimeCoins(1) + "\n\n"
-            + (ganador.equals("Empate") ? "¡EMPATE!" : "¡Ganó " + ganador + "!");
+                + "Player1 — Niveles ganados: " + wonP1
+                + "  |  Muertes: " + juego.getPlayerDeaths(0)
+                + "  |  Monedas: " + juego.getPlayerLifetimeCoins(0) + "\n"
+                + "Player2 — Niveles ganados: " + wonP2
+                + "  |  Muertes: " + juego.getPlayerDeaths(1)
+                + "  |  Monedas: " + juego.getPlayerLifetimeCoins(1) + "\n\n"
+                + (ganador.equals("Empate") ? "¡EMPATE!" : "¡Ganó " + ganador + "!");
         JOptionPane.showMessageDialog(this, msg, "Fin del juego", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -659,11 +682,11 @@ public class TheDOPOHardestGameGUI extends JFrame {
         for (int i = 0; i < BORDER_COLORS.length; i++) {
             Color c = BORDER_COLORS[i];
             applyBorderButtonStyle(borde1Botones[i], c,
-                c.equals(selectedBorder1),
-                twoPlayers && c.equals(selectedBorder2));
+                    c.equals(selectedBorder1),
+                    twoPlayers && c.equals(selectedBorder2));
             applyBorderButtonStyle(borde2Botones[i], c,
-                c.equals(selectedBorder2),
-                twoPlayers && c.equals(selectedBorder1));
+                    c.equals(selectedBorder2),
+                    twoPlayers && c.equals(selectedBorder1));
         }
         if (panelSeleccion != null) {
             panelSeleccion.revalidate();
@@ -699,7 +722,8 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
     private void exit() {
         int option = JOptionPane.showConfirmDialog(this, "¿Desea cerrar la aplicación?",
-            "Confirmar salida", JOptionPane.YES_NO_OPTION);
-        if (option == JOptionPane.YES_OPTION) System.exit(0);
+                "Confirmar salida", JOptionPane.YES_NO_OPTION);
+        if (option == JOptionPane.YES_OPTION)
+            System.exit(0);
     }
 }

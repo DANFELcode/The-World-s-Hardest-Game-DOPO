@@ -1,7 +1,6 @@
 package presentation;
 
 import domain.DrawCommand;
-import domain.TheDOPOHardestGame;
 import java.awt.*;
 import javax.swing.JPanel;
 
@@ -9,7 +8,7 @@ public class BoardPanel extends JPanel {
 
     private static final Color COLOR_BACKGROUND = new Color(170, 190, 220);
 
-    private TheDOPOHardestGame game;
+    private java.util.List<DrawCommand> drawCommands = new java.util.ArrayList<>();
 
     public BoardPanel() {
         setBackground(COLOR_BACKGROUND);
@@ -17,18 +16,18 @@ public class BoardPanel extends JPanel {
         setFocusable(true);
     }
 
-    public void setGame(TheDOPOHardestGame game) {
-        this.game = game;
+    public void setDrawCommands(java.util.List<DrawCommand> cmds) {
+        this.drawCommands = cmds;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (game == null) return;
+        if (drawCommands == null) return;
 
         Graphics2D g2 = (Graphics2D) g;
         Stroke originalStroke = g2.getStroke();
-        for (DrawCommand cmd : game.getDrawCommands()) {
+        for (DrawCommand cmd : drawCommands) {
             g2.setColor(cmd.color);
             if (cmd.shape == DrawCommand.Shape.OVAL) {
                 g2.fillOval(cmd.x, cmd.y, cmd.width, cmd.height);
