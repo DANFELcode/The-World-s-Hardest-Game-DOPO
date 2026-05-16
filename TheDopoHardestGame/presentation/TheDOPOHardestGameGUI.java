@@ -646,10 +646,10 @@ public class TheDOPOHardestGameGUI extends JFrame {
         String msg = "=== RESULTADO FINAL ===\n"
             + "Player1 — Niveles ganados: " + wonP1
             + "  |  Muertes: " + juego.getPlayerDeaths(0)
-            + "  |  Monedas: " + juego.getPlayerCoins(0) + "\n"
+            + "  |  Monedas: " + juego.getPlayerLifetimeCoins(0) + "\n"
             + "Player2 — Niveles ganados: " + wonP2
             + "  |  Muertes: " + juego.getPlayerDeaths(1)
-            + "  |  Monedas: " + juego.getPlayerCoins(1) + "\n\n"
+            + "  |  Monedas: " + juego.getPlayerLifetimeCoins(1) + "\n\n"
             + (ganador.equals("Empate") ? "¡EMPATE!" : "¡Ganó " + ganador + "!");
         JOptionPane.showMessageDialog(this, msg, "Fin del juego", JOptionPane.INFORMATION_MESSAGE);
     }

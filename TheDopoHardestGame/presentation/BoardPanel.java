@@ -45,6 +45,16 @@ public class BoardPanel extends JPanel {
                 }
                 g2.setStroke(originalStroke);
             }
+            if (cmd.outerBorderColor != null) {
+                g2.setColor(cmd.outerBorderColor);
+                g2.setStroke(new BasicStroke(3));
+                if (cmd.shape == DrawCommand.Shape.OVAL) {
+                    g2.drawOval(cmd.x - 3, cmd.y - 3, cmd.width + 6, cmd.height + 6);
+                } else {
+                    g2.drawRect(cmd.x - 3, cmd.y - 3, cmd.width + 6, cmd.height + 6);
+                }
+                g2.setStroke(originalStroke);
+            }
         }
     }
 
