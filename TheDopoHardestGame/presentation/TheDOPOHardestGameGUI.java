@@ -28,6 +28,21 @@ public class TheDOPOHardestGameGUI extends JFrame {
     private JButton playGame2;
     private JButton backInicio;
 
+    private JPanel panelSeleccion;
+    private JButton btnModePlayer, btnModePvsP, btnModePvsM;
+    private JButton btnSkinRojo, btnSkinAzul, btnSkinVerde;
+    private JPanel filaBorde1, filaBorde2;
+    private JButton[] borde1Botones;
+    private JButton[] borde2Botones;
+    private JButton btnJugarSeleccion, btnVolverSeleccion;
+    private TheDOPOHardestGame.GameMode selectedMode = TheDOPOHardestGame.GameMode.PLAYER;
+    private String selectedSkin = "red";
+    private Color selectedBorder1 = Color.BLACK;
+    private Color selectedBorder2 = Color.WHITE;
+
+    private static final String[] BORDER_NAMES = {"NEGRO", "BLANCO", "AMARILLO", "CYAN", "MAGENTA"};
+    private static final Color[] BORDER_COLORS = {Color.BLACK, Color.WHITE, Color.YELLOW, Color.CYAN, Color.MAGENTA};
+
     private JPanel panelJuego;
     private BoardPanel tablero;
     private JButton menu;
@@ -38,11 +53,14 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
     private GameLoop gameLoop;
 
-    private final Set<Integer> keysDown = new HashSet<>();
+    private final Set<Integer> keysDownPlayer1 = new HashSet<>();
+    private final Set<Integer> keysDownPlayer2 = new HashSet<>();
+    
 
     private static final Color COLOR_FONDO        = new Color(180, 180, 220);
     private static final String PANEL_INICIO      = "inicio";
     private static final String PANEL_EXPLICACION = "explicacion";
+    private static final String PANEL_SELECCION   = "seleccion";
     private static final String PANEL_JUEGO       = "juego";
 
     public TheDOPOHardestGameGUI() {
@@ -68,6 +86,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
         prepareElementsPanelInicio();
         prepareElementsPanelExp();
+        prepareElementsPanelSeleccion();
         prepareElementsPanelJuego();
         prepareElementsMenuBar();
 
@@ -175,6 +194,105 @@ public class TheDOPOHardestGameGUI extends JFrame {
         panel.add(panelExp, PANEL_EXPLICACION);
     }
 
+    private void prepareElementsPanelSeleccion() {
+        panelSeleccion = new JPanel(new BorderLayout());
+        panelSeleccion.setBackground(COLOR_FONDO);
+
+        JLabel titulo = new JLabel("Seleccione el modo de juego");
+        titulo.setFont(new Font("Arial", Font.BOLD, 28));
+        titulo.setForeground(new Color(30, 80, 180));
+        titulo.setHorizontalAlignment(SwingConstants.CENTER);
+        titulo.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
+        panelSeleccion.add(titulo, BorderLayout.NORTH);
+
+        JPanel centro = new JPanel(new GridLayout(4, 1, 0, 10));
+        centro.setBackground(COLOR_FONDO);
+        centro.setBorder(BorderFactory.createEmptyBorder(10, 60, 10, 60));
+
+        // Fila de modos
+        JPanel filaModos = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        filaModos.setBackground(COLOR_FONDO);
+        JLabel labelModo = new JLabel("Modo:  ");
+        labelModo.setFont(new Font("Arial", Font.BOLD, 16));
+        btnModePlayer = new JButton("PLAYER");
+        btnModePvsP   = new JButton("PvsP");
+        btnModePvsM   = new JButton("PvsM");
+        for (JButton b : new JButton[]{btnModePlayer, btnModePvsP, btnModePvsM}) {
+            b.setFont(new Font("Arial", Font.BOLD, 16));
+        }
+        filaModos.add(labelModo);
+        filaModos.add(btnModePlayer);
+        filaModos.add(btnModePvsP);
+        filaModos.add(btnModePvsM);
+
+        // Fila de skins
+        JPanel filaSkins = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        filaSkins.setBackground(COLOR_FONDO);
+        JLabel labelSkin = new JLabel("Skin:  ");
+        labelSkin.setFont(new Font("Arial", Font.BOLD, 16));
+        btnSkinRojo  = new JButton("ROJO");
+        btnSkinAzul  = new JButton("AZUL");
+        btnSkinVerde = new JButton("VERDE");
+        btnSkinRojo.setForeground(Color.RED);
+        btnSkinAzul.setForeground(Color.BLUE);
+        btnSkinVerde.setForeground(new Color(0, 150, 0));
+        for (JButton b : new JButton[]{btnSkinRojo, btnSkinAzul, btnSkinVerde}) {
+            b.setFont(new Font("Arial", Font.BOLD, 16));
+        }
+        filaSkins.add(labelSkin);
+        filaSkins.add(btnSkinRojo);
+        filaSkins.add(btnSkinAzul);
+        filaSkins.add(btnSkinVerde);
+
+        // Fila de borde P1
+        filaBorde1 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        filaBorde1.setBackground(COLOR_FONDO);
+        JLabel labelBorde1 = new JLabel("Borde P1:  ");
+        labelBorde1.setFont(new Font("Arial", Font.BOLD, 16));
+        filaBorde1.add(labelBorde1);
+        borde1Botones = new JButton[BORDER_NAMES.length];
+        for (int i = 0; i < BORDER_NAMES.length; i++) {
+            borde1Botones[i] = new JButton(BORDER_NAMES[i]);
+            borde1Botones[i].setFont(new Font("Arial", Font.BOLD, 14));
+            filaBorde1.add(borde1Botones[i]);
+        }
+
+        // Fila de borde P2 (visible solo en PvsP/PvsM)
+        filaBorde2 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        filaBorde2.setBackground(COLOR_FONDO);
+        JLabel labelBorde2 = new JLabel("Borde P2:  ");
+        labelBorde2.setFont(new Font("Arial", Font.BOLD, 16));
+        filaBorde2.add(labelBorde2);
+        borde2Botones = new JButton[BORDER_NAMES.length];
+        for (int i = 0; i < BORDER_NAMES.length; i++) {
+            borde2Botones[i] = new JButton(BORDER_NAMES[i]);
+            borde2Botones[i].setFont(new Font("Arial", Font.BOLD, 14));
+            filaBorde2.add(borde2Botones[i]);
+        }
+        filaBorde2.setVisible(false);
+
+        centro.add(filaModos);
+        centro.add(filaSkins);
+        centro.add(filaBorde1);
+        centro.add(filaBorde2);
+        panelSeleccion.add(centro, BorderLayout.CENTER);
+
+        // Botones de navegación
+        JPanel filaBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
+        filaBotones.setBackground(COLOR_FONDO);
+        btnVolverSeleccion = new JButton("VOLVER");
+        btnVolverSeleccion.setFont(new Font("Arial", Font.BOLD, 18));
+        btnVolverSeleccion.setForeground(new Color(150, 0, 200));
+        btnJugarSeleccion = new JButton("JUGAR");
+        btnJugarSeleccion.setFont(new Font("Arial", Font.BOLD, 18));
+        btnJugarSeleccion.setForeground(Color.RED);
+        filaBotones.add(btnVolverSeleccion);
+        filaBotones.add(btnJugarSeleccion);
+        panelSeleccion.add(filaBotones, BorderLayout.SOUTH);
+
+        panel.add(panelSeleccion, PANEL_SELECCION);
+    }
+
     private void prepareElementsPanelJuego() {
         panelJuego = new JPanel(new BorderLayout());
 
@@ -244,7 +362,88 @@ public class TheDOPOHardestGameGUI extends JFrame {
         playGame.addActionListener(e -> cardLayout.show(panel, PANEL_EXPLICACION));
         backInicio.addActionListener(e -> cardLayout.show(panel, PANEL_INICIO));
 
-        playGame2.addActionListener(e -> {
+        playGame2.addActionListener(e -> cardLayout.show(panel, PANEL_SELECCION));
+
+        btnVolverSeleccion.addActionListener(e -> cardLayout.show(panel, PANEL_EXPLICACION));
+
+        highlightButton(btnModePlayer, btnModePvsP, btnModePvsM);
+        highlightButton(btnSkinRojo, btnSkinAzul, btnSkinVerde);
+        refreshBorderButtonStates();
+
+        btnModePlayer.addActionListener(e -> {
+            selectedMode = TheDOPOHardestGame.GameMode.PLAYER;
+            highlightButton(btnModePlayer, btnModePvsP, btnModePvsM);
+            filaBorde2.setVisible(false);
+            refreshBorderButtonStates();
+        });
+        btnModePvsP.addActionListener(e -> {
+            selectedMode = TheDOPOHardestGame.GameMode.PvsP;
+            highlightButton(btnModePvsP, btnModePlayer, btnModePvsM);
+            filaBorde2.setVisible(true);
+            if (selectedBorder1.equals(selectedBorder2)) {
+                for (Color c : BORDER_COLORS) {
+                    if (!c.equals(selectedBorder1)) { selectedBorder2 = c; break; }
+                }
+            }
+            refreshBorderButtonStates();
+        });
+        btnModePvsM.addActionListener(e -> {
+            selectedMode = TheDOPOHardestGame.GameMode.PvsM;
+            highlightButton(btnModePvsM, btnModePlayer, btnModePvsP);
+            filaBorde2.setVisible(true);
+            if (selectedBorder1.equals(selectedBorder2)) {
+                for (Color c : BORDER_COLORS) {
+                    if (!c.equals(selectedBorder1)) { selectedBorder2 = c; break; }
+                }
+            }
+            refreshBorderButtonStates();
+        });
+
+        for (int i = 0; i < BORDER_NAMES.length; i++) {
+            final int idx = i;
+            borde1Botones[i].addActionListener(e -> {
+                selectedBorder1 = BORDER_COLORS[idx];
+                if (selectedBorder1.equals(selectedBorder2)) {
+                    // P2 también tenía este color, hay que cambiarle el de P2 al primer disponible
+                    for (Color c : BORDER_COLORS) {
+                        if (!c.equals(selectedBorder1)) { selectedBorder2 = c; break; }
+                    }
+                }
+                refreshBorderButtonStates();
+            });
+            borde2Botones[i].addActionListener(e -> {
+                selectedBorder2 = BORDER_COLORS[idx];
+                if (selectedBorder1.equals(selectedBorder2)) {
+                    for (Color c : BORDER_COLORS) {
+                        if (!c.equals(selectedBorder2)) { selectedBorder1 = c; break; }
+                    }
+                }
+                refreshBorderButtonStates();
+            });
+        }
+
+        btnSkinRojo.addActionListener(e -> {
+            selectedSkin = "red";
+            highlightButton(btnSkinRojo, btnSkinAzul, btnSkinVerde);
+        });
+        btnSkinAzul.addActionListener(e -> {
+            selectedSkin = "blue";
+            highlightButton(btnSkinAzul, btnSkinRojo, btnSkinVerde);
+        });
+        btnSkinVerde.addActionListener(e -> {
+            selectedSkin = "green";
+            highlightButton(btnSkinVerde, btnSkinRojo, btnSkinAzul);
+        });
+
+        btnJugarSeleccion.addActionListener(e -> {
+            juego.setGameMode(selectedMode);
+            juego.setPlayerType(0, selectedSkin);
+            juego.setPlayerBorderColor(0, selectedBorder1);
+            if (selectedMode == TheDOPOHardestGame.GameMode.PvsP
+                    || selectedMode == TheDOPOHardestGame.GameMode.PvsM) {
+                juego.setPlayerType(1, selectedSkin);
+                juego.setPlayerBorderColor(1, selectedBorder2);
+            }
             juego.startGame();
             cardLayout.show(panel, PANEL_JUEGO);
             SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
@@ -263,7 +462,8 @@ public class TheDOPOHardestGameGUI extends JFrame {
             int confirm = JOptionPane.showConfirmDialog(this, "¿Iniciar una nueva partida?",
                 "Nueva Partida", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                keysDown.clear();
+                keysDownPlayer1.clear();
+                keysDownPlayer2.clear();
                 juego.startGame();
                 cardLayout.show(panel, PANEL_JUEGO);
                 SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
@@ -280,7 +480,8 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
         reiniciar.addActionListener(e -> {
             gameLoop.stop();
-            keysDown.clear();
+            keysDownPlayer1.clear();
+                keysDownPlayer2.clear();
             juego.restartLevel();
             cardLayout.show(panel, PANEL_JUEGO);
             SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
@@ -353,6 +554,10 @@ public class TheDOPOHardestGameGUI extends JFrame {
         tablero.setFocusable(true);
 
         tablero.addKeyListener(new KeyAdapter() {
+            private static final Set<Integer> PVP_KEYS = new HashSet<>(java.util.Arrays.asList(
+                KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT
+            ));
+
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
@@ -360,49 +565,136 @@ public class TheDOPOHardestGameGUI extends JFrame {
                     pausar.setText(juego.isPaused() ? "Reanudar" : "Pausar");
                     return;
                 }
-                keysDown.add(e.getKeyCode());
+                if (PVP_KEYS.contains(e.getKeyCode())) {
+                    keysDownPlayer2.add(e.getKeyCode());
+                } else {
+                    keysDownPlayer1.add(e.getKeyCode());
+                }
             }
+
             @Override
             public void keyReleased(KeyEvent e) {
-                keysDown.remove(e.getKeyCode());
+                keysDownPlayer2.remove(e.getKeyCode());
+                keysDownPlayer1.remove(e.getKeyCode());
             }
         });
     }
 
     public void update() {
-        double dx = 0, dy = 0;
-        if (keysDown.contains(KeyEvent.VK_UP)    || keysDown.contains(KeyEvent.VK_W)) dy -= 1;
-        if (keysDown.contains(KeyEvent.VK_DOWN)  || keysDown.contains(KeyEvent.VK_S)) dy += 1;
-        if (keysDown.contains(KeyEvent.VK_LEFT)  || keysDown.contains(KeyEvent.VK_A)) dx -= 1;
-        if (keysDown.contains(KeyEvent.VK_RIGHT) || keysDown.contains(KeyEvent.VK_D)) dx += 1;
-        if (dx != 0 || dy != 0) juego.movePlayer(0, dx, dy);
+    	updatePlayer(0, keysDownPlayer1, KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D);
+    	if (juego.getGameMode() == TheDOPOHardestGame.GameMode.PvsP)
+    	    updatePlayer(1, keysDownPlayer2, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT);
         juego.update();
+    }
+    
+    private void updatePlayer(int index, Set<Integer> keys, int up, int down, int left, int right) {
+        double dx = 0, dy = 0;
+        if (keys.contains(up))    dy -= 1;
+        if (keys.contains(down))  dy += 1;
+        if (keys.contains(left))  dx -= 1;
+        if (keys.contains(right)) dx += 1;
+        if (dx != 0 || dy != 0) juego.movePlayer(index, dx, dy);
     }
 
     public void refresh() {
         if (juego.getCurrentLevel() != null) {
-            muertes.setText("MUERTES: " + juego.getPlayerDeaths(0));
-            monedas.setText("Monedas: " + juego.getCollectedCoins() + "/" + juego.getTotalCoins());
-            niveles.setText("Nivel: " + juego.getLevelNumber() + "/2");
-            tiempo.setText("Tiempo: " + String.format("%.0f", juego.getRemainingTime()));
+            boolean pvsp = juego.getGameMode() == TheDOPOHardestGame.GameMode.PvsP;
+            if (pvsp) {
+                muertes.setText("P1: " + juego.getPlayerDeaths(0) + " muertes  |  P2: " + juego.getPlayerDeaths(1) + " muertes");
+            } else {
+                muertes.setText("MUERTES: " + juego.getPlayerDeaths(0));
+            }
+            if (pvsp) {
+                monedas.setText("P1: " + juego.getPlayerCoins(0) + "/" + juego.getPlayerTotalCoins(0)
+                    + "  |  P2: " + juego.getPlayerCoins(1) + "/" + juego.getPlayerTotalCoins(1));
+            } else {
+                monedas.setText("Monedas: " + juego.getPlayerCoins(0) + "/" + juego.getPlayerTotalCoins(0));
+            }
+            niveles.setText("Nivel: " + juego.getLevelNumber());
+            tiempo.setText(pvsp ? "" : "Tiempo: " + String.format("%.0f", juego.getRemainingTime()));
 
             if (juego.isLevelComplete()) {
-                if (juego.getLevelNumber() == 1) {
-                    juego.advanceLevel();
-                } else {
+                boolean hasNext = juego.hasNextLevel();
+                juego.advanceLevel();
+                if (!hasNext) {
                     gameLoop.stop();
-                    keysDown.clear();
-                    JOptionPane.showMessageDialog(this, "¡HAS GANADO EL JUEGO!");
+                    keysDownPlayer1.clear();
+                    keysDownPlayer2.clear();
+                    if (pvsp) {
+                        mostrarResultadoPvsP();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "¡HAS GANADO EL JUEGO!");
+                    }
                     cardLayout.show(panel, PANEL_INICIO);
                 }
             } else if (juego.isGameOver()) {
                 gameLoop.stop();
-                keysDown.clear();
+                keysDownPlayer1.clear();
+                keysDownPlayer2.clear();
                 JOptionPane.showMessageDialog(this, "¡Tiempo agotado!");
                 cardLayout.show(panel, PANEL_INICIO);
             }
         }
         tablero.refresh();
+    }
+
+    private void mostrarResultadoPvsP() {
+        java.util.Map<String, Integer> levelsWon = juego.getLevelsWon();
+        int wonP1 = levelsWon.getOrDefault("Player1", 0);
+        int wonP2 = levelsWon.getOrDefault("Player2", 0);
+        String ganador = wonP1 > wonP2 ? "Player1" : wonP2 > wonP1 ? "Player2" : "Empate";
+        String msg = "=== RESULTADO FINAL ===\n"
+            + "Player1 — Niveles ganados: " + wonP1
+            + "  |  Muertes: " + juego.getPlayerDeaths(0)
+            + "  |  Monedas: " + juego.getPlayerCoins(0) + "\n"
+            + "Player2 — Niveles ganados: " + wonP2
+            + "  |  Muertes: " + juego.getPlayerDeaths(1)
+            + "  |  Monedas: " + juego.getPlayerCoins(1) + "\n\n"
+            + (ganador.equals("Empate") ? "¡EMPATE!" : "¡Ganó " + ganador + "!");
+        JOptionPane.showMessageDialog(this, msg, "Fin del juego", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void refreshBorderButtonStates() {
+        boolean twoPlayers = selectedMode != TheDOPOHardestGame.GameMode.PLAYER;
+        for (int i = 0; i < BORDER_COLORS.length; i++) {
+            Color c = BORDER_COLORS[i];
+            applyBorderButtonStyle(borde1Botones[i], c,
+                c.equals(selectedBorder1),
+                twoPlayers && c.equals(selectedBorder2));
+            applyBorderButtonStyle(borde2Botones[i], c,
+                c.equals(selectedBorder2),
+                twoPlayers && c.equals(selectedBorder1));
+        }
+        if (panelSeleccion != null) {
+            panelSeleccion.revalidate();
+            panelSeleccion.repaint();
+        }
+    }
+
+    private void applyBorderButtonStyle(JButton b, Color borderColor, boolean selectedHere, boolean takenByOther) {
+        b.setBackground(borderColor);
+        b.setForeground(borderColor.equals(Color.BLACK) ? Color.WHITE : Color.BLACK);
+        b.setOpaque(true);
+        b.setBorderPainted(true);
+        if (selectedHere) {
+            b.setBorder(BorderFactory.createLineBorder(new Color(30, 80, 180), 4));
+        } else {
+            b.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+        }
+        b.setEnabled(!takenByOther);
+    }
+
+    private void highlightButton(JButton selected, JButton... others) {
+        selected.setBackground(new Color(30, 80, 180));
+        selected.setForeground(Color.WHITE);
+        selected.setOpaque(true);
+        selected.setBorderPainted(false);
+        for (JButton b : others) {
+            b.setBackground(UIManager.getColor("Button.background"));
+            b.setForeground(Color.BLACK);
+            b.setOpaque(false);
+            b.setBorderPainted(true);
+        }
     }
 
     private void exit() {

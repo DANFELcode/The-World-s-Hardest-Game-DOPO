@@ -26,16 +26,24 @@ public class BoardPanel extends JPanel {
         super.paintComponent(g);
         if (game == null) return;
 
+        Graphics2D g2 = (Graphics2D) g;
+        Stroke originalStroke = g2.getStroke();
         for (DrawCommand cmd : game.getDrawCommands()) {
-            g.setColor(cmd.color);
+            g2.setColor(cmd.color);
             if (cmd.shape == DrawCommand.Shape.OVAL) {
-                g.fillOval(cmd.x, cmd.y, cmd.width, cmd.height);
+                g2.fillOval(cmd.x, cmd.y, cmd.width, cmd.height);
             } else {
-                g.fillRect(cmd.x, cmd.y, cmd.width, cmd.height);
+                g2.fillRect(cmd.x, cmd.y, cmd.width, cmd.height);
             }
             if (cmd.borderColor != null) {
-                g.setColor(cmd.borderColor);
-                g.drawRect(cmd.x, cmd.y, cmd.width, cmd.height);
+                g2.setColor(cmd.borderColor);
+                g2.setStroke(new BasicStroke(3));
+                if (cmd.shape == DrawCommand.Shape.OVAL) {
+                    g2.drawOval(cmd.x, cmd.y, cmd.width, cmd.height);
+                } else {
+                    g2.drawRect(cmd.x, cmd.y, cmd.width, cmd.height);
+                }
+                g2.setStroke(originalStroke);
             }
         }
     }
