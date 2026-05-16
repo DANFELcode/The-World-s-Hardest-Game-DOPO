@@ -113,12 +113,8 @@ public class TheDOPOHardestGame implements Serializable {
     public void importarNivel(File file) throws GameException {
         if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
         Level level = dataAccess.loadLevelAbsolute(file);
-        if (level != null) {
-            this.currentLevel = level;
-            this.currentLevelNumber = level.getNumber();
-        } else {
-            throw new GameException("No se pudo importar el nivel.");
-        }
+        this.currentLevel = level;
+        this.currentLevelNumber = level.getNumber();
     }
 
     public enum GameMode {

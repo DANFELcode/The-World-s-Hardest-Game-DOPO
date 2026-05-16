@@ -27,7 +27,6 @@ public class GameDataAccess {
     public static GameDataAccess getInstance() {
         if (instance == null) {
             instance = new GameDataAccess();
-            GameLogger.getInstance().logInfo("GameDataAccess inicializado");
         }
         return instance;
     }
@@ -43,12 +42,18 @@ public class GameDataAccess {
         return params;
     }
 
+    /** Loads a level for the given mode. Returns null on error (already logged via exception auto-log). */
     public Level loadLevel(String file, TheDOPOHardestGame.GameMode mode) {
         String subfolder = mode == TheDOPOHardestGame.GameMode.PvsP ? "pvsp/" : "player/";
-        return loadLevelAbsolute(new File(LEVELS_PATH + subfolder + file));
+        try {
+            return loadLevelAbsolute(new File(LEVELS_PATH + subfolder + file));
+        } catch (GameException e) {
+            return null;
+        }
     }
 
-    public Level loadLevelAbsolute(File file) {
+    public Level loadLevelAbsolute(File file) throws LevelFormatException, LevelIOException {
+        String fileName = file.getName();
         Integer number = null;
         Double time = null;
         GameMap map = new GameMap(800, 500);
@@ -60,26 +65,20 @@ public class GameDataAccess {
                 line = line.trim();
                 if (line.isEmpty()) continue;
                 if (line.startsWith("NUMBER=")) {
-                    number = Integer.parseInt(line.split("=")[1]);
+                    number = parseIntField(fileName, "NUMBER", line.split("=")[1]);
                 } else if (line.startsWith("TIME=")) {
-                    time = Double.parseDouble(line.split("=")[1]);
+                    time = parseDoubleField(fileName, "TIME", line.split("=")[1]);
                 } else {
                     elementLines.add(line);
                 }
             }
         } catch (IOException e) {
-            GameLogger.getInstance().logError("Error leyendo nivel: " + file.getName(), e);
-            return null;
+            throw new LevelIOException(fileName, "Error leyendo nivel: " + e.getMessage());
         }
 
-        if (number == null || time == null) {
-            try {
-                throw new GameException("Faltan NUMBER o TIME en: " + file);
-            } catch (GameException e) {
-                GameLogger.getInstance().logError("Nivel inválido", e);
-                return null;
-            }
-        }
+        if (number == null) throw new LevelFormatException(fileName, "Falta campo NUMBER");
+        if (time == null)   throw new LevelFormatException(fileName, "Falta campo TIME");
+        if (time <= 0)      throw new LevelFormatException(fileName, "TIME debe ser > 0");
 
         // Convert seconds from the file into ticks (the domain's time unit).
         int timeInTicks = (int) Math.round(time * TICKS_PER_SECOND);
@@ -95,42 +94,86 @@ public class GameDataAccess {
             switch (type) {
                 case "WALL":
                 case "LIFESOURCE":
-                case "BOMB":       level.addStaticElement(createStaticElement(type, p)); break;
-                case "COIN":       level.addCoin(createCoin(p)); break;
-                case "ENEMY":      level.addEnemy(createEnemy(p)); break;
+                case "BOMB":              level.addStaticElement(createStaticElement(fileName, map, type, p)); break;
+                case "COIN":              level.addCoin(createCoin(fileName, map, p)); break;
+                case "ENEMY":             level.addEnemy(createEnemy(fileName, map, p)); break;
                 case "INITIAL_ZONE":
                 case "FINAL_ZONE":
-                case "INTERMEDIATE_ZONE": addZone(level, type, p); break;
-                default:           GameLogger.getInstance().logWarning("Tipo desconocido en nivel: " + type); break;
+                case "INTERMEDIATE_ZONE": addZone(fileName, map, level, type, p); break;
+                default: throw new LevelFormatException(fileName, "Tipo desconocido: " + type);
             }
         }
 
-        GameLogger.getInstance().logInfo("Nivel " + number + " cargado desde " + file.getName());
         return level;
     }
 
-    private double getDbl(Map<String, String> p, String key) {
-        return Double.parseDouble(p.get(key));
+    // ===== Validation helpers =====
+
+    private int parseIntField(String filePath, String name, String value) throws LevelFormatException {
+        try { return Integer.parseInt(value.trim()); }
+        catch (NumberFormatException e) {
+            throw new LevelFormatException(filePath, "Campo '" + name + "' no es entero: " + value);
+        }
     }
 
-    private StaticElement createStaticElement(String type, Map<String, String> p) {
-        double x = getDbl(p, "x");
-        double y = getDbl(p, "y");
-        double w = getDbl(p, "width");
-        double h = getDbl(p, "height");
+    private double parseDoubleField(String filePath, String name, String value) throws LevelFormatException {
+        try { return Double.parseDouble(value.trim()); }
+        catch (NumberFormatException e) {
+            throw new LevelFormatException(filePath, "Campo '" + name + "' no es numérico: " + value);
+        }
+    }
+
+    private double requireDouble(String filePath, Map<String, String> p, String key) throws LevelFormatException {
+        String v = p.get(key);
+        if (v == null) throw new LevelFormatException(filePath, "Falta campo '" + key + "'");
+        return parseDoubleField(filePath, key, v);
+    }
+
+    private String requireString(String filePath, Map<String, String> p, String key) throws LevelFormatException {
+        String v = p.get(key);
+        if (v == null) throw new LevelFormatException(filePath, "Falta campo '" + key + "'");
+        return v;
+    }
+
+    private void requirePositive(String filePath, String name, double value) throws LevelFormatException {
+        if (value <= 0) throw new LevelFormatException(filePath, name + " debe ser > 0 (valor=" + value + ")");
+    }
+
+    private void requireInBounds(String filePath, String elementType,
+                                 double x, double y, double w, double h, GameMap map) throws LevelFormatException {
+        if (x < 0 || y < 0 || x + w > map.getWidth() || y + h > map.getHeight()) {
+            throw new LevelFormatException(filePath,
+                elementType + " fuera de límites del mapa (" + map.getWidth() + "x" + map.getHeight()
+                + "): x=" + x + ",y=" + y + ",w=" + w + ",h=" + h);
+        }
+    }
+
+    // ===== Element factories =====
+
+    private StaticElement createStaticElement(String filePath, GameMap map, String type, Map<String, String> p) throws LevelFormatException {
+        double x = requireDouble(filePath, p, "x");
+        double y = requireDouble(filePath, p, "y");
+        double w = requireDouble(filePath, p, "width");
+        double h = requireDouble(filePath, p, "height");
+        requirePositive(filePath, "width", w);
+        requirePositive(filePath, "height", h);
+        requireInBounds(filePath, type, x, y, w, h, map);
         switch (type) {
             case "WALL":       return new SolidWall(x, y, w, h, "black");
             case "LIFESOURCE": return new LifeSource(x, y, w, h, "pink");
             case "BOMB":       return new Bomb(x, y, w, h);
-            default: throw new IllegalArgumentException("Unknown static element: " + type);
+            default: throw new LevelFormatException(filePath, "Static element desconocido: " + type);
         }
     }
 
-    private Coin createCoin(Map<String, String> p) {
-        double x = getDbl(p, "x");
-        double y = getDbl(p, "y");
-        double w = getDbl(p, "width");
-        double h = getDbl(p, "height");
+    private Coin createCoin(String filePath, GameMap map, Map<String, String> p) throws LevelFormatException {
+        double x = requireDouble(filePath, p, "x");
+        double y = requireDouble(filePath, p, "y");
+        double w = requireDouble(filePath, p, "width");
+        double h = requireDouble(filePath, p, "height");
+        requirePositive(filePath, "width", w);
+        requirePositive(filePath, "height", h);
+        requireInBounds(filePath, "COIN", x, y, w, h, map);
         String skinType = p.get("type");
         String owner = p.getOrDefault("owner", "Player1");
         if ("blue".equals(skinType) || "green".equals(skinType) || "red".equals(skinType)) {
@@ -139,37 +182,57 @@ public class GameDataAccess {
         return new Coin(x, y, w, h, skinType, owner);
     }
 
-    private Enemy createEnemy(Map<String, String> p) {
-        double x = getDbl(p, "x");
-        double y = getDbl(p, "y");
-        double w = getDbl(p, "width");
-        double h = getDbl(p, "height");
+    private Enemy createEnemy(String filePath, GameMap map, Map<String, String> p) throws LevelFormatException {
+        double x = requireDouble(filePath, p, "x");
+        double y = requireDouble(filePath, p, "y");
+        double w = requireDouble(filePath, p, "width");
+        double h = requireDouble(filePath, p, "height");
+        requirePositive(filePath, "width", w);
+        requirePositive(filePath, "height", h);
+        requireInBounds(filePath, "ENEMY", x, y, w, h, map);
+        String movementType = requireString(filePath, p, "movement");
         MovementStrategy movement;
-        String movementType = p.get("movement");
 
         if ("patrol".equals(movementType)) {
-            String[] points = p.get("route").split("\\|");
-            Point2D.Double[] route = new Point2D.Double[points.length];
+            String route = requireString(filePath, p, "route");
+            String[] points = route.split("\\|");
+            Point2D.Double[] routePts = new Point2D.Double[points.length];
             for (int i = 0; i < points.length; i++) {
                 String[] xy = points[i].split(":");
-                route[i] = new Point2D.Double(Double.parseDouble(xy[0]), Double.parseDouble(xy[1]));
+                if (xy.length != 2) throw new LevelFormatException(filePath, "Punto de ruta inválido: " + points[i]);
+                routePts[i] = new Point2D.Double(
+                    parseDoubleField(filePath, "route.x", xy[0]),
+                    parseDoubleField(filePath, "route.y", xy[1]));
             }
-            movement = PatrolMovement.basic(route);
-        } else {
-            Direction dir = Direction.valueOf(p.get("direction"));
-            int sign = Integer.parseInt(p.get("sign"));
+            movement = PatrolMovement.basic(routePts);
+        } else if ("basic".equals(movementType) || "accelerated".equals(movementType)) {
+            String dirStr = requireString(filePath, p, "direction");
+            Direction dir;
+            try { dir = Direction.valueOf(dirStr); }
+            catch (IllegalArgumentException e) {
+                throw new LevelFormatException(filePath, "Dirección inválida: " + dirStr);
+            }
+            int sign = parseIntField(filePath, "sign", requireString(filePath, p, "sign"));
+            if (sign != 1 && sign != -1) {
+                throw new LevelFormatException(filePath, "sign debe ser 1 o -1 (valor=" + sign + ")");
+            }
             movement = "accelerated".equals(movementType)
                 ? LinearMovement.accelerated(dir, sign)
                 : LinearMovement.basic(dir, sign);
+        } else {
+            throw new LevelFormatException(filePath, "movement desconocido: " + movementType);
         }
         return new Enemy(x, y, w, h, movement);
     }
 
-    private void addZone(Level level, String type, Map<String, String> p) {
-        double x = getDbl(p, "x");
-        double y = getDbl(p, "y");
-        double w = getDbl(p, "width");
-        double h = getDbl(p, "height");
+    private void addZone(String filePath, GameMap map, Level level, String type, Map<String, String> p) throws LevelFormatException {
+        double x = requireDouble(filePath, p, "x");
+        double y = requireDouble(filePath, p, "y");
+        double w = requireDouble(filePath, p, "width");
+        double h = requireDouble(filePath, p, "height");
+        requirePositive(filePath, "width", w);
+        requirePositive(filePath, "height", h);
+        requireInBounds(filePath, type, x, y, w, h, map);
         switch (type) {
             case "INITIAL_ZONE": {
                 String owner = p.getOrDefault("owner", "Player1");
@@ -190,21 +253,17 @@ public class GameDataAccess {
     public void guardarPartida(TheDOPOHardestGame game, File file) throws GameException {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
             out.writeObject(game);
-            GameLogger.getInstance().logInfo("Partida guardada en " + file.getAbsolutePath());
         } catch (IOException e) {
-            GameLogger.getInstance().logError("Error al guardar la partida", e);
-            throw new GameException("Error al guardar la partida: " + e.getMessage());
+            throw new PersistenceException("save", "Error al guardar la partida: " + e.getMessage());
         }
     }
 
     public TheDOPOHardestGame abrirPartida(File file) throws GameException {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             TheDOPOHardestGame game = (TheDOPOHardestGame) in.readObject();
-            GameLogger.getInstance().logInfo("Partida abierta desde " + file.getAbsolutePath());
             return game;
         } catch (IOException | ClassNotFoundException e) {
-            GameLogger.getInstance().logError("Error al abrir la partida", e);
-            throw new GameException("Error al abrir la partida: " + e.getMessage());
+            throw new PersistenceException("open", "Error al abrir la partida: " + e.getMessage());
         }
     }
 
@@ -245,10 +304,8 @@ public class GameDataAccess {
                 }
                 writer.println(line);
             }
-            GameLogger.getInstance().logInfo("Nivel exportado en " + file.getAbsolutePath());
         } catch (IOException e) {
-            GameLogger.getInstance().logError("Error al exportar nivel", e);
-            throw new GameException("Error al exportar nivel: " + e.getMessage());
+            throw new LevelIOException(file.getName(), "Error al exportar nivel: " + e.getMessage());
         }
     }
 }
