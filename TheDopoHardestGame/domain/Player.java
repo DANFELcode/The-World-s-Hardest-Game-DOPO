@@ -36,13 +36,13 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     /** Each player subclass must declare its own initial skin. */
     protected abstract SkinBehavior createDefaultSkin();
 
-    
-    public void collectCoin() {
-        coinsCollected++;
-    }
 
-    public void resetCoins() {
-        coinsCollected = 0;
+    /** No-op hook called when a coin is picked up. Per-level count lives in Level. */
+    public void collectCoin() { }
+
+    /** Adds the given amount to the player's lifetime coin total (snapshot on level end). */
+    public void addToLifetime(int amount) {
+        coinsCollected += amount;
     }
     public void markCheckpoint(double x, double y) {
         setSpawnPoint(x, y);
@@ -66,11 +66,12 @@ public abstract class Player extends MovableElement implements Drawable, Interac
         }
     }
 
-    /** Raw death: increments counter, repositions to spawn, and restores default skin. */
+    /** Single entry point for death: increments counter, repositions, restores skin, resets coins. */
     public void die(Level level) {
         this.deaths++;
         this.setPosition(spawnX, spawnY);
         restoreSkin();
+        level.onPlayerDeath(this);
     }
 
     /** Called by the game when the player is hit by an enemy or hazard. */
@@ -112,14 +113,14 @@ public abstract class Player extends MovableElement implements Drawable, Interac
 
     @Override
     public DrawCommand toDrawCommand() {
-        Color drawBorder = (extraLives > 0) ? new Color(255, 105, 180) : borderColor;
+        Color outer = (extraLives > 0) ? new Color(255, 105, 180) : null;
         long now = System.currentTimeMillis();
         Color displayColor = getDisplayColor();
         if (now - lastHitTime < INVULNERABILITY_TIME && (now / 50) % 2 == 0) {
             displayColor = Color.WHITE;
         }
         return new DrawCommand(displayColor, (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(),
-                DrawCommand.Shape.RECT, drawBorder);
+                DrawCommand.Shape.RECT, borderColor, outer);
     }
 
     public void setBorderColor(Color color) {

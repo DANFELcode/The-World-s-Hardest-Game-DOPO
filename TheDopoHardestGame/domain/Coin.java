@@ -58,6 +58,9 @@ public class Coin extends StaticElement implements Collectible {
         this.collected = false;
     }
 
+    /** Whether this coin resets on player death even when the player has a checkpoint. */
+    public boolean resetsOnAnyDeath() { return false; }
+
     /** Returns the coin's type identifier used in level files (e.g. "yellow", "blue"). */
     public String getCoinType() { return "yellow"; }
     

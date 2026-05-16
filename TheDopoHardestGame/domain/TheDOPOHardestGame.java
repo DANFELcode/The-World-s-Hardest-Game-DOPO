@@ -187,6 +187,14 @@ public class TheDOPOHardestGame implements Serializable {
         if (currentLevel == null) return 0;
         List<Player> players = currentLevel.getPlayers();
         if (playerIndex < 0 || playerIndex >= players.size()) return 0;
+        return currentLevel.getCoinsCollectedCountBy(players.get(playerIndex));
+    }
+
+    /** Returns the total number of coin pickups this player has done across the game (re-pickups counted). */
+    public int getPlayerLifetimeCoins(int playerIndex) {
+        if (currentLevel == null) return 0;
+        List<Player> players = currentLevel.getPlayers();
+        if (playerIndex < 0 || playerIndex >= players.size()) return 0;
         return players.get(playerIndex).getCoinsCollected();
     }
 
@@ -287,6 +295,10 @@ public class TheDOPOHardestGame implements Serializable {
      */
     public void advanceLevel() {
         List<Player> players = currentLevel.getPlayers();
+        // Snapshot current level coin progress into each player's lifetime stat
+        for (Player p : players) {
+            p.addToLifetime(currentLevel.getCoinsCollectedCountBy(p));
+        }
         currentLevelNumber++;
         Level next = dataAccess.loadLevel("level" + currentLevelNumber + ".txt", currentGameMode);
         Player winner = currentLevel.getWinner();

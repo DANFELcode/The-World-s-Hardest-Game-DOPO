@@ -38,7 +38,6 @@ public class Enemy extends MovableElement implements Lethal, Interactable, Drawa
     public void onPlayerContact(Player player, Level level) {
         if (!isDead) {
             onDestroy(player, level);
-            level.onPlayerDeath(player);
         }
     }
 

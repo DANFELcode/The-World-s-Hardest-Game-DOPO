@@ -58,14 +58,13 @@ public class Level implements Serializable {
      * Handles the penalty rules when a player dies in the level.
      * @param player the player that died
      */
+    /** Applies death-penalty rules: resets the dying player's owned coins. */
     public void onPlayerDeath(Player player) {
-        boolean atSpawn = Math.abs(player.getX() - player.getSpawnX()) < 0.01
-                       && Math.abs(player.getY() - player.getSpawnY()) < 0.01;
-
-        if (atSpawn && !player.hasCheckpoint()) {
-            String name = player.getName();
-            for (Coin coin : coins) {
-                if (name.equals(coin.getOwnerName())) coin.reset();
+        boolean noCheckpoint = !player.hasCheckpoint();
+        String name = player.getName();
+        for (Coin coin : coins) {
+            if (name.equals(coin.getOwnerName()) && (noCheckpoint || coin.resetsOnAnyDeath())) {
+                coin.reset();
             }
         }
     }
@@ -125,6 +124,16 @@ public class Level implements Serializable {
             if (name.equals(coin.getOwnerName()) && !coin.isCollected()) return false;
         }
         return true;
+    }
+
+    /** Returns how many of this player's coins are currently collected in the level. */
+    public int getCoinsCollectedCountBy(Player player) {
+        String name = player.getName();
+        int count = 0;
+        for (Coin coin : coins) {
+            if (name.equals(coin.getOwnerName()) && coin.isCollected()) count++;
+        }
+        return count;
     }
 
     public void addPlayer(Player player) {

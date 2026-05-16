@@ -33,7 +33,6 @@ public abstract class StaticElement implements Interactable, Drawable, Serializa
     public void onPlayerContact(Player player, Level level) {
         if (!isBlocking()) {
             onContact(player, level);
-            level.onPlayerDeath(player);
         }
     }
 

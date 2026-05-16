@@ -40,4 +40,7 @@ public class SkinCoin extends Coin {
 
     @Override
     public String getCoinType() { return getColor(); }
+
+    @Override
+    public boolean resetsOnAnyDeath() { return true; }
 }
