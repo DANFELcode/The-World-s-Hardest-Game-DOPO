@@ -8,9 +8,20 @@ import java.awt.Color;
  * <b>Inv:</b> width > 0 and height > 0
  */
 public class InitialZone extends Zone {
+	private String ownerName;
 
     @Override
     public Color getDisplayColor() { return new Color(170, 240, 170); }
+
+
+    
+    @Override
+    public void onPlayerContact(Player player, Level level) {
+    	super.onPlayerContact(player, level);
+    	if (player.getName().equals(ownerName)) {
+    		player.setSpawnPoint(x, y);
+    	}
+    }
 
 
     /**
@@ -20,7 +31,8 @@ public class InitialZone extends Zone {
      * @param width zone width, must be greater than 0
      * @param height zone height, must be greater than 0
      */
-    public InitialZone(double x, double y, double width, double height) {
+    public InitialZone(double x, double y, double width, double height, String ownerName) {
         super(x, y, width, height);
+        this.ownerName = ownerName;
     }
 }

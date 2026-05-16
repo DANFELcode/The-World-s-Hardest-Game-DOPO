@@ -14,6 +14,8 @@ public class Level implements Serializable {
     private int number;
     /** Remaining time in ticks. Presentation translates to seconds for display. */
     private int gameTime;
+    private boolean hasTimer = true;
+    private Player winner;
     private GameMap map;
     private ArrayList<Player> players;
     private ArrayList<Enemy> enemies;
@@ -21,6 +23,7 @@ public class Level implements Serializable {
     private ArrayList<StaticElement> staticElements;
     private HashMap<String, Zone> zones;
     private ArrayList<Interactable> interactables;
+    
 
     public Level(int number, int gameTimeInTicks, GameMap map) {
         this.number = number;
@@ -59,11 +62,10 @@ public class Level implements Serializable {
         boolean atSpawn = Math.abs(player.getX() - player.getSpawnX()) < 0.01
                        && Math.abs(player.getY() - player.getSpawnY()) < 0.01;
 
-        if (atSpawn) {
-            if (!player.hasCheckpoint()) {
-                for (Coin coin : coins) {
-                    coin.reset();
-                }
+        if (atSpawn && !player.hasCheckpoint()) {
+            String name = player.getName();
+            for (Coin coin : coins) {
+                if (name.equals(coin.getOwnerName())) coin.reset();
             }
         }
     }
@@ -71,7 +73,7 @@ public class Level implements Serializable {
     private void resolvePlayerCollisions() {
         for (Interactable element : interactables) {
             for (Player player : players) {
-                if (element.getAreaColision().intersects(player.getAreaColision())) {
+                if (element != player && element.getAreaColision().intersects(player.getAreaColision())) {
                     element.onPlayerContact(player, this);
                 }
             }
@@ -88,18 +90,23 @@ public class Level implements Serializable {
     }
 
     private void updateTime() {
-        if (gameTime > 0) gameTime--;
+        if (hasTimer && gameTime > 0) gameTime--;
     }
+
+    public void setHasTimer(boolean hasTimer) { this.hasTimer = hasTimer; }
+    public boolean hasTimer() { return hasTimer; }
 
     /** Returns remaining time in ticks. Presentation should translate to seconds. */
     public int getGameTime() { return gameTime; }
 
     public boolean isLevelComplete() {
-        if (!isCoinsCollected()) return false;
-        Zone fZone = zones.get("final");
-        if (fZone == null) return false;
-        for (Player p : players) {
-            if (fZone.getAreaColision().intersects(p.getAreaColision())) return true;
+        return hasWinner();
+    }
+
+    /** Returns true if the player is currently intersecting any zone (safe from hits). */
+    public boolean isInSafeZone(Player player) {
+        for (Zone zone : zones.values()) {
+            if (zone.getAreaColision().intersects(player.getAreaColision())) return true;
         }
         return false;
     }
@@ -111,13 +118,18 @@ public class Level implements Serializable {
         return true;
     }
 
-    public void addPlayer(Player player) {
-        Zone initial = zones.get("initial");
-        if (initial != null) {
-            player.setSpawnPoint(initial.getX(), initial.getY());
-            player.setPosition(initial.getX(), initial.getY());
+    /** Returns true if all coins owned by this player have been collected. */
+    public boolean isCoinsCollectedBy(Player player) {
+        String name = player.getName();
+        for (Coin coin : coins) {
+            if (name.equals(coin.getOwnerName()) && !coin.isCollected()) return false;
         }
+        return true;
+    }
+
+    public void addPlayer(Player player) {
         players.add(player);
+        interactables.add(player);
     }
 
     public void addCoin(Coin coin) {
@@ -138,13 +150,9 @@ public class Level implements Serializable {
     public void addZone(String type, Zone zone) {
         zones.put(type, zone);
         interactables.add(zone);
-        if ("initial".equals(type)) {
-            for (Player p : players) {
-                p.setSpawnPoint(zone.getX(), zone.getY());
-                p.setPosition(zone.getX(), zone.getY());
-            }
-        }
     }
+    
+
 
     public boolean isBlocking(double x, double y) {
         for (StaticElement e : staticElements) {
@@ -160,8 +168,17 @@ public class Level implements Serializable {
                 && !isBlocking(x, y + height - 1)
                 && !isBlocking(x + width - 1, y + height - 1);
     }
+    
+    public boolean hasWinner() {
+    	return winner != null;
+    }
+    
+    public void setWinner(Player player) {
+    	this.winner = player;
+    }
 
     public int getNumber() { return number; }
+    public Player getWinner() {return winner;}
     public GameMap getMap() { return map; }
     public ArrayList<Player> getPlayers() { return players; }
     public ArrayList<Enemy> getEnemies() { return enemies; }
@@ -170,4 +187,6 @@ public class Level implements Serializable {
     public ArrayList<Coin> getCoins() { return coins; }
     public ArrayList<StaticElement> getStaticElements() { return staticElements; }
     public HashMap<String, Zone> getZones() { return zones; }
+
+
 }

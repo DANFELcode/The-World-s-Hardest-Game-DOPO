@@ -10,17 +10,20 @@ import java.awt.Color;
 public class Coin extends StaticElement implements Collectible {
 
     private boolean collected;
+    private String ownerName;
+    private transient Player ownerPlayer;
+
+    public Coin(double x, double y, double width, double height, String color) {
+        this(x, y, width, height, color, "Player1");
+    }
 
     /**
-     * Creates a coin at the given position and size.
-     * @param x horizontal position
-     * @param y vertical position
-     * @param width coin width, must be greater than 0
-     * @param height coin height, must be greater than 0
+     * Creates a coin at the given position and size, owned by ownerName.
      */
-    public Coin(double x, double y, double width, double height, String color) {
+    public Coin(double x, double y, double width, double height, String color, String ownerName) {
         super(x, y, width, height, color);
         this.collected = false;
+        this.ownerName = ownerName;
     }
 
     /**
@@ -28,8 +31,15 @@ public class Coin extends StaticElement implements Collectible {
      * @param player the player that collected the coin
      */
     public void onCollect(Player player) {
-        if (!collected) this.collected = true;
+        if (!collected && player.getName().equals(ownerName)) {
+            this.collected = true;
+            player.collectCoin();
+        }
     }
+
+    public String getOwnerName() { return ownerName; }
+
+    public void setOwnerPlayer(Player p) { this.ownerPlayer = p; }
 
     @Override
     public void onContact(Player player, Level level) {
@@ -57,6 +67,7 @@ public class Coin extends StaticElement implements Collectible {
 
     @Override
     public DrawCommand toDrawCommand() {
-        return new DrawCommand(getDisplayColor(), (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(), DrawCommand.Shape.OVAL);
+        Color border = (ownerPlayer != null) ? ownerPlayer.getBorderColor() : null;
+        return new DrawCommand(getDisplayColor(), (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(), DrawCommand.Shape.OVAL, border);
     }
 }

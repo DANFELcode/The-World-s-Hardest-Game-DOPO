@@ -15,8 +15,8 @@ public class DefaultSkin implements SkinBehavior {
     }
 
     @Override
-    public void onHit(Player player) {
-        player.die();
+    public void onHit(Player player, Level level) {
+        player.die(level);
     }
     
     @Override

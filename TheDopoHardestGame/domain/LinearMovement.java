@@ -7,9 +7,6 @@ package domain;
  */
 public class LinearMovement implements MovementStrategy {
 
-    public enum Direction { HORIZONTAL, VERTICAL }
-    
-
     private Direction direction;
     private int sign;
     private final double speedInUnits;

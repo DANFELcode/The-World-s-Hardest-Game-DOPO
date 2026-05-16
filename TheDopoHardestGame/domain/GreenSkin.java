@@ -18,13 +18,12 @@ public class GreenSkin implements SkinBehavior {
     }
 
     @Override
-    public void onHit(Player player) {
+    public void onHit(Player player, Level level) {
         if (!isWeakened) {
             isWeakened = true;
             player.setSpeed(SPEED * 0.7);
         } else {
-            player.die();
-            apply(player);
+            player.die(level);
         }
     }
 

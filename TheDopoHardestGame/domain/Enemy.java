@@ -30,14 +30,14 @@ public class Enemy extends MovableElement implements Lethal, Interactable, Drawa
     }
 
     @Override
-    public void onDestroy(Player player) {
-        player.onHit();
+    public void onDestroy(Player player, Level level) {
+        player.onHit(level);
     }
 
     @Override
     public void onPlayerContact(Player player, Level level) {
         if (!isDead) {
-            onDestroy(player);
+            onDestroy(player, level);
             level.onPlayerDeath(player);
         }
     }

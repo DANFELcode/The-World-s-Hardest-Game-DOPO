@@ -17,28 +17,21 @@ import java.util.List;
 import java.util.Map;
 
 public class GameDataAccess {
-	private static final String LEVELS_PATH = "resources/levels/";
-	/** Conversion factor: how many ticks the level file's "TIME=N seconds" maps to. Must match the GameLoop tick rate. */
-	public static final int TICKS_PER_SECOND = 60;
-	private static GameDataAccess instance;
-	
-	
-	private GameDataAccess() {
-		
-	}	
-	
-	
+    private static final String LEVELS_PATH = "resources/levels/";
+    /** Conversion factor: how many ticks the level file's "TIME=N seconds" maps to. Must match the GameLoop tick rate. */
+    public static final int TICKS_PER_SECOND = 60;
+    private static GameDataAccess instance;
+
+    private GameDataAccess() { }
+
     public static GameDataAccess getInstance() {
         if (instance == null) {
-        	instance = new GameDataAccess();
-        	GameLogger.getInstance().logInfo("GameDataAccess inicializado");
+            instance = new GameDataAccess();
+            GameLogger.getInstance().logInfo("GameDataAccess inicializado");
         }
-        
         return instance;
     }
-    
-    //convierte un array de strings en un mapa de pares clave-valor
-    
+
     private Map<String, String> parseParams(String paramsStr) {
         Map<String, String> params = new HashMap<>();
         for (String pair : paramsStr.split(",")) {
@@ -49,22 +42,20 @@ public class GameDataAccess {
         }
         return params;
     }
-    
-    public Level loadLevel(String file) {
-        return loadLevelAbsolute(new File(LEVELS_PATH + file));
+
+    public Level loadLevel(String file, TheDOPOHardestGame.GameMode mode) {
+        String subfolder = mode == TheDOPOHardestGame.GameMode.PvsP ? "pvsp/" : "player/";
+        return loadLevelAbsolute(new File(LEVELS_PATH + subfolder + file));
     }
 
     public Level loadLevelAbsolute(File file) {
-    	Integer number = null;
+        Integer number = null;
         Double time = null;
         GameMap map = new GameMap(800, 500);
-        List<String> elementLines = new ArrayList<>(); //todo lo que no sea configuración
+        List<String> elementLines = new ArrayList<>();
 
-    	try (
-    		BufferedReader reader = new BufferedReader(
-    				new FileReader(file))){
-    		
-    		String line;
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.isEmpty()) continue;
@@ -80,7 +71,7 @@ public class GameDataAccess {
             GameLogger.getInstance().logError("Error leyendo nivel: " + file.getName(), e);
             return null;
         }
-    	
+
         if (number == null || time == null) {
             try {
                 throw new GameException("Faltan NUMBER o TIME en: " + file);
@@ -89,160 +80,112 @@ public class GameDataAccess {
                 return null;
             }
         }
-        
+
         // Convert seconds from the file into ticks (the domain's time unit).
         int timeInTicks = (int) Math.round(time * TICKS_PER_SECOND);
         Level level = new Level(number, timeInTicks, map);
-        
-        for (String elementLine: elementLines) {
-        	int spaceIdx = elementLine.indexOf(' ');
-        	String type = spaceIdx == -1 ? elementLine : elementLine.substring(0, spaceIdx);
-        	Map<String, String> p = spaceIdx == -1
-        	    ? new HashMap<>()
-        	    : parseParams(elementLine.substring(spaceIdx + 1));
-        	
-        	
-        	switch(type) {
-	        	case "PLAYER":
-	        		Player player;
-	                switch (p.get("type")) {
-	                case "blue":
-	                    player = new BluePlayer("Player",
-	                        Double.parseDouble(p.get("x")),
-	                        Double.parseDouble(p.get("y")));
-	                    break;
-	                case "green":
-	                    player = new GreenPlayer("Player",
-	                        Double.parseDouble(p.get("x")),
-	                        Double.parseDouble(p.get("y")));
-	                    break;
-	                default:
-	                    player = new RedPlayer("Player",
-	                        Double.parseDouble(p.get("x")),
-	                        Double.parseDouble(p.get("y")));
-	                    break;
-	                }
-	                level.addPlayer(player);
-	                break;
-	            
-	            case "WALL":
-	                level.addStaticElement(new SolidWall(
-	                    Double.parseDouble(p.get("x")),
-	                    Double.parseDouble(p.get("y")),
-	                    Double.parseDouble(p.get("width")),
-	                    Double.parseDouble(p.get("height")),
-	                    "black"
-	                ));
-	                break;
-	                
-	            case "COIN":
-	                if ("blue".equals(p.get("type")) || "green".equals(p.get("type")) || "red".equals(p.get("type"))) {
-	                    level.addCoin(new SkinCoin(
-	                        Double.parseDouble(p.get("x")),
-	                        Double.parseDouble(p.get("y")),
-	                        Double.parseDouble(p.get("width")),
-	                        Double.parseDouble(p.get("height")),
-	                        p.get("type")
-	                    ));
-	                } else {
-	                    level.addCoin(new Coin(
-	                        Double.parseDouble(p.get("x")),
-	                        Double.parseDouble(p.get("y")),
-	                        Double.parseDouble(p.get("width")),
-	                        Double.parseDouble(p.get("height")),
-	                        p.get("type")
-	                    ));
-	                }
-	                break;
-	                
-	            case "ENEMY":
-	                MovementStrategy movement;
-	                String movementType = p.get("movement");
-	                if ("patrol".equals(movementType)) {
-	                    String[] points = p.get("route").split("\\|");
-	                    Point2D.Double[] route = new Point2D.Double[points.length];
-	                    for (int i = 0; i < points.length; i++) {
-	                        String[] xy = points[i].split(":");
-	                        route[i] = new Point2D.Double(
-	                            Double.parseDouble(xy[0]),
-	                            Double.parseDouble(xy[1])
-	                        );
-	                    }
-	                    movement = PatrolMovement.basic(route);
-	                } else {
-	                    LinearMovement.Direction dir =
-	                        LinearMovement.Direction.valueOf(p.get("direction"));
-	                    int sign = Integer.parseInt(p.get("sign"));
-	                    movement = "accelerated".equals(movementType)
-	                        ? LinearMovement.accelerated(dir, sign)
-	                        : LinearMovement.basic(dir, sign);
-	                }
-	                level.addEnemy(new Enemy(
-	                    Double.parseDouble(p.get("x")),
-	                    Double.parseDouble(p.get("y")),
-	                    Double.parseDouble(p.get("width")),
-	                    Double.parseDouble(p.get("height")),
-	                    movement
-	                ));
-	                break;
-	                
-	            case "LIFESOURCE":
-	                level.addStaticElement(new LifeSource(
-	                    Double.parseDouble(p.get("x")),
-	                    Double.parseDouble(p.get("y")),
-	                    Double.parseDouble(p.get("width")),
-	                    Double.parseDouble(p.get("height")),
-	                    "yellow"
-	                ));
-	                break;
 
-	            case "BOMB":
-	                level.addStaticElement(new Bomb(
-	                    Double.parseDouble(p.get("x")),
-	                    Double.parseDouble(p.get("y")),
-	                    Double.parseDouble(p.get("width")),
-	                    Double.parseDouble(p.get("height"))
-	                ));
-	                break;
-	                
-	            case "INITIAL_ZONE":
-	                level.addZone("initial", new InitialZone(
-	                    Double.parseDouble(p.get("x")),
-	                    Double.parseDouble(p.get("y")),
-	                    Double.parseDouble(p.get("width")),
-	                    Double.parseDouble(p.get("height"))
-	                ));
-	                break;
+        for (String elementLine : elementLines) {
+            int spaceIdx = elementLine.indexOf(' ');
+            String type = spaceIdx == -1 ? elementLine : elementLine.substring(0, spaceIdx);
+            Map<String, String> p = spaceIdx == -1
+                ? new HashMap<>()
+                : parseParams(elementLine.substring(spaceIdx + 1));
 
-	            case "FINAL_ZONE":
-	                level.addZone("final", new FinalZone(
-	                    Double.parseDouble(p.get("x")),
-	                    Double.parseDouble(p.get("y")),
-	                    Double.parseDouble(p.get("width")),
-	                    Double.parseDouble(p.get("height"))
-	                ));
-	                break;
+            switch (type) {
+                case "WALL":
+                case "LIFESOURCE":
+                case "BOMB":       level.addStaticElement(createStaticElement(type, p)); break;
+                case "COIN":       level.addCoin(createCoin(p)); break;
+                case "ENEMY":      level.addEnemy(createEnemy(p)); break;
+                case "INITIAL_ZONE":
+                case "FINAL_ZONE":
+                case "INTERMEDIATE_ZONE": addZone(level, type, p); break;
+                default:           GameLogger.getInstance().logWarning("Tipo desconocido en nivel: " + type); break;
+            }
+        }
 
-	            case "INTERMEDIATE_ZONE":
-	                level.addZone("intermediate", new IntermediateZone(
-	                    Double.parseDouble(p.get("x")),
-	                    Double.parseDouble(p.get("y")),
-	                    Double.parseDouble(p.get("width")),
-	                    Double.parseDouble(p.get("height"))
-	                ));
-	                break;
-	                
-	            default:
-	                GameLogger.getInstance().logWarning(
-	                    "Tipo desconocido en nivel: " + type);
-	                break;
-	        	}    		
-    		}
-        	
-	        GameLogger.getInstance().logInfo("Nivel " + number + " cargado desde " + file.getName());
-	        return level;
+        GameLogger.getInstance().logInfo("Nivel " + number + " cargado desde " + file.getName());
+        return level;
+    }
 
-    	}
+    private double getDbl(Map<String, String> p, String key) {
+        return Double.parseDouble(p.get(key));
+    }
+
+    private StaticElement createStaticElement(String type, Map<String, String> p) {
+        double x = getDbl(p, "x");
+        double y = getDbl(p, "y");
+        double w = getDbl(p, "width");
+        double h = getDbl(p, "height");
+        switch (type) {
+            case "WALL":       return new SolidWall(x, y, w, h, "black");
+            case "LIFESOURCE": return new LifeSource(x, y, w, h, "pink");
+            case "BOMB":       return new Bomb(x, y, w, h);
+            default: throw new IllegalArgumentException("Unknown static element: " + type);
+        }
+    }
+
+    private Coin createCoin(Map<String, String> p) {
+        double x = getDbl(p, "x");
+        double y = getDbl(p, "y");
+        double w = getDbl(p, "width");
+        double h = getDbl(p, "height");
+        String skinType = p.get("type");
+        String owner = p.getOrDefault("owner", "Player1");
+        if ("blue".equals(skinType) || "green".equals(skinType) || "red".equals(skinType)) {
+            return new SkinCoin(x, y, w, h, skinType, owner);
+        }
+        return new Coin(x, y, w, h, skinType, owner);
+    }
+
+    private Enemy createEnemy(Map<String, String> p) {
+        double x = getDbl(p, "x");
+        double y = getDbl(p, "y");
+        double w = getDbl(p, "width");
+        double h = getDbl(p, "height");
+        MovementStrategy movement;
+        String movementType = p.get("movement");
+
+        if ("patrol".equals(movementType)) {
+            String[] points = p.get("route").split("\\|");
+            Point2D.Double[] route = new Point2D.Double[points.length];
+            for (int i = 0; i < points.length; i++) {
+                String[] xy = points[i].split(":");
+                route[i] = new Point2D.Double(Double.parseDouble(xy[0]), Double.parseDouble(xy[1]));
+            }
+            movement = PatrolMovement.basic(route);
+        } else {
+            Direction dir = Direction.valueOf(p.get("direction"));
+            int sign = Integer.parseInt(p.get("sign"));
+            movement = "accelerated".equals(movementType)
+                ? LinearMovement.accelerated(dir, sign)
+                : LinearMovement.basic(dir, sign);
+        }
+        return new Enemy(x, y, w, h, movement);
+    }
+
+    private void addZone(Level level, String type, Map<String, String> p) {
+        double x = getDbl(p, "x");
+        double y = getDbl(p, "y");
+        double w = getDbl(p, "width");
+        double h = getDbl(p, "height");
+        switch (type) {
+            case "INITIAL_ZONE": {
+                String owner = p.getOrDefault("owner", "Player1");
+                level.addZone("initial_" + owner, new InitialZone(x, y, w, h, owner));
+                break;
+            }
+            case "FINAL_ZONE": {
+                String owner = p.getOrDefault("owner", "Player1");
+                level.addZone("final_" + owner, new FinalZone(x, y, w, h, owner));
+                break;
+            }
+            case "INTERMEDIATE_ZONE":
+                level.addZone("intermediate", new IntermediateZone(x, y, w, h));
+                break;
+        }
+    }
 
     public void guardarPartida(TheDOPOHardestGame game, File file) throws GameException {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
@@ -268,12 +211,7 @@ public class GameDataAccess {
     public void exportarNivel(Level level, File file) throws GameException {
         try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
             writer.println("NUMBER=" + level.getNumber());
-            // Export back to seconds (the file format's unit).
             writer.println("TIME=" + (level.getGameTime() / (double) TICKS_PER_SECOND));
-            for (Player p : level.getPlayers()) {
-                writer.println("PLAYER x=" + p.getSpawnX() + ",y=" + p.getSpawnY()
-                        + ",type=" + p.getTypeName());
-            }
             for (StaticElement e : level.getStaticElements()) {
                 writer.println(e.getFileType() + " x=" + e.getX() + ",y=" + e.getY()
                         + ",width=" + e.getWidth() + ",height=" + e.getHeight());
@@ -286,12 +224,26 @@ public class GameDataAccess {
             for (Coin c : level.getCoins()) {
                 writer.println("COIN x=" + c.getX() + ",y=" + c.getY()
                         + ",width=" + c.getWidth() + ",height=" + c.getHeight()
-                        + ",type=" + c.getCoinType());
+                        + ",type=" + c.getCoinType()
+                        + ",owner=" + c.getOwnerName());
             }
             for (Map.Entry<String, Zone> entry : level.getZones().entrySet()) {
+                String key = entry.getKey();
                 Zone z = entry.getValue();
-                writer.println(entry.getKey().toUpperCase() + "_ZONE x=" + z.getX() + ",y=" + z.getY()
-                        + ",width=" + z.getWidth() + ",height=" + z.getHeight());
+                String line;
+                if (key.startsWith("initial_")) {
+                    line = "INITIAL_ZONE x=" + z.getX() + ",y=" + z.getY()
+                            + ",width=" + z.getWidth() + ",height=" + z.getHeight()
+                            + ",owner=" + key.substring("initial_".length());
+                } else if (key.startsWith("final_")) {
+                    line = "FINAL_ZONE x=" + z.getX() + ",y=" + z.getY()
+                            + ",width=" + z.getWidth() + ",height=" + z.getHeight()
+                            + ",owner=" + key.substring("final_".length());
+                } else {
+                    line = key.toUpperCase() + "_ZONE x=" + z.getX() + ",y=" + z.getY()
+                            + ",width=" + z.getWidth() + ",height=" + z.getHeight();
+                }
+                writer.println(line);
             }
             GameLogger.getInstance().logInfo("Nivel exportado en " + file.getAbsolutePath());
         } catch (IOException e) {

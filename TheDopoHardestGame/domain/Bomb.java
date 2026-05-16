@@ -16,14 +16,14 @@ public class Bomb extends StaticElement implements Lethal {
 
     @Override
     public void onContact(Player player, Level level) {
-        onDestroy(player);
+        onDestroy(player, level);
     }
 
     @Override
-    public void onDestroy(Player player) {
+    public void onDestroy(Player player, Level level) {
         if (!exploded) {
             this.exploded = true;
-            player.onHit();
+            player.onHit(level);
         }
     }
 
