@@ -1,0 +1,55 @@
+NUMBER=2
+TIME=180
+
+WALL x=0,y=0,width=800,height=20
+WALL x=0,y=480,width=800,height=20
+WALL x=0,y=0,width=20,height=500
+WALL x=780,y=0,width=20,height=500
+
+WALL x=180,y=20,width=20,height=160
+WALL x=180,y=320,width=20,height=160
+WALL x=600,y=20,width=20,height=160
+WALL x=600,y=320,width=20,height=160
+
+WALL x=340,y=160,width=120,height=20
+WALL x=340,y=320,width=120,height=20
+
+ENEMY x=100,y=80,width=20,height=20,movement=basic,direction=VERTICAL,sign=1
+ENEMY x=140,y=380,width=20,height=20,movement=basic,direction=VERTICAL,sign=-1
+ENEMY x=660,y=80,width=20,height=20,movement=basic,direction=VERTICAL,sign=1
+ENEMY x=620,y=380,width=20,height=20,movement=basic,direction=VERTICAL,sign=-1
+
+ENEMY x=250,y=210,width=20,height=20,movement=basic,direction=HORIZONTAL,sign=1
+ENEMY x=250,y=270,width=20,height=20,movement=basic,direction=HORIZONTAL,sign=-1
+ENEMY x=530,y=210,width=20,height=20,movement=basic,direction=HORIZONTAL,sign=-1
+ENEMY x=530,y=270,width=20,height=20,movement=basic,direction=HORIZONTAL,sign=1
+
+ENEMY x=350,y=200,width=20,height=20,movement=patrol,route=350:200|450:200|450:280|350:280
+
+ENEMY x=390,y=50,width=20,height=20,movement=accelerated,direction=HORIZONTAL,sign=1
+ENEMY x=390,y=420,width=20,height=20,movement=accelerated,direction=HORIZONTAL,sign=-1
+
+INTERMEDIATE_ZONE x=370,y=210,width=60,height=80
+
+COIN x=110,y=243,width=12,height=12,type=yellow,owner=Player1
+COIN x=678,y=243,width=12,height=12,type=yellow,owner=Player2
+
+COIN x=240,y=80,width=12,height=12,type=yellow,owner=Player1
+COIN x=548,y=80,width=12,height=12,type=yellow,owner=Player2
+
+COIN x=240,y=400,width=12,height=12,type=yellow,owner=Player1
+COIN x=548,y=400,width=12,height=12,type=yellow,owner=Player2
+
+COIN x=370,y=440,width=15,height=15,type=green,owner=Player1
+COIN x=415,y=440,width=15,height=15,type=green,owner=Player2
+
+LIFESOURCE x=375,y=40,width=20,height=20
+LIFESOURCE x=405,y=40,width=20,height=20
+
+BOMB x=290,y=240,width=20,height=20
+BOMB x=490,y=240,width=20,height=20
+
+INITIAL_ZONE x=20,y=190,width=60,height=120,owner=Player1
+INITIAL_ZONE x=720,y=190,width=60,height=120,owner=Player2
+FINAL_ZONE x=720,y=190,width=60,height=120,owner=Player1
+FINAL_ZONE x=20,y=190,width=60,height=120,owner=Player2
