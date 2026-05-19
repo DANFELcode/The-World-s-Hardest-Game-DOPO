@@ -1,6 +1,5 @@
 package domain;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -9,12 +8,13 @@ import java.util.HashMap;
  * <b>(number, gameTime, map, enemies, coins, staticElements, zones)</b> <br>
  * <b>Inv:</b> number >= 0 and gameTime > 0 and map != null
  */
-public class Level implements Serializable {
+public class Level {
 
     private int number;
     /** Remaining time in ticks. Presentation translates to seconds for display. */
     private int gameTime;
     private boolean hasTimer = true;
+    private boolean isPaused = false;
     private Player winner;
     private GameMap map;
     private ArrayList<Player> players;
@@ -37,7 +37,11 @@ public class Level implements Serializable {
         this.interactables = new ArrayList<Interactable>();
     }
 
+    public void togglePause() { isPaused = !isPaused; }
+    public boolean isPaused() { return isPaused; }
+
     public void updateLevel() {
+        if (isPaused) return;
         moveEnemies();
         resolvePlayerCollisions();
 
@@ -54,11 +58,7 @@ public class Level implements Serializable {
         }
     }
 
-    /**
-     * Handles the penalty rules when a player dies in the level.
-     * @param player the player that died
-     */
-    /** Applies death-penalty rules: resets the dying player's owned coins. */
+    /** Applies death-penalty rules: resets the dying player's owned coins and collectibles. */
     public void onPlayerDeath(Player player) {
         boolean noCheckpoint = !player.hasCheckpoint();
         String name = player.getName();
@@ -66,6 +66,9 @@ public class Level implements Serializable {
             if (name.equals(coin.getOwnerName()) && (noCheckpoint || coin.resetsOnAnyDeath())) {
                 coin.reset();
             }
+        }
+        for (StaticElement element : staticElements) {
+            element.reset();
         }
     }
 

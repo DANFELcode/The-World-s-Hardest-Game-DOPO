@@ -1,4 +1,5 @@
 package domain;
+import dto.DrawCommand;
 
 import java.awt.Color;
 
@@ -11,7 +12,7 @@ public class Coin extends StaticElement implements Collectible {
 
     private boolean collected;
     private String ownerName;
-    private transient Player ownerPlayer;
+    private Player ownerPlayer;
 
     /**
      * Creates a coin at the given position and size, owned by ownerName.
@@ -61,7 +62,7 @@ public class Coin extends StaticElement implements Collectible {
     public String getCoinType() { return "yellow"; }
     
     public Color getDisplayColor() {
-        return new Color(218, 165, 32);
+        return GameConstants.COLOR_COIN;
     }
 
     @Override

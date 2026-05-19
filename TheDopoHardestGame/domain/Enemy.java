@@ -1,4 +1,5 @@
 package domain;
+import dto.DrawCommand;
 
 import java.awt.Color;
 
@@ -11,7 +12,7 @@ public class Enemy extends MovableElement implements Lethal, Interactable, Drawa
 
     private MovementStrategy movement;
     private boolean isDead;
-    private transient Player lastVictim;
+    private Player lastVictim;
 
     public Enemy(double x, double y, double width, double height, MovementStrategy movement) {
         super(x, y, width, height, 1.0);
@@ -56,7 +57,7 @@ public class Enemy extends MovableElement implements Lethal, Interactable, Drawa
     public MovementStrategy getMovement() { return movement; }
 
     public Color getDisplayColor() {
-        return new Color(40, 60, 200);
+        return GameConstants.COLOR_ENEMY;
     }
 
     @Override

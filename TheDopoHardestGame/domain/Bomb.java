@@ -1,4 +1,5 @@
 package domain;
+import dto.DrawCommand;
 
 import java.awt.Color;
 
@@ -37,7 +38,7 @@ public class Bomb extends StaticElement implements Lethal {
 
     @Override
     public Color getDisplayColor() {
-        return new Color(160, 32, 240);
+        return GameConstants.COLOR_BOMB;
     }
 
     @Override

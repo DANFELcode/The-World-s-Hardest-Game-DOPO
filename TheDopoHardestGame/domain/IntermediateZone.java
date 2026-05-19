@@ -15,7 +15,7 @@ public class IntermediateZone extends Zone {
 
     @Override
     public Color getDisplayColor() {
-        return new Color(144, 238, 144);
+        return GameConstants.COLOR_INTERMEDIATE_ZONE;
     }
 
     /**

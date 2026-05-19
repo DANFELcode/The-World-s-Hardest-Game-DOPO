@@ -1,4 +1,5 @@
 package domain;
+import dto.DrawCommand;
 
 import java.awt.Color;
 
@@ -12,7 +13,7 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     protected int deaths;
     protected double spawnX;
     protected double spawnY;
-    protected boolean hasCheckpoint;
+    private boolean hasCheckpoint;
     protected SkinBehavior currentSkin;
     protected int extraLives = 0;
     protected Color borderColor = Color.BLACK;
@@ -32,6 +33,15 @@ public abstract class Player extends MovableElement implements Drawable, Interac
 
     /** Each player subclass must declare its own initial skin. */
     protected abstract SkinBehavior createDefaultSkin();
+
+    /** Factory method: creates the appropriate Player subclass for the given type identifier. */
+    public static Player create(String type, String name, double x, double y) {
+        switch (type) {
+            case "blue":  return new BluePlayer(name, x, y);
+            case "green": return new GreenPlayer(name, x, y);
+            default:      return new RedPlayer(name, x, y);
+        }
+    }
     
     // se deja metodo por extension futura
     /** No-op hook called when a coin is picked up. Per-level count lives in Level. */
@@ -56,6 +66,11 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     }
 
     public void move(double dx, double dy, Level level) {
+        double length = Math.sqrt(dx * dx + dy * dy);
+        if (length > 1.0) {
+            dx /= length;
+            dy /= length;
+        }
         double nextX = getX() + (dx * getSpeed());
         double nextY = getY() + (dy * getSpeed());
         if (level.isWalkable(nextX, nextY, getWidth(), getHeight())) {
@@ -107,7 +122,7 @@ public abstract class Player extends MovableElement implements Drawable, Interac
 
     @Override
     public DrawCommand toDrawCommand() {
-        Color outer = (extraLives > 0) ? new Color(255, 105, 180) : null;
+        Color outer = (extraLives > 0) ? GameConstants.COLOR_LIFESOURCE : null;
         return new DrawCommand(getDisplayColor(), (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(),
                 DrawCommand.Shape.RECT, borderColor, outer);
     }
@@ -128,10 +143,13 @@ public abstract class Player extends MovableElement implements Drawable, Interac
         this.die(level);
         other.die(level);
     }
+    public void setDeaths(int deaths) { this.deaths = deaths; }
+    public void restoreLifetime(int coins) { this.coinsCollected = coins; }
+
     public int getDeaths() { return deaths; }
     public String getName() { return name; }
     public double getSpawnX() { return spawnX; }
     public double getSpawnY() { return spawnY; }
-    public int getCoinsCollected() {return coinsCollected; }
+    public int getCoinsCollected() { return coinsCollected; }
     
 }

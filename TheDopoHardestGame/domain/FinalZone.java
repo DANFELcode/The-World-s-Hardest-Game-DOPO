@@ -17,7 +17,7 @@ public class FinalZone extends Zone {
     }
 
     @Override
-    public Color getDisplayColor() { return new Color(60, 160, 60); }
+    public Color getDisplayColor() { return GameConstants.COLOR_FINAL_ZONE; }
     
     @Override
     public void onPlayerContact(Player player, Level level) {

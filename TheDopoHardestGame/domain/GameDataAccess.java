@@ -3,13 +3,9 @@ package domain;
 import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +36,16 @@ public class GameDataAccess {
             }
         }
         return params;
+    }
+
+    /** Returns how many level files exist for the given mode. */
+    public int getLevelCount(GameMode mode) {
+        String subfolder = mode == GameMode.PvsP ? "pvsp/" : "player/";
+        int count = 0;
+        while (new File(LEVELS_PATH + subfolder + "level" + (count + 1) + ".txt").exists()) {
+            count++;
+        }
+        return count;
     }
 
     /** Loads a level for the given mode. Returns null on error (already logged via exception auto-log). */
@@ -133,7 +139,7 @@ public class GameDataAccess {
         }
     }
 
-    private static final double MIN_PLAYER_SIZE = 20.0;
+    private static final double MIN_PLAYER_SIZE = GameConstants.MIN_PLAYER_SIZE;
 
     // ===== Validation helpers =====
 
@@ -279,20 +285,38 @@ public class GameDataAccess {
     }
 
     public void guardarPartida(TheDOPOHardestGame game, File file) throws GameException {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
-            out.writeObject(game);
+        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+            writer.println("mode=" + game.getGameMode().name());
+            writer.println("level=" + game.getCurrentLevelNumber());
+            for (Player p : game.getPlayers()) {
+                String owner = p.getName();
+                writer.println("player." + owner + ".type=" + p.getTypeName());
+                writer.println("player." + owner + ".deaths=" + p.getDeaths());
+                writer.println("player." + owner + ".lifetime=" + p.getCoinsCollected());
+                writer.println("player." + owner + ".borderColor=" + p.getBorderColor().getRGB());
+            }
+            for (Map.Entry<String, Integer> entry : game.getLevelsWon().entrySet()) {
+                writer.println("levelsWon." + entry.getKey() + "=" + entry.getValue());
+            }
         } catch (IOException e) {
             throw new PersistenceException("save", "Error al guardar la partida: " + e.getMessage());
         }
     }
 
-    public TheDOPOHardestGame abrirPartida(File file) throws GameException {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
-            TheDOPOHardestGame game = (TheDOPOHardestGame) in.readObject();
-            return game;
-        } catch (IOException | ClassNotFoundException e) {
+    public Map<String, String> abrirPartida(File file) throws GameException {
+        Map<String, String> data = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+                int idx = line.indexOf('=');
+                if (idx > 0) data.put(line.substring(0, idx), line.substring(idx + 1));
+            }
+        } catch (IOException e) {
             throw new PersistenceException("open", "Error al abrir la partida: " + e.getMessage());
         }
+        return data;
     }
 
     public void exportarNivel(Level level, File file) throws GameException {

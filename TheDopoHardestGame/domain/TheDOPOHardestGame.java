@@ -1,8 +1,8 @@
 package domain;
+import dto.DrawCommand;
 
 import java.awt.geom.Point2D;
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,33 +14,33 @@ import java.util.Map;
  * <b>(currentLevel, currentGameMode, isPaused)</b> <br>
  * <b>Inv:</b> currentGameMode != null
  */
-public class TheDOPOHardestGame implements Serializable {
+public class TheDOPOHardestGame {
 
     private Level currentLevel;
     private GameMode currentGameMode;
-    private boolean isPaused;
     private int currentLevelNumber = 1;
-    private transient GameDataAccess dataAccess = GameDataAccess.getInstance();
+    private GameDataAccess dataAccess = GameDataAccess.getInstance();
     private Map<String, Integer> levelsWon;
     private Map<String, String> playerTypes;
     private Map<String, java.awt.Color> playerBorderColors;
 
-    //guardar solo el nivel en el que quedo, guardar solo lo necesario no todo el juego
     public TheDOPOHardestGame() {
         this.currentGameMode = GameMode.PLAYER;
-        this.isPaused = false;
         this.levelsWon = new HashMap<String, Integer>();
         this.playerTypes = new HashMap<String, String>();
         this.playerBorderColors = new HashMap<String, java.awt.Color>();
     }
 
-    public void startGame() {
-        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
-        currentLevelNumber = 1;
+    public void startGame(int levelNumber) {
+        currentLevelNumber = levelNumber;
         levelsWon = new HashMap<>();
         currentLevel = dataAccess.loadLevel("level" + currentLevelNumber + ".txt", currentGameMode);
         applyModeRules(currentLevel);
         createPlayers();
+    }
+
+    public int getAvailableLevelCount() {
+        return dataAccess.getLevelCount(currentGameMode);
     }
 
     private void applyModeRules(Level level) {
@@ -56,18 +56,7 @@ public class TheDOPOHardestGame implements Serializable {
             if (key.startsWith("initial_")) {
                 String owner = key.replace("initial_", "");
                 String type = playerTypes.getOrDefault(owner, "red");
-                Player player;
-                switch (type) {
-                    case "blue":
-                        player = new BluePlayer(owner, zone.getX(), zone.getY());
-                        break;
-                    case "green":
-                        player = new GreenPlayer(owner, zone.getX(), zone.getY());
-                        break;
-                    default:
-                        player = new RedPlayer(owner, zone.getX(), zone.getY());
-                        break;
-                }
+                Player player = Player.create(type, owner, zone.getX(), zone.getY());
                 java.awt.Color border = playerBorderColors.get(owner);
                 if (border != null) player.setBorderColor(border);
                 currentLevel.addPlayer(player);
@@ -89,28 +78,67 @@ public class TheDOPOHardestGame implements Serializable {
     }
 
 	public void guardarPartida(File file) throws GameException {
-        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
+
         dataAccess.guardarPartida(this, file);
     }
 
     public void abrirPartida(File file) throws GameException {
-        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
-        TheDOPOHardestGame loaded = dataAccess.abrirPartida(file);
-        this.currentLevel = loaded.currentLevel;
-        this.currentGameMode = loaded.currentGameMode;
-        this.isPaused = loaded.isPaused;
-        this.currentLevelNumber = loaded.currentLevelNumber;
+
+        Map<String, String> data = dataAccess.abrirPartida(file);
+
+        String modeStr = data.get("mode");
+        currentGameMode = modeStr != null ? GameMode.valueOf(modeStr) : GameMode.PLAYER;
+
+        String levelStr = data.get("level");
+        currentLevelNumber = levelStr != null ? Integer.parseInt(levelStr) : 1;
+
+        playerTypes = new HashMap<>();
+        levelsWon = new HashMap<>();
+        playerBorderColors = new HashMap<>();
+        Map<String, Integer> savedDeaths = new HashMap<>();
+        Map<String, Integer> savedLifetimes = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (key.startsWith("player.") && key.endsWith(".type")) {
+                String owner = key.substring("player.".length(), key.length() - ".type".length());
+                playerTypes.put(owner, value);
+            } else if (key.startsWith("player.") && key.endsWith(".deaths")) {
+                String owner = key.substring("player.".length(), key.length() - ".deaths".length());
+                savedDeaths.put(owner, Integer.parseInt(value));
+            } else if (key.startsWith("player.") && key.endsWith(".lifetime")) {
+                String owner = key.substring("player.".length(), key.length() - ".lifetime".length());
+                savedLifetimes.put(owner, Integer.parseInt(value));
+            } else if (key.startsWith("player.") && key.endsWith(".borderColor")) {
+                String owner = key.substring("player.".length(), key.length() - ".borderColor".length());
+                playerBorderColors.put(owner, new java.awt.Color(Integer.parseInt(value)));
+            } else if (key.startsWith("levelsWon.")) {
+                String owner = key.substring("levelsWon.".length());
+                levelsWon.put(owner, Integer.parseInt(value));
+            }
+        }
+
+        currentLevel = dataAccess.loadLevel("level" + currentLevelNumber + ".txt", currentGameMode);
+        applyModeRules(currentLevel);
+        createPlayers();
+
+        for (Player p : currentLevel.getPlayers()) {
+            String owner = p.getName();
+            if (savedDeaths.containsKey(owner)) p.setDeaths(savedDeaths.get(owner));
+            if (savedLifetimes.containsKey(owner)) p.restoreLifetime(savedLifetimes.get(owner));
+        }
     }
 
     public void exportarNivel(File file) throws GameException {
-        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
+
         if (currentLevel != null) {
             dataAccess.exportarNivel(currentLevel, file);
         }
     }
 
     public void importarNivel(File file) throws GameException {
-        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
+
         Level level = dataAccess.loadLevelAbsolute(file);
         this.currentLevel = level;
         this.currentLevelNumber = level.getNumber();
@@ -129,13 +157,13 @@ public class TheDOPOHardestGame implements Serializable {
     }
 
     public void update() {
-        if (!isPaused && currentLevel != null) {
+        if (currentLevel != null) {
             currentLevel.updateLevel();
         }
     }
 
     public void movePlayer(int playerIndex, double dx, double dy) {
-        if (!isPaused && currentLevel != null) {
+        if (currentLevel != null && !currentLevel.isPaused()) {
             List<Player> players = currentLevel.getPlayers();
             if (playerIndex >= 0 && playerIndex < players.size()) {
                 players.get(playerIndex).move(dx, dy, currentLevel);
@@ -185,17 +213,18 @@ public class TheDOPOHardestGame implements Serializable {
     }
 
     public void togglePause() {
-        this.isPaused = !this.isPaused;
+        if (currentLevel != null) currentLevel.togglePause();
     }
 
-    public boolean isPaused() { return isPaused; }
+    public boolean isPaused() {
+        return currentLevel != null && currentLevel.isPaused();
+    }
 
     public void restartLevel() {
-        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
+
         currentLevel = dataAccess.loadLevel("level" + currentLevelNumber + ".txt", currentGameMode);
         applyModeRules(currentLevel);
         createPlayers();
-        isPaused = false;
     }
 
     public GameMode getGameMode() { return currentGameMode; }
@@ -246,7 +275,7 @@ public class TheDOPOHardestGame implements Serializable {
         for (Zone zone : currentLevel.getZones().values())
             commands.add(zone.toDrawCommand());
         for (StaticElement e : currentLevel.getStaticElements())
-            commands.add(e.toDrawCommand());
+            if (e.isVisible()) commands.add(e.toDrawCommand());
         for (Coin coin : currentLevel.getCoins())
             if (!coin.isCollected()) commands.add(coin.toDrawCommand());
         for (Enemy enemy : currentLevel.getEnemies())
@@ -256,11 +285,16 @@ public class TheDOPOHardestGame implements Serializable {
         return commands;
     }
 
+    public java.awt.Color getBackgroundColor() {
+        if (currentLevel == null) return GameConstants.COLOR_BOARD;
+        return currentLevel.getMap().getBackgroundColor();
+    }
+
     public int getCurrentLevelNumber() { return currentLevelNumber; }
 
     /** Returns true if there is a next level available for the current game mode. */
     public boolean hasNextLevel() {
-        if (dataAccess == null) dataAccess = GameDataAccess.getInstance();
+
         return dataAccess.loadLevel("level" + (currentLevelNumber + 1) + ".txt", currentGameMode) != null;
     }
 
@@ -285,7 +319,7 @@ public class TheDOPOHardestGame implements Serializable {
         } else {
             applyModeRules(next);
             for (Player p : players) {
-                p.hasCheckpoint = false;
+                p.resetCheckpoint();
                 p.restoreSkin();
                 Zone initial = next.getZones().get("initial_" + p.getName());
                 if (initial != null) {

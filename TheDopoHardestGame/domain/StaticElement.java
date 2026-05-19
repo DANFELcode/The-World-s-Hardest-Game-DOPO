@@ -1,15 +1,16 @@
 package domain;
+import dto.DrawCommand;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
-import java.io.Serializable;
+
 
 /**
  * Represents a static element in the game. <br>
  * <b>(x, y, width, height)</b> <br>
  * <b>Inv:</b> width > 0 and height > 0
  */
-public abstract class StaticElement implements Interactable, Drawable, Serializable {
+public abstract class StaticElement implements Interactable, Drawable {
     private double x;
     private double y;
     private double width;
@@ -31,7 +32,7 @@ public abstract class StaticElement implements Interactable, Drawable, Serializa
 
     @Override
     public void onPlayerContact(Player player, Level level) {
-        if (!isBlocking()) {
+        if (!isBlocking() && isVisible()) {
             onContact(player, level);
         }
     }
@@ -52,6 +53,8 @@ public abstract class StaticElement implements Interactable, Drawable, Serializa
 
     public boolean shouldBeRemoved() { return false; }
     public boolean isBlocking() { return false; }
+    public boolean isVisible() { return true; }
+    public void reset() { }
     public Color getDisplayColor() { return Color.BLACK; }
 
     /** Returns the element's type identifier used in level files (e.g. "WALL", "BOMB"). */

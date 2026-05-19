@@ -11,14 +11,14 @@ public class InitialZone extends Zone {
 	private String ownerName;
 
     @Override
-    public Color getDisplayColor() { return new Color(170, 240, 170); }
+    public Color getDisplayColor() { return GameConstants.COLOR_INITIAL_ZONE; }
 
 
     
     @Override
     public void onPlayerContact(Player player, Level level) {
     	super.onPlayerContact(player, level);
-    	if (player.getName().equals(ownerName)) {
+    	if (player.getName().equals(ownerName) && !player.hasCheckpoint()) {
     		player.setSpawnPoint(x, y);
     	}
     }

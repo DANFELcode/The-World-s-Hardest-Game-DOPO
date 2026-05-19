@@ -1,4 +1,5 @@
 package domain;
+import dto.DrawCommand;
 
 import java.awt.Color;
 
@@ -42,9 +43,13 @@ public class LifeSource extends StaticElement implements Collectible {
     }
 
     @Override
-    public boolean shouldBeRemoved() {
-        return collected;
-    }
+    public boolean shouldBeRemoved() { return false; }
+
+    @Override
+    public boolean isVisible() { return !collected; }
+
+    @Override
+    public void reset() { collected = false; }
 
     @Override
     public String getFileType() {
@@ -53,7 +58,7 @@ public class LifeSource extends StaticElement implements Collectible {
 
     @Override
     public Color getDisplayColor() {
-        return new Color(255, 105, 180);
+        return GameConstants.COLOR_LIFESOURCE;
     }
 
     @Override

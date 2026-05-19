@@ -1,14 +1,13 @@
 package domain;
 
 import java.awt.geom.Rectangle2D;
-import java.io.Serializable;
 
 /**
  * Represents a movable element in the game. <br>
  * <b>(x, y, width, height, speed)</b> <br>
  * <b>Inv:</b> speed > 0 and width > 0 and height > 0
  */
-public abstract class MovableElement implements Serializable {
+public abstract class MovableElement {
     private double x;
     private double y;
     private double width;
