@@ -5,7 +5,7 @@ import java.awt.Color;
 /**
  * Represents a player in the game. <br>
  * <b>(name, deaths, spawnX, spawnY)</b> <br>
- * <b>Inv:</b> deaths >= 0
+ * <b>Inv:</b> deaths >= 0 
  */
 public abstract class Player extends MovableElement implements Drawable, Interactable {
     protected String name;
@@ -14,13 +14,10 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     protected double spawnY;
     protected boolean hasCheckpoint;
     protected SkinBehavior currentSkin;
-    protected long lastHitTime = 0;
     protected int extraLives = 0;
     protected Color borderColor = Color.BLACK;
 
     private int coinsCollected;
-
-    protected static final long INVULNERABILITY_TIME = 300;
 
     public Player(String name, double x, double y, double width, double height, double speed) {
         super(x, y, width, height, speed);
@@ -35,8 +32,8 @@ public abstract class Player extends MovableElement implements Drawable, Interac
 
     /** Each player subclass must declare its own initial skin. */
     protected abstract SkinBehavior createDefaultSkin();
-
-
+    
+    // se deja metodo por extension futura
     /** No-op hook called when a coin is picked up. Per-level count lives in Level. */
     public void collectCoin() { }
 
@@ -77,9 +74,6 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     /** Called by the game when the player is hit by an enemy or hazard. */
     public void onHit(Level level) {
         if (level.isInSafeZone(this)) return;
-        long now = System.currentTimeMillis();
-        if (now - lastHitTime < INVULNERABILITY_TIME) return;
-        lastHitTime = now;
         if (extraLives > 0) {
             extraLives--;
             return;
@@ -114,12 +108,7 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     @Override
     public DrawCommand toDrawCommand() {
         Color outer = (extraLives > 0) ? new Color(255, 105, 180) : null;
-        long now = System.currentTimeMillis();
-        Color displayColor = getDisplayColor();
-        if (now - lastHitTime < INVULNERABILITY_TIME && (now / 50) % 2 == 0) {
-            displayColor = Color.WHITE;
-        }
-        return new DrawCommand(displayColor, (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(),
+        return new DrawCommand(getDisplayColor(), (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(),
                 DrawCommand.Shape.RECT, borderColor, outer);
     }
 

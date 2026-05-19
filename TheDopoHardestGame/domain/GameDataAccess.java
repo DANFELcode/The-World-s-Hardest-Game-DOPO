@@ -43,8 +43,8 @@ public class GameDataAccess {
     }
 
     /** Loads a level for the given mode. Returns null on error (already logged via exception auto-log). */
-    public Level loadLevel(String file, TheDOPOHardestGame.GameMode mode) {
-        String subfolder = mode == TheDOPOHardestGame.GameMode.PvsP ? "pvsp/" : "player/";
+    public Level loadLevel(String file, GameMode mode) {
+        String subfolder = mode == GameMode.PvsP ? "pvsp/" : "player/";
         try {
             return loadLevelAbsolute(new File(LEVELS_PATH + subfolder + file));
         } catch (GameException e) {
@@ -104,8 +104,36 @@ public class GameDataAccess {
             }
         }
 
+        validateInitialZones(fileName, level);
         return level;
     }
+
+    /** Ensures every InitialZone is large enough for a player and the player's spawn area is wall-free. */
+    private void validateInitialZones(String filePath, Level level) throws LevelFormatException {
+        for (Map.Entry<String, Zone> entry : level.getZones().entrySet()) {
+            String key = entry.getKey();
+            if (!key.startsWith("initial_")) continue;
+            Zone zone = entry.getValue();
+            if (zone.getWidth() < MIN_PLAYER_SIZE || zone.getHeight() < MIN_PLAYER_SIZE) {
+                throw new LevelFormatException(filePath,
+                    key + " es más pequeña que el tamaño mínimo de jugador ("
+                    + MIN_PLAYER_SIZE + "x" + MIN_PLAYER_SIZE + ")");
+            }
+            // El jugador respawnea en la esquina superior izquierda de la zona.
+            java.awt.geom.Rectangle2D spawn = new java.awt.geom.Rectangle2D.Double(
+                zone.getX(), zone.getY(), MIN_PLAYER_SIZE, MIN_PLAYER_SIZE);
+            for (StaticElement e : level.getStaticElements()) {
+                if (e.isBlocking() && e.getAreaColision().intersects(spawn)) {
+                    throw new LevelFormatException(filePath,
+                        key + ": el spawn (" + zone.getX() + "," + zone.getY()
+                        + ") se solapa con un elemento bloqueante en ("
+                        + e.getX() + "," + e.getY() + ")");
+                }
+            }
+        }
+    }
+
+    private static final double MIN_PLAYER_SIZE = 20.0;
 
     // ===== Validation helpers =====
 

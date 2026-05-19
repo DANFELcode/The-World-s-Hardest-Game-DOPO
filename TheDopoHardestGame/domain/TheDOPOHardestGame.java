@@ -22,15 +22,16 @@ public class TheDOPOHardestGame implements Serializable {
     private int currentLevelNumber = 1;
     private transient GameDataAccess dataAccess = GameDataAccess.getInstance();
     private Map<String, Integer> levelsWon;
-    private Map<Integer, String> playerTypes;
-    private Map<Integer, java.awt.Color> playerBorderColors;
+    private Map<String, String> playerTypes;
+    private Map<String, java.awt.Color> playerBorderColors;
 
+    //guardar solo el nivel en el que quedo, guardar solo lo necesario no todo el juego
     public TheDOPOHardestGame() {
         this.currentGameMode = GameMode.PLAYER;
         this.isPaused = false;
         this.levelsWon = new HashMap<String, Integer>();
-        this.playerTypes = new HashMap<Integer, String>();
-        this.playerBorderColors = new HashMap<Integer, java.awt.Color>();
+        this.playerTypes = new HashMap<String, String>();
+        this.playerBorderColors = new HashMap<String, java.awt.Color>();
     }
 
     public void startGame() {
@@ -49,13 +50,12 @@ public class TheDOPOHardestGame implements Serializable {
     }
 
     private void createPlayers() {
-        int index = 0;
         for (Map.Entry<String, Zone> entry : currentLevel.getZones().entrySet()) {
             String key = entry.getKey();
             Zone zone = entry.getValue();
             if (key.startsWith("initial_")) {
                 String owner = key.replace("initial_", "");
-                String type = playerTypes.getOrDefault(index, "red");
+                String type = playerTypes.getOrDefault(owner, "red");
                 Player player;
                 switch (type) {
                     case "blue":
@@ -68,11 +68,10 @@ public class TheDOPOHardestGame implements Serializable {
                         player = new RedPlayer(owner, zone.getX(), zone.getY());
                         break;
                 }
-                java.awt.Color border = playerBorderColors.get(index);
+                java.awt.Color border = playerBorderColors.get(owner);
                 if (border != null) player.setBorderColor(border);
                 currentLevel.addPlayer(player);
                 assignCoinOwners(currentLevel, player);
-                index++;
             }
         }
     }
@@ -85,8 +84,8 @@ public class TheDOPOHardestGame implements Serializable {
         }
     }
 
-    public void setPlayerBorderColor(int index, java.awt.Color color) {
-        this.playerBorderColors.put(index, color);
+    public void setPlayerBorderColor(String owner, java.awt.Color color) {
+        this.playerBorderColors.put(owner, color);
     }
 
 	public void guardarPartida(File file) throws GameException {
@@ -117,33 +116,12 @@ public class TheDOPOHardestGame implements Serializable {
         this.currentLevelNumber = level.getNumber();
     }
 
-    public enum GameMode {
-        PLAYER(1, false),
-        PvsP(2, false),
-        PvsM(1, true);
-
-        private final int playerCount;
-        private final boolean hasMachine;
-
-        GameMode(int playerCount, boolean hasMachine) {
-            this.playerCount = playerCount;
-            this.hasMachine = hasMachine;
-        }
-        
-        public boolean isComplete(Level level) {
-        	return level.isLevelComplete();
-        }
-
-        public int getPlayerCount() { return playerCount; }
-        public boolean hasMachine() { return hasMachine; }
-    }
-
     public void setGameMode(GameMode mode) {
         this.currentGameMode = mode;
     }
     
-    public void setPlayerType(int index, String type) {
-    	this.playerTypes.put(index, type);
+    public void setPlayerType(String owner, String type) {
+    	this.playerTypes.put(owner, type);
     }
 
     public void startLevel(int levelNumber, int gameTimeInTicks, GameMap map) {

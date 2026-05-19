@@ -11,6 +11,7 @@ public class Enemy extends MovableElement implements Lethal, Interactable, Drawa
 
     private MovementStrategy movement;
     private boolean isDead;
+    private transient Player lastVictim;
 
     public Enemy(double x, double y, double width, double height, MovementStrategy movement) {
         super(x, y, width, height, 1.0);
@@ -36,9 +37,10 @@ public class Enemy extends MovableElement implements Lethal, Interactable, Drawa
 
     @Override
     public void onPlayerContact(Player player, Level level) {
-        if (!isDead) {
-            onDestroy(player, level);
-        }
+        if (isDead) return;
+        if (lastVictim == player) return;   // mismo player aún en contacto
+        lastVictim = player;
+        onDestroy(player, level);
     }
 
     @Override
@@ -46,6 +48,9 @@ public class Enemy extends MovableElement implements Lethal, Interactable, Drawa
 
     public void move(Level level) {
         movement.move(this, level);
+        if (lastVictim != null && !getAreaColision().intersects(lastVictim.getAreaColision())) {
+            lastVictim = null;
+        }
     }
 
     public MovementStrategy getMovement() { return movement; }

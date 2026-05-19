@@ -6,10 +6,6 @@ public class SkinCoin extends Coin {
 
     private final SkinBehavior skin;
 
-    public SkinCoin(double x, double y, double width, double height, String color) {
-        this(x, y, width, height, color, "Player1");
-    }
-
     public SkinCoin(double x, double y, double width, double height, String color, String ownerName) {
         super(x, y, width, height, color, ownerName);
         this.skin = buildSkin(color);
@@ -27,7 +23,7 @@ public class SkinCoin extends Coin {
     public void onCollect(Player player) {
         boolean wasUncollected = !isCollected();
         super.onCollect(player);
-        if (wasUncollected) {
+        if (wasUncollected && isCollected()) {
             player.restoreSkin();
             player.changeSkin(skin);
         }

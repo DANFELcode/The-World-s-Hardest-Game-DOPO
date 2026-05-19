@@ -13,10 +13,6 @@ public class Coin extends StaticElement implements Collectible {
     private String ownerName;
     private transient Player ownerPlayer;
 
-    public Coin(double x, double y, double width, double height, String color) {
-        this(x, y, width, height, color, "Player1");
-    }
-
     /**
      * Creates a coin at the given position and size, owned by ownerName.
      */
