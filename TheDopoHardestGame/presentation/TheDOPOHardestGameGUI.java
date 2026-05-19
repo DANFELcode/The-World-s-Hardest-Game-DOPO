@@ -1,6 +1,7 @@
 package presentation;
 
 import domain.TheDOPOHardestGame;
+import domain.GameMode;
 import java.awt.*;
 import javax.swing.*;
 import java.util.HashSet;
@@ -19,7 +20,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
     private CardLayout cardLayout;
 
     private JPanel panelInicio;
-    private JLabel labelTitulo;
     private JButton playGame;
     private JButton settings;
 
@@ -35,13 +35,14 @@ public class TheDOPOHardestGameGUI extends JFrame {
     private JButton[] borde1Botones;
     private JButton[] borde2Botones;
     private JButton btnJugarSeleccion, btnVolverSeleccion;
-    private TheDOPOHardestGame.GameMode selectedMode = TheDOPOHardestGame.GameMode.PLAYER;
+    private GameMode selectedMode = GameMode.PLAYER;
     private String selectedSkin = "red";
     private Color selectedBorder1 = Color.BLACK;
     private Color selectedBorder2 = Color.WHITE;
 
-    private static final String[] BORDER_NAMES = { "NEGRO", "BLANCO", "AMARILLO", "CYAN", "MAGENTA" };
-    private static final Color[] BORDER_COLORS = { Color.BLACK, Color.WHITE, Color.YELLOW, Color.CYAN, Color.MAGENTA };
+    //dominio lista de colores que se puedan escoger y personalizar, obtener border names desde dominio
+    private static final String[] BORDER_NAMES = {"NEGRO", "BLANCO", "AMARILLO", "CYAN", "MAGENTA"};
+    private static final Color[] BORDER_COLORS = {Color.BLACK, Color.WHITE, Color.YELLOW, Color.CYAN, Color.MAGENTA};
 
     private JPanel panelJuego;
     private BoardPanel tablero;
@@ -55,16 +56,13 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
     private final Set<Integer> keysDownPlayer1 = new HashSet<>();
     private final Set<Integer> keysDownPlayer2 = new HashSet<>();
+    
 
-    private static final Color COLOR_FONDO = new Color(180, 180, 220);
-    private static final String PANEL_INICIO = "inicio";
+    private static final Color COLOR_FONDO        = new Color(180, 180, 220);
+    private static final String PANEL_INICIO      = "inicio";
     private static final String PANEL_EXPLICACION = "explicacion";
-    private static final String PANEL_SELECCION = "seleccion";
-    private static final String PANEL_JUEGO = "juego";
-
-    private static final Set<Integer> PVP_KEYS = new HashSet<>(java.util.Arrays.asList(
-        KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT
-    ));
+    private static final String PANEL_SELECCION   = "seleccion";
+    private static final String PANEL_JUEGO       = "juego";
 
     public TheDOPOHardestGameGUI() {
         super("TheDOPOHardestGame");
@@ -86,12 +84,12 @@ public class TheDOPOHardestGameGUI extends JFrame {
     public void prepareElements() {
         cardLayout = new CardLayout();
         panel = new JPanel(cardLayout);
-
+        
+        prepareElementsMenuBar();
         prepareElementsPanelInicio();
         prepareElementsPanelExp();
         prepareElementsPanelSeleccion();
         prepareElementsPanelJuego();
-        prepareElementsMenuBar();
 
         this.add(panel);
     }
@@ -127,66 +125,261 @@ public class TheDOPOHardestGameGUI extends JFrame {
         this.setJMenuBar(menuBar);
     }
 
+    private JButton createStyledButton(String text, Color fillColor) {
+        JButton btn = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
+                int w = getWidth(), h = getHeight();
+
+                // Fondo redondeado sutil cuando hover
+                if (getModel().isRollover()) {
+                    g2.setColor(new Color(255, 255, 255, 70));
+                    g2.fillRoundRect(0, 0, w, h, 24, 24);
+                }
+
+                // Arial Black (más grueso que Arial Bold)
+                Font font = new Font("Arial Black", Font.BOLD, 42);
+                java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
+                java.awt.font.TextLayout layout = new java.awt.font.TextLayout(getText(), font, frc);
+                java.awt.geom.Rectangle2D bounds = layout.getBounds();
+
+                // Centrado horizontal por bounds del texto
+                double x = w / 2.0 - bounds.getCenterX();
+                // Centrado vertical por métricas del font (consistente con o sin acentos)
+                java.awt.font.LineMetrics lm = font.getLineMetrics("Ay", frc);
+                double y = h / 2.0 + (lm.getAscent() - lm.getDescent()) / 2.0;
+
+                java.awt.geom.AffineTransform transform = java.awt.geom.AffineTransform.getTranslateInstance(x, y);
+                java.awt.Shape shape = layout.getOutline(transform);
+
+                // Extrusión 3D: copias offset hacia abajo-derecha en versión oscura del color
+                Color deep = fillColor.darker().darker();
+                int depth = 3;
+                for (int i = depth; i >= 1; i--) {
+                    java.awt.geom.AffineTransform extrudeTr =
+                        java.awt.geom.AffineTransform.getTranslateInstance(x + i * 0.7, y + i * 0.7);
+                    java.awt.Shape extrudeShape = layout.getOutline(extrudeTr);
+                    float t = i / (float) depth;
+                    int r = (int) (fillColor.getRed()   * (1 - t) * 0.4 + deep.getRed()   * t * 0.6);
+                    int gg = (int) (fillColor.getGreen() * (1 - t) * 0.4 + deep.getGreen() * t * 0.6);
+                    int b = (int) (fillColor.getBlue()  * (1 - t) * 0.4 + deep.getBlue()  * t * 0.6);
+                    g2.setColor(new Color(Math.min(255, r), Math.min(255, gg), Math.min(255, b)));
+                    g2.fill(extrudeShape);
+                }
+
+                // Gradiente vertical del fill (más claro arriba, más oscuro abajo)
+                Color top = getModel().isPressed() ? fillColor.darker()
+                          : getModel().isRollover() ? brighten(fillColor, 0.25f)
+                          : brighten(fillColor, 0.15f);
+                Color bot = getModel().isPressed() ? fillColor.darker().darker()
+                          : fillColor;
+
+                java.awt.geom.Rectangle2D sb = shape.getBounds2D();
+                GradientPaint grad = new GradientPaint(
+                    0, (float) sb.getMinY(), top,
+                    0, (float) sb.getMaxY(), bot);
+                g2.setPaint(grad);
+                g2.fill(shape);
+
+                // Outline negro delgado
+                g2.setColor(Color.BLACK);
+                g2.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.draw(shape);
+
+                g2.dispose();
+            }
+        };
+        btn.setOpaque(false);
+        btn.setBorderPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setFocusPainted(false);
+        // Calcular ancho del botón según el texto real + padding lateral
+        Font measureFont = new Font("Arial Black", Font.BOLD, 42);
+        java.awt.font.FontRenderContext frc = new java.awt.font.FontRenderContext(null, true, true);
+        java.awt.font.TextLayout layout = new java.awt.font.TextLayout(text, measureFont, frc);
+        int textWidth = (int) Math.ceil(layout.getBounds().getWidth());
+        btn.setPreferredSize(new Dimension(textWidth + 60, 90));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return btn;
+    }
+
+    private JPanel createGradientPanel(LayoutManager layout) {
+        JPanel p = new JPanel(layout) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                GradientPaint bg = new GradientPaint(
+                    0, 0, new Color(213, 213, 255),
+                    0, getHeight(), Color.WHITE);
+                g2.setPaint(bg);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+                g2.dispose();
+            }
+        };
+        p.setOpaque(false);
+        return p;
+    }
+
+    private static Color brighten(Color c, float amount) {
+        int r = Math.min(255, (int) (c.getRed()   + (255 - c.getRed())   * amount));
+        int g = Math.min(255, (int) (c.getGreen() + (255 - c.getGreen()) * amount));
+        int b = Math.min(255, (int) (c.getBlue()  + (255 - c.getBlue())  * amount));
+        return new Color(r, g, b);
+    }
+
     private void prepareElementsPanelInicio() {
-        panelInicio = new JPanel(new BorderLayout());
-        panelInicio.setBackground(COLOR_FONDO);
+        panelInicio = createGradientPanel(new BorderLayout());
 
-        JPanel panelTitulo = new JPanel(new BorderLayout());
-        panelTitulo.setBackground(COLOR_FONDO);
+        JPanel grupoArriba = new JPanel();
+        grupoArriba.setLayout(new BoxLayout(grupoArriba, BoxLayout.Y_AXIS));
+        grupoArriba.setOpaque(false);
 
-        labelTitulo = new JLabel("THE DOPO HARDEST GAME");
-        labelTitulo.setFont(new Font("Arial", Font.BOLD, 40));
-        labelTitulo.setForeground(new Color(30, 80, 180));
-        labelTitulo.setHorizontalAlignment(SwingConstants.CENTER);
+        JComponent tituloDibujado = new JComponent() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        panelTitulo.add(labelTitulo, BorderLayout.CENTER);
+                int w = getWidth();
 
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
-        panelBotones.setBackground(COLOR_FONDO);
+                // Calcular primero la posición y ancho del título grande
+                Font bigFont = new Font("Impact", Font.PLAIN, 95);
+                java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
+                String big = "HARDEST GAME";
+                java.awt.font.TextLayout layout = new java.awt.font.TextLayout(big, bigFont, frc);
 
-        playGame = new JButton("JUGAR");
-        playGame.setFont(new Font("Arial", Font.BOLD, 20));
-        playGame.setForeground(Color.RED);
+                double baseW = layout.getBounds().getWidth();
+                double maxW = w * 0.92;
+                double scaleX = Math.min(1.8, maxW / baseW);
+                double textW = baseW * scaleX;
+                double bigX = (w - textW) / 2.0;
+                double bigY = 175;
 
-        settings = new JButton("CONFIGURACIONES");
-        settings.setFont(new Font("Arial", Font.BOLD, 20));
-        settings.setForeground(new Color(0, 150, 0));
+                // Línea pequeña: alineada al borde izquierdo del título grande
+                Font smallFont = new Font("Arial", Font.BOLD, 32);
+                g2.setFont(smallFont);
+                g2.setColor(Color.BLACK);
+                String small = "THE DOPO...";
+                g2.drawString(small, (int) bigX, 75);
+
+                java.awt.geom.AffineTransform transform = new java.awt.geom.AffineTransform();
+                transform.translate(bigX, bigY);
+                transform.scale(scaleX, 1.0);
+                java.awt.Shape outline = layout.getOutline(transform);
+
+                java.awt.geom.Rectangle2D shapeBounds = outline.getBounds2D();
+                float minY = (float) shapeBounds.getMinY();
+                float maxY = (float) shapeBounds.getMaxY();
+
+                // Extrusión 3D: copias offset hacia abajo-derecha en azul oscuro
+                int depth = 10;
+                for (int i = depth; i >= 1; i--) {
+                    java.awt.geom.AffineTransform extrudeTr =
+                        java.awt.geom.AffineTransform.getTranslateInstance(i * 0.8, i * 0.8);
+                    java.awt.Shape extrudeShape = extrudeTr.createTransformedShape(outline);
+                    float t = i / (float) depth;
+                    int r = (int) (30 + (10 - 30) * (1 - t));
+                    int g3 = (int) (50 + (25 - 50) * (1 - t));
+                    int b = (int) (100 + (60 - 100) * (1 - t));
+                    g2.setColor(new Color(r, g3, b));
+                    g2.fill(extrudeShape);
+                }
+
+                // Doble contorno alrededor de la cara frontal: negro grueso + blanco encima
+                g2.setColor(Color.BLACK);
+                g2.setStroke(new BasicStroke(10f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.draw(outline);
+                g2.setColor(Color.WHITE);
+                g2.setStroke(new BasicStroke(6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.draw(outline);
+
+                // Gradiente glossy: azul grisáceo débil arriba → azul medio → más oscuro abajo
+                java.awt.LinearGradientPaint gradient = new java.awt.LinearGradientPaint(
+                    0, minY, 0, maxY,
+                    new float[]{0f, 0.45f, 1f},
+                    new Color[]{
+                        new Color(0x9A, 0xB1, 0xCC),
+                        new Color(0x6E, 0xA0, 0xE6),
+                        new Color(0x46, 0x79, 0xBE)
+                    }
+                );
+                g2.setPaint(gradient);
+                g2.fill(outline);
+
+                // Brillo superior sutil
+                java.awt.geom.Rectangle2D sheenRect = new java.awt.geom.Rectangle2D.Double(
+                    shapeBounds.getX(), minY, shapeBounds.getWidth(),
+                    shapeBounds.getHeight() * 0.45);
+                java.awt.Shape sheenClip = new java.awt.geom.Area(outline);
+                ((java.awt.geom.Area) sheenClip).intersect(new java.awt.geom.Area(sheenRect));
+                LinearGradientPaint sheen = new LinearGradientPaint(
+                    0, minY, 0, (float)(minY + shapeBounds.getHeight() * 0.45),
+                    new float[]{0f, 1f},
+                    new Color[]{
+                        new Color(255, 255, 255, 120),
+                        new Color(255, 255, 255, 0)
+                    }
+                );
+                g2.setPaint(sheen);
+                g2.fill(sheenClip);
+
+                g2.dispose();
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(800, 220);
+            }
+        };
+        tituloDibujado.setOpaque(false);
+        tituloDibujado.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        panelBotones.setOpaque(false);
+        panelBotones.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        playGame = createStyledButton("JUGAR", new Color(0xEB, 0x55, 0x55));
+        settings = createStyledButton("CONFIGURACIÓN", new Color(0x4C, 0xC1, 0x6D));
 
         panelBotones.add(playGame);
         panelBotones.add(settings);
 
-        panelInicio.add(panelTitulo, BorderLayout.CENTER);
-        panelInicio.add(panelBotones, BorderLayout.SOUTH);
+        grupoArriba.add(Box.createVerticalStrut(40));
+        grupoArriba.add(tituloDibujado);
+        grupoArriba.add(Box.createVerticalStrut(40));
+        grupoArriba.add(panelBotones);
+
+        panelInicio.add(grupoArriba, BorderLayout.CENTER);
 
         panel.add(panelInicio, PANEL_INICIO);
     }
 
     private void prepareElementsPanelExp() {
-        panelExp = new JPanel(new BorderLayout());
-        panelExp.setBackground(COLOR_FONDO);
+        panelExp = createGradientPanel(new BorderLayout());
 
         descripcion = new JLabel("<html><div style='text-align: justify; width: 400px'>"
-                + "Eres el cuadrado <font color='red'><b>rojo</b></font>. "
-                + "Evita los circulos <font color='blue'><b>azules</b></font> y recolecta las "
-                + "monedas <font color='#DAA520'><b>amarillas</b></font>. "
-                + "Una vez recolectadas todas las monedas, ve hacia la "
-                + "zona <font color='green'><b>verde</b></font> antes de que se acabe el tiempo para completar el nivel. "
-                + "Algunos niveles tienen mas de una zona verde, estas zonas son check points. "
-                + "</div></html>");
+            + "Eres el cuadrado <font color='red'><b>rojo</b></font>. "
+            + "Evita los circulos <font color='blue'><b>azules</b></font> y recolecta las "
+            + "monedas <font color='#DAA520'><b>amarillas</b></font>. "
+            + "Una vez recolectadas todas las monedas, ve hacia la "
+            + "zona <font color='green'><b>verde</b></font> antes de que se acabe el tiempo para completar el nivel. "
+            + "Algunos niveles tienen mas de una zona verde, estas zonas son check points. "
+            + "</div></html>");
         descripcion.setFont(new Font("Arial", Font.PLAIN, 20));
         descripcion.setHorizontalAlignment(SwingConstants.CENTER);
         descripcion.setBorder(BorderFactory.createEmptyBorder(40, 60, 20, 60));
 
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
-        panelBotones.setBackground(COLOR_FONDO);
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 30));
+        panelBotones.setOpaque(false);
 
-        backInicio = new JButton("VOLVER AL MENU");
-        backInicio.setFont(new Font("Arial", Font.BOLD, 20));
-        backInicio.setForeground(new Color(150, 0, 200));
-
-        playGame2 = new JButton("JUGAR");
-        playGame2.setFont(new Font("Arial", Font.BOLD, 20));
-        playGame2.setForeground(Color.RED);
+        backInicio = createStyledButton("VOLVER", new Color(0x9A, 0x4B, 0xC1));
+        playGame2 = createStyledButton("JUGAR", new Color(0xEB, 0x55, 0x55));
 
         panelBotones.add(backInicio);
         panelBotones.add(playGame2);
@@ -198,8 +391,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
     }
 
     private void prepareElementsPanelSeleccion() {
-        panelSeleccion = new JPanel(new BorderLayout());
-        panelSeleccion.setBackground(COLOR_FONDO);
+        panelSeleccion = createGradientPanel(new BorderLayout());
 
         JLabel titulo = new JLabel("Seleccione el modo de juego");
         titulo.setFont(new Font("Arial", Font.BOLD, 28));
@@ -209,18 +401,18 @@ public class TheDOPOHardestGameGUI extends JFrame {
         panelSeleccion.add(titulo, BorderLayout.NORTH);
 
         JPanel centro = new JPanel(new GridLayout(4, 1, 0, 10));
-        centro.setBackground(COLOR_FONDO);
+        centro.setOpaque(false);
         centro.setBorder(BorderFactory.createEmptyBorder(10, 60, 10, 60));
 
         // Fila de modos
         JPanel filaModos = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        filaModos.setBackground(COLOR_FONDO);
+        filaModos.setOpaque(false);
         JLabel labelModo = new JLabel("Modo:  ");
         labelModo.setFont(new Font("Arial", Font.BOLD, 16));
         btnModePlayer = new JButton("PLAYER");
-        btnModePvsP = new JButton("PvsP");
-        btnModePvsM = new JButton("PvsM");
-        for (JButton b : new JButton[] { btnModePlayer, btnModePvsP, btnModePvsM }) {
+        btnModePvsP   = new JButton("PvsP");
+        btnModePvsM   = new JButton("PvsM");
+        for (JButton b : new JButton[]{btnModePlayer, btnModePvsP, btnModePvsM}) {
             b.setFont(new Font("Arial", Font.BOLD, 16));
         }
         filaModos.add(labelModo);
@@ -230,16 +422,16 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
         // Fila de skins
         JPanel filaSkins = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        filaSkins.setBackground(COLOR_FONDO);
+        filaSkins.setOpaque(false);
         JLabel labelSkin = new JLabel("Skin:  ");
         labelSkin.setFont(new Font("Arial", Font.BOLD, 16));
-        btnSkinRojo = new JButton("ROJO");
-        btnSkinAzul = new JButton("AZUL");
+        btnSkinRojo  = new JButton("ROJO");
+        btnSkinAzul  = new JButton("AZUL");
         btnSkinVerde = new JButton("VERDE");
         btnSkinRojo.setForeground(Color.RED);
         btnSkinAzul.setForeground(Color.BLUE);
         btnSkinVerde.setForeground(new Color(0, 150, 0));
-        for (JButton b : new JButton[] { btnSkinRojo, btnSkinAzul, btnSkinVerde }) {
+        for (JButton b : new JButton[]{btnSkinRojo, btnSkinAzul, btnSkinVerde}) {
             b.setFont(new Font("Arial", Font.BOLD, 16));
         }
         filaSkins.add(labelSkin);
@@ -249,7 +441,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
         // Fila de borde P1
         filaBorde1 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        filaBorde1.setBackground(COLOR_FONDO);
+        filaBorde1.setOpaque(false);
         JLabel labelBorde1 = new JLabel("Borde P1:  ");
         labelBorde1.setFont(new Font("Arial", Font.BOLD, 16));
         filaBorde1.add(labelBorde1);
@@ -262,7 +454,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
         // Fila de borde P2 (visible solo en PvsP/PvsM)
         filaBorde2 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        filaBorde2.setBackground(COLOR_FONDO);
+        filaBorde2.setOpaque(false);
         JLabel labelBorde2 = new JLabel("Borde P2:  ");
         labelBorde2.setFont(new Font("Arial", Font.BOLD, 16));
         filaBorde2.add(labelBorde2);
@@ -282,13 +474,9 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
         // Botones de navegación
         JPanel filaBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
-        filaBotones.setBackground(COLOR_FONDO);
-        btnVolverSeleccion = new JButton("VOLVER");
-        btnVolverSeleccion.setFont(new Font("Arial", Font.BOLD, 18));
-        btnVolverSeleccion.setForeground(new Color(150, 0, 200));
-        btnJugarSeleccion = new JButton("JUGAR");
-        btnJugarSeleccion.setFont(new Font("Arial", Font.BOLD, 18));
-        btnJugarSeleccion.setForeground(Color.RED);
+        filaBotones.setOpaque(false);
+        btnVolverSeleccion = createStyledButton("VOLVER", new Color(0x9A, 0x4B, 0xC1));
+        btnJugarSeleccion = createStyledButton("JUGAR", new Color(0xEB, 0x55, 0x55));
         filaBotones.add(btnVolverSeleccion);
         filaBotones.add(btnJugarSeleccion);
         panelSeleccion.add(filaBotones, BorderLayout.SOUTH);
@@ -331,6 +519,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
         panelInfo.add(muertes, BorderLayout.EAST);
 
         tablero = new BoardPanel();
+        tablero.setGame(juego);
 
         JPanel panelSur = new JPanel(new BorderLayout());
         panelSur.setBackground(Color.BLACK);
@@ -355,19 +544,33 @@ public class TheDOPOHardestGameGUI extends JFrame {
     }
 
     private void prepareActions() {
+        prepareActionsWindow();
+        prepareActionsPanelInicio();
+        prepareActionsPanelExp();
+        prepareActionsPanelSeleccion();
+        prepareActionsMenuArchivo();
+        prepareActionsMenuOpciones();
+        prepareActionsPanelJuego();
+    }
+
+    private void prepareActionsWindow() {
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(WindowEvent e) {
-                exit();
-            }
+            public void windowClosing(WindowEvent e) { exit(); }
         });
+    }
 
+    private void prepareActionsPanelInicio() {
         playGame.addActionListener(e -> cardLayout.show(panel, PANEL_EXPLICACION));
+    }
+
+    private void prepareActionsPanelExp() {
         backInicio.addActionListener(e -> cardLayout.show(panel, PANEL_INICIO));
-
         playGame2.addActionListener(e -> cardLayout.show(panel, PANEL_SELECCION));
+    }
 
+    private void prepareActionsPanelSeleccion() {
         btnVolverSeleccion.addActionListener(e -> cardLayout.show(panel, PANEL_EXPLICACION));
 
         highlightButton(btnModePlayer, btnModePvsP, btnModePvsM);
@@ -375,37 +578,23 @@ public class TheDOPOHardestGameGUI extends JFrame {
         refreshBorderButtonStates();
 
         btnModePlayer.addActionListener(e -> {
-            selectedMode = TheDOPOHardestGame.GameMode.PLAYER;
+            selectedMode = GameMode.PLAYER;
             highlightButton(btnModePlayer, btnModePvsP, btnModePvsM);
             filaBorde2.setVisible(false);
             refreshBorderButtonStates();
         });
         btnModePvsP.addActionListener(e -> {
-            selectedMode = TheDOPOHardestGame.GameMode.PvsP;
+            selectedMode = GameMode.PvsP;
             highlightButton(btnModePvsP, btnModePlayer, btnModePvsM);
             filaBorde2.setVisible(true);
-            if (selectedBorder1.equals(selectedBorder2)) {
-                for (Color c : BORDER_COLORS) {
-                    if (!c.equals(selectedBorder1)) {
-                        selectedBorder2 = c;
-                        break;
-                    }
-                }
-            }
+            ensureBordersDiffer();
             refreshBorderButtonStates();
         });
         btnModePvsM.addActionListener(e -> {
-            selectedMode = TheDOPOHardestGame.GameMode.PvsM;
+            selectedMode = GameMode.PvsM;
             highlightButton(btnModePvsM, btnModePlayer, btnModePvsP);
             filaBorde2.setVisible(true);
-            if (selectedBorder1.equals(selectedBorder2)) {
-                for (Color c : BORDER_COLORS) {
-                    if (!c.equals(selectedBorder1)) {
-                        selectedBorder2 = c;
-                        break;
-                    }
-                }
-            }
+            ensureBordersDiffer();
             refreshBorderButtonStates();
         });
 
@@ -414,12 +603,8 @@ public class TheDOPOHardestGameGUI extends JFrame {
             borde1Botones[i].addActionListener(e -> {
                 selectedBorder1 = BORDER_COLORS[idx];
                 if (selectedBorder1.equals(selectedBorder2)) {
-                    // P2 también tenía este color, hay que cambiarle el de P2 al primer disponible
                     for (Color c : BORDER_COLORS) {
-                        if (!c.equals(selectedBorder1)) {
-                            selectedBorder2 = c;
-                            break;
-                        }
+                        if (!c.equals(selectedBorder1)) { selectedBorder2 = c; break; }
                     }
                 }
                 refreshBorderButtonStates();
@@ -428,10 +613,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
                 selectedBorder2 = BORDER_COLORS[idx];
                 if (selectedBorder1.equals(selectedBorder2)) {
                     for (Color c : BORDER_COLORS) {
-                        if (!c.equals(selectedBorder2)) {
-                            selectedBorder1 = c;
-                            break;
-                        }
+                        if (!c.equals(selectedBorder2)) { selectedBorder1 = c; break; }
                     }
                 }
                 refreshBorderButtonStates();
@@ -453,30 +635,100 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
         btnJugarSeleccion.addActionListener(e -> {
             juego.setGameMode(selectedMode);
-            juego.setPlayerType(0, selectedSkin);
-            juego.setPlayerBorderColor(0, selectedBorder1);
-            if (selectedMode == TheDOPOHardestGame.GameMode.PvsP
-                    || selectedMode == TheDOPOHardestGame.GameMode.PvsM) {
-                juego.setPlayerType(1, selectedSkin);
-                juego.setPlayerBorderColor(1, selectedBorder2);
+            juego.setPlayerType("Player1", selectedSkin);
+            juego.setPlayerBorderColor("Player1", selectedBorder1);
+            if (selectedMode == GameMode.PvsP || selectedMode == GameMode.PvsM) {
+                juego.setPlayerType("Player2", selectedSkin);
+                juego.setPlayerBorderColor("Player2", selectedBorder2);
             }
             juego.startGame();
             cardLayout.show(panel, PANEL_JUEGO);
             SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
             gameLoop.start();
         });
+    }
 
-        menu.addActionListener(e -> {
+    private void ensureBordersDiffer() {
+        if (selectedBorder1.equals(selectedBorder2)) {
+            for (Color c : BORDER_COLORS) {
+                if (!c.equals(selectedBorder1)) { selectedBorder2 = c; break; }
+            }
+        }
+    }
+
+    private void prepareActionsMenuArchivo() {
+        guardarPartida.addActionListener(e -> {
             gameLoop.stop();
-            cardLayout.show(panel, PANEL_INICIO);
+            JFileChooser fc = new JFileChooser();
+            if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    juego.guardarPartida(fc.getSelectedFile());
+                    JOptionPane.showMessageDialog(this, "Partida guardada exitosamente.");
+                } catch (domain.GameException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            if (panelJuego.isShowing()) gameLoop.start();
         });
 
+        abrirPartida.addActionListener(e -> {
+            gameLoop.stop();
+            JFileChooser fc = new JFileChooser();
+            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    juego.abrirPartida(fc.getSelectedFile());
+                    cardLayout.show(panel, PANEL_JUEGO);
+                    SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
+                    gameLoop.start();
+                    JOptionPane.showMessageDialog(this, "Partida cargada exitosamente.");
+                    return;
+                } catch (domain.GameException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            if (panelJuego.isShowing()) gameLoop.start();
+        });
+
+        exportarNivel.addActionListener(e -> {
+            gameLoop.stop();
+            JFileChooser fc = new JFileChooser();
+            if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    juego.exportarNivel(fc.getSelectedFile());
+                    JOptionPane.showMessageDialog(this, "Nivel exportado exitosamente.");
+                } catch (domain.GameException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            if (panelJuego.isShowing()) gameLoop.start();
+        });
+
+        importarNivel.addActionListener(e -> {
+            gameLoop.stop();
+            JFileChooser fc = new JFileChooser();
+            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    juego.importarNivel(fc.getSelectedFile());
+                    cardLayout.show(panel, PANEL_JUEGO);
+                    SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
+                    gameLoop.start();
+                    JOptionPane.showMessageDialog(this, "Nivel importado exitosamente.");
+                    return;
+                } catch (domain.GameException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            if (panelJuego.isShowing()) gameLoop.start();
+        });
+    }
+
+    private void prepareActionsMenuOpciones() {
         salir.addActionListener(e -> exit());
 
         nuevaPartida.addActionListener(e -> {
             gameLoop.stop();
             int confirm = JOptionPane.showConfirmDialog(this, "¿Iniciar una nueva partida?",
-                    "Nueva Partida", JOptionPane.YES_NO_OPTION);
+                "Nueva Partida", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 keysDownPlayer1.clear();
                 keysDownPlayer2.clear();
@@ -503,77 +755,20 @@ public class TheDOPOHardestGameGUI extends JFrame {
             SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
             gameLoop.start();
         });
-        guardarPartida.addActionListener(e -> {
-            gameLoop.stop();
-            JFileChooser fc = new JFileChooser();
-            if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-                try {
-                    juego.guardarPartida(fc.getSelectedFile());
-                    JOptionPane.showMessageDialog(this, "Partida guardada exitosamente.");
-                } catch (domain.GameException ex) {
-                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-            if (panelJuego.isShowing())
-                gameLoop.start();
-        });
+    }
 
-        abrirPartida.addActionListener(e -> {
+    private void prepareActionsPanelJuego() {
+        menu.addActionListener(e -> {
             gameLoop.stop();
-            JFileChooser fc = new JFileChooser();
-            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                try {
-                    juego.abrirPartida(fc.getSelectedFile());
-                    cardLayout.show(panel, PANEL_JUEGO);
-                    SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
-                    gameLoop.start();
-                    JOptionPane.showMessageDialog(this, "Partida cargada exitosamente.");
-                    return;
-                } catch (domain.GameException ex) {
-                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-            if (panelJuego.isShowing())
-                gameLoop.start();
-        });
-
-        exportarNivel.addActionListener(e -> {
-            gameLoop.stop();
-            JFileChooser fc = new JFileChooser();
-            if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-                try {
-                    juego.exportarNivel(fc.getSelectedFile());
-                    JOptionPane.showMessageDialog(this, "Nivel exportado exitosamente.");
-                } catch (domain.GameException ex) {
-                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-            if (panelJuego.isShowing())
-                gameLoop.start();
-        });
-
-        importarNivel.addActionListener(e -> {
-            gameLoop.stop();
-            JFileChooser fc = new JFileChooser();
-            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                try {
-                    juego.importarNivel(fc.getSelectedFile());
-                    cardLayout.show(panel, PANEL_JUEGO);
-                    SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
-                    gameLoop.start();
-                    JOptionPane.showMessageDialog(this, "Nivel importado exitosamente.");
-                    return;
-                } catch (domain.GameException ex) {
-                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-            if (panelJuego.isShowing())
-                gameLoop.start();
+            cardLayout.show(panel, PANEL_INICIO);
         });
 
         tablero.setFocusable(true);
-
         tablero.addKeyListener(new KeyAdapter() {
+            private static final Set<Integer> PVP_KEYS = new HashSet<>(java.util.Arrays.asList(
+                KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT
+            ));
+
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
@@ -597,38 +792,32 @@ public class TheDOPOHardestGameGUI extends JFrame {
     }
 
     public void update() {
-        updatePlayer(0, keysDownPlayer1, KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D);
-        if (juego.getGameMode() == TheDOPOHardestGame.GameMode.PvsP)
-            updatePlayer(1, keysDownPlayer2, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT);
+    	updatePlayer(0, keysDownPlayer1, KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D);
+    	if (juego.getGameMode() == GameMode.PvsP)
+    	    updatePlayer(1, keysDownPlayer2, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT);
         juego.update();
     }
-
+    
     private void updatePlayer(int index, Set<Integer> keys, int up, int down, int left, int right) {
         double dx = 0, dy = 0;
-        if (keys.contains(up))
-            dy -= 1;
-        if (keys.contains(down))
-            dy += 1;
-        if (keys.contains(left))
-            dx -= 1;
-        if (keys.contains(right))
-            dx += 1;
-        if (dx != 0 || dy != 0)
-            juego.movePlayer(index, dx, dy);
+        if (keys.contains(up))    dy -= 1;
+        if (keys.contains(down))  dy += 1;
+        if (keys.contains(left))  dx -= 1;
+        if (keys.contains(right)) dx += 1;
+        if (dx != 0 || dy != 0) juego.movePlayer(index, dx, dy);
     }
 
     public void refresh() {
         if (juego.getCurrentLevel() != null) {
-            boolean pvsp = juego.getGameMode() == TheDOPOHardestGame.GameMode.PvsP;
+            boolean pvsp = juego.getGameMode() == GameMode.PvsP;
             if (pvsp) {
-                muertes.setText("P1: " + juego.getPlayerDeaths(0) + " muertes  |  P2: " + juego.getPlayerDeaths(1)
-                        + " muertes");
+                muertes.setText("P1: " + juego.getPlayerDeaths(0) + " muertes  |  P2: " + juego.getPlayerDeaths(1) + " muertes");
             } else {
                 muertes.setText("MUERTES: " + juego.getPlayerDeaths(0));
             }
             if (pvsp) {
                 monedas.setText("P1: " + juego.getPlayerCoins(0) + "/" + juego.getPlayerTotalCoins(0)
-                        + "  |  P2: " + juego.getPlayerCoins(1) + "/" + juego.getPlayerTotalCoins(1));
+                    + "  |  P2: " + juego.getPlayerCoins(1) + "/" + juego.getPlayerTotalCoins(1));
             } else {
                 monedas.setText("Monedas: " + juego.getPlayerCoins(0) + "/" + juego.getPlayerTotalCoins(0));
             }
@@ -657,7 +846,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
                 cardLayout.show(panel, PANEL_INICIO);
             }
         }
-        tablero.setDrawCommands(juego.getDrawCommands());
         tablero.refresh();
     }
 
@@ -667,26 +855,26 @@ public class TheDOPOHardestGameGUI extends JFrame {
         int wonP2 = levelsWon.getOrDefault("Player2", 0);
         String ganador = wonP1 > wonP2 ? "Player1" : wonP2 > wonP1 ? "Player2" : "Empate";
         String msg = "=== RESULTADO FINAL ===\n"
-                + "Player1 — Niveles ganados: " + wonP1
-                + "  |  Muertes: " + juego.getPlayerDeaths(0)
-                + "  |  Monedas: " + juego.getPlayerLifetimeCoins(0) + "\n"
-                + "Player2 — Niveles ganados: " + wonP2
-                + "  |  Muertes: " + juego.getPlayerDeaths(1)
-                + "  |  Monedas: " + juego.getPlayerLifetimeCoins(1) + "\n\n"
-                + (ganador.equals("Empate") ? "¡EMPATE!" : "¡Ganó " + ganador + "!");
+            + "Player1 — Niveles ganados: " + wonP1
+            + "  |  Muertes: " + juego.getPlayerDeaths(0)
+            + "  |  Monedas: " + juego.getPlayerLifetimeCoins(0) + "\n"
+            + "Player2 — Niveles ganados: " + wonP2
+            + "  |  Muertes: " + juego.getPlayerDeaths(1)
+            + "  |  Monedas: " + juego.getPlayerLifetimeCoins(1) + "\n\n"
+            + (ganador.equals("Empate") ? "¡EMPATE!" : "¡Ganó " + ganador + "!");
         JOptionPane.showMessageDialog(this, msg, "Fin del juego", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void refreshBorderButtonStates() {
-        boolean twoPlayers = selectedMode != TheDOPOHardestGame.GameMode.PLAYER;
+        boolean twoPlayers = selectedMode != GameMode.PLAYER;
         for (int i = 0; i < BORDER_COLORS.length; i++) {
             Color c = BORDER_COLORS[i];
             applyBorderButtonStyle(borde1Botones[i], c,
-                    c.equals(selectedBorder1),
-                    twoPlayers && c.equals(selectedBorder2));
+                c.equals(selectedBorder1),
+                twoPlayers && c.equals(selectedBorder2));
             applyBorderButtonStyle(borde2Botones[i], c,
-                    c.equals(selectedBorder2),
-                    twoPlayers && c.equals(selectedBorder1));
+                c.equals(selectedBorder2),
+                twoPlayers && c.equals(selectedBorder1));
         }
         if (panelSeleccion != null) {
             panelSeleccion.revalidate();
@@ -722,8 +910,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
     private void exit() {
         int option = JOptionPane.showConfirmDialog(this, "¿Desea cerrar la aplicación?",
-                "Confirmar salida", JOptionPane.YES_NO_OPTION);
-        if (option == JOptionPane.YES_OPTION)
-            System.exit(0);
+            "Confirmar salida", JOptionPane.YES_NO_OPTION);
+        if (option == JOptionPane.YES_OPTION) System.exit(0);
     }
 }
