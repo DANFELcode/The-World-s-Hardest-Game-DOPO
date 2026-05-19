@@ -35,6 +35,8 @@ public class TheDOPOHardestGameGUI extends JFrame {
     private JButton[] borde1Botones;
     private JButton[] borde2Botones;
     private JButton btnJugarSeleccion, btnVolverSeleccion;
+    private JPanel filaLevel;
+    private int selectedLevel = 1;
     private GameMode selectedMode = GameMode.PLAYER;
     private String selectedSkin = "red";
     private Color selectedBorder1 = Color.BLACK;
@@ -400,7 +402,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
         titulo.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
         panelSeleccion.add(titulo, BorderLayout.NORTH);
 
-        JPanel centro = new JPanel(new GridLayout(4, 1, 0, 10));
+        JPanel centro = new JPanel(new GridLayout(5, 1, 0, 10));
         centro.setOpaque(false);
         centro.setBorder(BorderFactory.createEmptyBorder(10, 60, 10, 60));
 
@@ -466,10 +468,18 @@ public class TheDOPOHardestGameGUI extends JFrame {
         }
         filaBorde2.setVisible(false);
 
+        // Fila de niveles
+        filaLevel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        filaLevel.setOpaque(false);
+        JLabel labelLevel = new JLabel("Nivel:  ");
+        labelLevel.setFont(new Font("Arial", Font.BOLD, 16));
+        filaLevel.add(labelLevel);
+
         centro.add(filaModos);
         centro.add(filaSkins);
         centro.add(filaBorde1);
         centro.add(filaBorde2);
+        centro.add(filaLevel);
         panelSeleccion.add(centro, BorderLayout.CENTER);
 
         // Botones de navegación
@@ -579,23 +589,29 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
         btnModePlayer.addActionListener(e -> {
             selectedMode = GameMode.PLAYER;
+            selectedLevel = 1;
             highlightButton(btnModePlayer, btnModePvsP, btnModePvsM);
             filaBorde2.setVisible(false);
             refreshBorderButtonStates();
+            refreshLevelButtons();
         });
         btnModePvsP.addActionListener(e -> {
             selectedMode = GameMode.PvsP;
+            selectedLevel = 1;
             highlightButton(btnModePvsP, btnModePlayer, btnModePvsM);
             filaBorde2.setVisible(true);
             ensureBordersDiffer();
             refreshBorderButtonStates();
+            refreshLevelButtons();
         });
         btnModePvsM.addActionListener(e -> {
             selectedMode = GameMode.PvsM;
+            selectedLevel = 1;
             highlightButton(btnModePvsM, btnModePlayer, btnModePvsP);
             filaBorde2.setVisible(true);
             ensureBordersDiffer();
             refreshBorderButtonStates();
+            refreshLevelButtons();
         });
 
         for (int i = 0; i < BORDER_NAMES.length; i++) {
@@ -641,11 +657,34 @@ public class TheDOPOHardestGameGUI extends JFrame {
                 juego.setPlayerType("Player2", selectedSkin);
                 juego.setPlayerBorderColor("Player2", selectedBorder2);
             }
-            juego.startGame();
+            juego.startGame(selectedLevel);
             cardLayout.show(panel, PANEL_JUEGO);
             SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
             gameLoop.start();
         });
+
+        refreshLevelButtons();
+    }
+
+    private void refreshLevelButtons() {
+        // Remove old level buttons (keep the label at index 0)
+        while (filaLevel.getComponentCount() > 1) filaLevel.remove(1);
+        juego.setGameMode(selectedMode);
+        int count = juego.getAvailableLevelCount();
+        for (int i = 1; i <= count; i++) {
+            final int lvl = i;
+            JButton btn = new JButton(String.valueOf(i));
+            btn.setFont(new Font("Arial", Font.BOLD, 16));
+            if (lvl == selectedLevel) btn.setBackground(new Color(0xEB, 0x55, 0x55));
+            btn.addActionListener(e -> {
+                selectedLevel = lvl;
+                refreshLevelButtons();
+            });
+            filaLevel.add(btn);
+        }
+        if (selectedLevel > count) selectedLevel = 1;
+        filaLevel.revalidate();
+        filaLevel.repaint();
     }
 
     private void ensureBordersDiffer() {
@@ -691,7 +730,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
         exportarNivel.addActionListener(e -> {
             gameLoop.stop();
-            JFileChooser fc = new JFileChooser();
+            JFileChooser fc = new JFileChooser(new java.io.File("resources/levels/user"));
             if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 try {
                     juego.exportarNivel(fc.getSelectedFile());
@@ -705,7 +744,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
         importarNivel.addActionListener(e -> {
             gameLoop.stop();
-            JFileChooser fc = new JFileChooser();
+            JFileChooser fc = new JFileChooser(new java.io.File("resources/levels/user"));
             if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 try {
                     juego.importarNivel(fc.getSelectedFile());
@@ -732,7 +771,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
             if (confirm == JOptionPane.YES_OPTION) {
                 keysDownPlayer1.clear();
                 keysDownPlayer2.clear();
-                juego.startGame();
+                juego.startGame(1);
                 cardLayout.show(panel, PANEL_JUEGO);
                 SwingUtilities.invokeLater(() -> tablero.requestFocusInWindow());
                 gameLoop.start();

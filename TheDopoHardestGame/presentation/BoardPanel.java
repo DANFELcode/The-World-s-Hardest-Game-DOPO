@@ -1,23 +1,19 @@
 package presentation;
 
-import domain.DrawCommand;
+import dto.DrawCommand;
 import domain.TheDOPOHardestGame;
 import java.awt.*;
 import javax.swing.JPanel;
 
 public class BoardPanel extends JPanel {
 	
-	// color de board debe ir en clase BoardPanel
-    private static final Color COLOR_BACKGROUND = new Color(180, 181, 254);
-
     private TheDOPOHardestGame game;
 
     public BoardPanel() {
-        setBackground(COLOR_BACKGROUND);
         setPreferredSize(new Dimension(800, 500));
         setFocusable(true);
     }
-
+    
     public void setGame(TheDOPOHardestGame game) {
         this.game = game;
     }
@@ -28,6 +24,9 @@ public class BoardPanel extends JPanel {
         if (game == null) return;
 
         Graphics2D g2 = (Graphics2D) g;
+        g2.setColor(game.getBackgroundColor());
+        g2.fillRect(0, 0, getWidth(), getHeight());
+
         Stroke originalStroke = g2.getStroke();
         for (DrawCommand cmd : game.getDrawCommands()) {
             g2.setColor(cmd.color);
