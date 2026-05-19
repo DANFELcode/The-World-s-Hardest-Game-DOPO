@@ -418,9 +418,9 @@ class TheDOPOHardestGameTest {
     @Test
     void gameModeIsCompleteShouldDelegateToLevel() {
         Level l = new Level(1, 1000, map);
-        assertFalse(TheDOPOHardestGame.GameMode.PLAYER.isComplete(l));
+        assertFalse(GameMode.PLAYER.isComplete(l));
         l.setWinner(redPlayer);
-        assertTrue(TheDOPOHardestGame.GameMode.PLAYER.isComplete(l));
+        assertTrue(GameMode.PLAYER.isComplete(l));
     }
 
     // =================== 8. Lifecycle ===================
@@ -428,7 +428,7 @@ class TheDOPOHardestGameTest {
     @Test
     void isGameOverShouldBeTrueWhenTimeRunsOutAndLevelNotComplete() {
         Level l = new Level(1, 1, map);
-        game.setGameMode(TheDOPOHardestGame.GameMode.PLAYER);
+        game.setGameMode(GameMode.PLAYER);
         game.startLevel(1, 0, map);
         // Use the facade game which has currentLevel via startLevel
         // After timer hits zero, isGameOver true
@@ -438,7 +438,7 @@ class TheDOPOHardestGameTest {
 
     @Test
     void isGameOverShouldBeFalseInPvspRegardlessOfTime() {
-        game.setGameMode(TheDOPOHardestGame.GameMode.PvsP);
+        game.setGameMode(GameMode.PvsP);
         game.startLevel(1, 0, map);
         game.getCurrentLevel().setHasTimer(false);
         assertFalse(game.isGameOver());
@@ -447,7 +447,7 @@ class TheDOPOHardestGameTest {
     @Test
     void hasNextLevelShouldReturnFalseAtLastLevel() {
         // Player mode last level is level3; loading level4 should return null
-        game.setGameMode(TheDOPOHardestGame.GameMode.PLAYER);
+        game.setGameMode(GameMode.PLAYER);
         game.startGame();
         // Skip ahead to level 3
         while (game.getCurrentLevelNumber() < 3 && game.hasNextLevel()) {
@@ -458,7 +458,7 @@ class TheDOPOHardestGameTest {
 
     @Test
     void restartLevelShouldReloadCurrentLevel() {
-        game.setGameMode(TheDOPOHardestGame.GameMode.PLAYER);
+        game.setGameMode(GameMode.PLAYER);
         game.startGame();
         int levelNumberBefore = game.getCurrentLevelNumber();
         game.restartLevel();
@@ -482,7 +482,7 @@ class TheDOPOHardestGameTest {
 
     @Test
     void exportarNivelShouldThrowLevelIOExceptionOnInvalidPath() {
-        game.setGameMode(TheDOPOHardestGame.GameMode.PLAYER);
+        game.setGameMode(GameMode.PLAYER);
         game.startGame();
         File invalid = new File("/__nonexistent__/cannot/be/written.txt");
         assertThrows(LevelIOException.class, () -> game.exportarNivel(invalid));
@@ -490,7 +490,7 @@ class TheDOPOHardestGameTest {
 
     @Test
     void saveAndLoadRoundtripShouldPreserveLevelNumber(@TempDir Path tmp) throws Exception {
-        game.setGameMode(TheDOPOHardestGame.GameMode.PLAYER);
+        game.setGameMode(GameMode.PLAYER);
         game.startGame();
         File save = tmp.resolve("save.dat").toFile();
         game.guardarPartida(save);
