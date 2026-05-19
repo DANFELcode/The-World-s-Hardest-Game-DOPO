@@ -204,15 +204,13 @@ class TheDOPOHardestGameTest {
     }
 
     @Test
-    void invulnerabilityShouldPreventRapidConsecutiveDeaths() {
+    void consecutiveHitsByDifferentEnemiesAreIndependent() {
+        // Invulnerability was removed. Each onHit call is independent.
+        // Protection against double-hit lives in Enemy.lastVictim, not in onHit.
         level.addPlayer(redPlayer);
         int initial = redPlayer.getDeaths();
-        redPlayer.onHit(level);
-        int afterFirst = redPlayer.getDeaths();
-        redPlayer.onHit(level); // within INVULNERABILITY_TIME
-        int afterSecond = redPlayer.getDeaths();
-        assertEquals(afterFirst, afterSecond, "Second consecutive hit must be ignored");
-        assertEquals(initial + 1, afterFirst);
+        redPlayer.onHit(level); // first hit kills RedPlayer
+        assertEquals(initial + 1, redPlayer.getDeaths());
     }
 
     @Test
@@ -448,7 +446,7 @@ class TheDOPOHardestGameTest {
     void hasNextLevelShouldReturnFalseAtLastLevel() {
         // Player mode last level is level3; loading level4 should return null
         game.setGameMode(GameMode.PLAYER);
-        game.startGame();
+        game.startGame(1);
         // Skip ahead to level 3
         while (game.getCurrentLevelNumber() < 3 && game.hasNextLevel()) {
             game.advanceLevel();
@@ -459,7 +457,7 @@ class TheDOPOHardestGameTest {
     @Test
     void restartLevelShouldReloadCurrentLevel() {
         game.setGameMode(GameMode.PLAYER);
-        game.startGame();
+        game.startGame(1);
         int levelNumberBefore = game.getCurrentLevelNumber();
         game.restartLevel();
         assertEquals(levelNumberBefore, game.getCurrentLevelNumber());
@@ -483,7 +481,7 @@ class TheDOPOHardestGameTest {
     @Test
     void exportarNivelShouldThrowLevelIOExceptionOnInvalidPath() {
         game.setGameMode(GameMode.PLAYER);
-        game.startGame();
+        game.startGame(1);
         File invalid = new File("/__nonexistent__/cannot/be/written.txt");
         assertThrows(LevelIOException.class, () -> game.exportarNivel(invalid));
     }
@@ -491,7 +489,7 @@ class TheDOPOHardestGameTest {
     @Test
     void saveAndLoadRoundtripShouldPreserveLevelNumber(@TempDir Path tmp) throws Exception {
         game.setGameMode(GameMode.PLAYER);
-        game.startGame();
+        game.startGame(1);
         File save = tmp.resolve("save.dat").toFile();
         game.guardarPartida(save);
         TheDOPOHardestGame loaded = new TheDOPOHardestGame();
@@ -580,10 +578,14 @@ class TheDOPOHardestGameTest {
     }
 
     @Test
-    void lifeSourceShouldBeRemovedAfterCollection() {
+    void lifeSourceShouldBeInvisibleAfterCollectionAndReappearOnDeath() {
+        level.addPlayer(redPlayer);
         LifeSource life = new LifeSource(100, 100, 20, 20, "pink");
         life.onCollect(redPlayer);
-        assertTrue(life.shouldBeRemoved());
+        assertFalse(life.isVisible(), "LifeSource must be invisible after collection");
+        assertFalse(life.shouldBeRemoved(), "LifeSource stays in list to allow reset on death");
+        life.reset();
+        assertTrue(life.isVisible(), "LifeSource must reappear after reset");
     }
 
     // =================== 12. PvsP player-player collision ===================
