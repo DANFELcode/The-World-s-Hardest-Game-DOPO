@@ -1,0 +1,7 @@
+NUMBER=105
+TIME=180
+WALL x=0,y=0,width=800,height=20
+INITIAL_ZONE x=20,y=20,width=60,height=60,owner=Player1
+INTERMEDIATE_ZONE x=200,y=20,width=60,height=60
+ENEMY x=300,y=20,width=20,height=20,movement=basic,direction=VERTICAL,sign=1
+FINAL_ZONE x=400,y=20,width=60,height=60,owner=Player1

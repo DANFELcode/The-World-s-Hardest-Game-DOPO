@@ -48,7 +48,7 @@ BOMB x=530,y=410,width=20,height=20
 BOMB x=530,y=430,width=20,height=20
 BOMB x=530,y=450,width=20,height=20
 
-LIFESOURCE x=390,y=235,width=20,height=20,owner=Player1
+LIFESOURCE x=390,y=235,width=20,height=20
 
 COIN x=120,y=92,width=15,height=15,type=blue
 COIN x=630,y=92,width=15,height=15,type=red

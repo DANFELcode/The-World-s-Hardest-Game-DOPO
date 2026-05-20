@@ -1,0 +1,7 @@
+NUMBER=103
+TIME=180
+WALL x=0,y=0,width=800,height=20
+INITIAL_ZONE x=20,y=30,width=50,height=50,owner=Player1
+ENEMY x=100,y=100,width=20,height=20,movement=basic,direction=HORIZONTAL,sign=1
+ENEMY x=100,y=200,width=20,height=20,movement=accelerated,direction=HORIZONTAL,sign=1
+ENEMY x=100,y=300,width=20,height=20,movement=patrol,route=100:300|500:300

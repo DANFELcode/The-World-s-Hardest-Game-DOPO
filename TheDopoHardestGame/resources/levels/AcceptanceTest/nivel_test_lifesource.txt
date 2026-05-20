@@ -1,0 +1,6 @@
+NUMBER=104
+TIME=180
+WALL x=0,y=0,width=800,height=20
+INITIAL_ZONE x=20,y=20,width=60,height=60,owner=Player1
+LIFESOURCE x=100,y=100,width=20,height=20
+ENEMY x=200,y=100,width=20,height=20,movement=basic,direction=VERTICAL,sign=1
