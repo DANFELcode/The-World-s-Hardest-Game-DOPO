@@ -8,10 +8,10 @@ package domain;
 public class ExpertStrategy implements GameStrategy {
 
     /**
-     * Executes the optimal move for the machine.
-     * @param machine the machine player
+     * Executes the optimal move for the player.
+     * @param player the player being controlled
      * @param level the current level
      */
     @Override
-    public void execute(Machine machine, Level level) {}
+    public void execute(Player player, Level level) {}
 }

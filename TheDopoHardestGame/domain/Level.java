@@ -43,6 +43,7 @@ public class Level {
     public void updateLevel() {
         if (isPaused) return;
         moveEnemies();
+        automatePlayers();
         resolvePlayerCollisions();
 
         interactables.removeIf(Interactable::shouldRemove);
@@ -58,6 +59,13 @@ public class Level {
         }
     }
 
+    /** Calls automate() on every player. Players without a strategy are no-op; AI players move via their strategy. */
+    private void automatePlayers() {
+        for (Player player : players) {
+            player.automate(this);
+        }
+    }
+
     /** Applies death-penalty rules: resets the dying player's owned coins and collectibles. */
     public void onPlayerDeath(Player player) {
         boolean noCheckpoint = !player.hasCheckpoint();
@@ -68,7 +76,9 @@ public class Level {
             }
         }
         for (StaticElement element : staticElements) {
-            element.reset();
+            if (name.equals(element.getOwnerName())) {
+                element.reset();
+            }
         }
     }
 

@@ -50,7 +50,7 @@ public class GameDataAccess {
 
     /** Loads a level for the given mode. Returns null on error (already logged via exception auto-log). */
     public Level loadLevel(String file, GameMode mode) {
-        String subfolder = mode == GameMode.PvsP ? "pvsp/" : "player/";
+    	String subfolder = (mode == GameMode.PLAYER) ? "player/" : "pvsp/";
         try {
             return loadLevelAbsolute(new File(LEVELS_PATH + subfolder + file));
         } catch (GameException e) {
@@ -194,7 +194,7 @@ public class GameDataAccess {
         requireInBounds(filePath, type, x, y, w, h, map);
         switch (type) {
             case "WALL":       return new SolidWall(x, y, w, h, "black");
-            case "LIFESOURCE": return new LifeSource(x, y, w, h, "pink");
+            case "LIFESOURCE": return new LifeSource(x, y, w, h, "pink", p.getOrDefault("owner", "Player1"));
             case "BOMB":       return new Bomb(x, y, w, h);
             default: throw new LevelFormatException(filePath, "Static element desconocido: " + type);
         }
@@ -325,7 +325,8 @@ public class GameDataAccess {
             writer.println("TIME=" + (level.getGameTime() / (double) TICKS_PER_SECOND));
             for (StaticElement e : level.getStaticElements()) {
                 writer.println(e.getFileType() + " x=" + e.getX() + ",y=" + e.getY()
-                        + ",width=" + e.getWidth() + ",height=" + e.getHeight());
+                        + ",width=" + e.getWidth() + ",height=" + e.getHeight()
+                        + e.extraFileParams());
             }
             for (Enemy e : level.getEnemies()) {
                 writer.println("ENEMY x=" + e.getX() + ",y=" + e.getY()

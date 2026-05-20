@@ -34,8 +34,10 @@ public class Coin extends StaticElement implements Collectible {
         }
     }
 
+    @Override
     public String getOwnerName() { return ownerName; }
 
+    @Override
     public void setOwnerPlayer(Player p) { this.ownerPlayer = p; }
 
     @Override

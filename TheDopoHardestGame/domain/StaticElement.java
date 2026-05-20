@@ -55,10 +55,17 @@ public abstract class StaticElement implements Interactable, Drawable {
     public boolean isBlocking() { return false; }
     public boolean isVisible() { return true; }
     public void reset() { }
+    /** Owner of this element, or null if unowned (walls, bombs). */
+    public String getOwnerName() { return null; }
+    /** Hook for owned elements to keep a reference to the owning Player (for visual border, etc.). */
+    public void setOwnerPlayer(Player p) { }
     public Color getDisplayColor() { return Color.BLACK; }
 
     /** Returns the element's type identifier used in level files (e.g. "WALL", "BOMB"). */
     public String getFileType() { return "WALL"; }
+
+    /** Extra fields to append after the basic x/y/width/height when exporting (e.g. ",owner=Player1"). */
+    public String extraFileParams() { return ""; }
 
     @Override
     public DrawCommand toDrawCommand() {

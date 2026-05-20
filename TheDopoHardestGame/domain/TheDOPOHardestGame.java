@@ -44,7 +44,8 @@ public class TheDOPOHardestGame {
     }
 
     private void applyModeRules(Level level) {
-        if (level != null && currentGameMode == GameMode.PvsP) {
+        // Two-player modes (PvsP and PvsM) have no time limit — first to finish wins.
+        if (level != null && (currentGameMode == GameMode.PvsP || currentGameMode == GameMode.PvsM)) {
             level.setHasTimer(false);
         }
     }
@@ -57,18 +58,25 @@ public class TheDOPOHardestGame {
                 String owner = key.replace("initial_", "");
                 String type = playerTypes.getOrDefault(owner, "red");
                 Player player = Player.create(type, owner, zone.getX(), zone.getY());
+                boolean isMachine = currentGameMode == GameMode.PvsM && "Player2".equals(owner);
+                if (isMachine) player.setStrategy(new RandomStrategy());
                 java.awt.Color border = playerBorderColors.get(owner);
                 if (border != null) player.setBorderColor(border);
                 currentLevel.addPlayer(player);
-                assignCoinOwners(currentLevel, player);
+                assignOwners(currentLevel, player);
             }
         }
     }
 
-    private void assignCoinOwners(Level level, Player player) {
+    private void assignOwners(Level level, Player player) {
         for (Coin c : level.getCoins()) {
             if (player.getName().equals(c.getOwnerName())) {
                 c.setOwnerPlayer(player);
+            }
+        }
+        for (StaticElement e : level.getStaticElements()) {
+            if (player.getName().equals(e.getOwnerName())) {
+                e.setOwnerPlayer(player);
             }
         }
     }
@@ -321,13 +329,14 @@ public class TheDOPOHardestGame {
             for (Player p : players) {
                 p.resetCheckpoint();
                 p.restoreSkin();
+                p.setLastSkin(null);
                 Zone initial = next.getZones().get("initial_" + p.getName());
                 if (initial != null) {
                     p.setSpawnPoint(initial.getX(), initial.getY());
                     p.setPosition(initial.getX(), initial.getY());
                 }
                 next.addPlayer(p);
-                assignCoinOwners(next, p);
+                assignOwners(next, p);
             }
             currentLevel = next;
         }

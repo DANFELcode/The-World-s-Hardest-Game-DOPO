@@ -1,16 +1,14 @@
 package domain;
 
-import java.io.Serializable;
-
 /**
- * Defines the behavior strategy of the machine player. <br>
+ * Defines an AI movement strategy attached to a Player. <br>
  */
-public interface GameStrategy extends Serializable {
+public interface GameStrategy {
 
     /**
-     * Executes the strategy for the machine player.
-     * @param machine the machine player
+     * Decides and applies the player's movement this tick.
+     * @param player the player being controlled by the strategy
      * @param level the current level
      */
-    void execute(Machine machine, Level level);
+    void execute(Player player, Level level);
 }

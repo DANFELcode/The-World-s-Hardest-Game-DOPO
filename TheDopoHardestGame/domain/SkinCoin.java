@@ -4,19 +4,11 @@ import java.awt.Color;
 
 public class SkinCoin extends Coin {
 
-    private final SkinBehavior skin;
+    private final String skinType;
 
     public SkinCoin(double x, double y, double width, double height, String color, String ownerName) {
         super(x, y, width, height, color, ownerName);
-        this.skin = buildSkin(color);
-    }
-
-    private static SkinBehavior buildSkin(String color) {
-        switch (color.toLowerCase()) {
-            case "blue":  return new BlueSkin();
-            case "green": return new GreenSkin();
-            default:      return new DefaultSkin();
-        }
+        this.skinType = color;
     }
 
     @Override
@@ -25,18 +17,16 @@ public class SkinCoin extends Coin {
         super.onCollect(player);
         if (wasUncollected && isCollected()) {
             player.restoreSkin();
-            player.changeSkin(skin);
+            player.changeSkin(SkinBehavior.of(skinType));
+            player.setLastSkin(skinType);
         }
     }
 
     @Override
     public Color getDisplayColor() {
-        return skin.getDisplayColor();
+        return SkinBehavior.of(skinType).getDisplayColor();
     }
 
     @Override
     public String getCoinType() { return getColor(); }
-
-    @Override
-    public boolean resetsOnAnyDeath() { return true; }
 }
