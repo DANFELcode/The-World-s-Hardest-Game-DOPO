@@ -192,7 +192,18 @@ class TheDOPOHardestGameTest {
     }
 
     @Test
-    void playerDeathShouldAlwaysResetSkinCoinsRegardlessOfCheckpoint() {
+    void skinCoinShouldResetOnDeathWithoutCheckpoint() {
+        SkinCoin skinCoin = new SkinCoin(200, 240, 15, 15, "green", "Player1");
+        level.addCoin(skinCoin);
+        level.addPlayer(redPlayer);
+        skinCoin.setOwnerPlayer(redPlayer);
+        skinCoin.onCollect(redPlayer);
+        redPlayer.die(level);
+        assertFalse(skinCoin.isCollected(), "SkinCoin must reset on death without checkpoint");
+    }
+
+    @Test
+    void skinCoinShouldNotResetOnDeathWithCheckpoint() {
         SkinCoin skinCoin = new SkinCoin(200, 240, 15, 15, "green", "Player1");
         level.addCoin(skinCoin);
         level.addPlayer(redPlayer);
@@ -200,7 +211,7 @@ class TheDOPOHardestGameTest {
         skinCoin.onCollect(redPlayer);
         redPlayer.markCheckpoint(300, 300);
         redPlayer.die(level);
-        assertFalse(skinCoin.isCollected(), "SkinCoin must reset even with checkpoint");
+        assertTrue(skinCoin.isCollected(), "SkinCoin must stay collected after death with checkpoint");
     }
 
     @Test
@@ -250,7 +261,6 @@ class TheDOPOHardestGameTest {
         int before = greenPlayer.getDeaths();
         greenPlayer.onHit(level);
         assertEquals(before, greenPlayer.getDeaths(), "First hit only weakens");
-        try { Thread.sleep(350); } catch (InterruptedException ignored) {}
         greenPlayer.onHit(level);
         assertEquals(before + 1, greenPlayer.getDeaths(), "Second hit kills weakened green");
     }
@@ -560,7 +570,7 @@ class TheDOPOHardestGameTest {
 
     @Test
     void lifeSourceShouldGrantExtraLifeOnCollect() {
-        LifeSource life = new LifeSource(100, 100, 20, 20, "pink");
+        LifeSource life = new LifeSource(100, 100, 20, 20, "pink", "Player1");
         assertEquals(0, redPlayer.getExtraLives());
         life.onCollect(redPlayer);
         assertEquals(1, redPlayer.getExtraLives());
@@ -580,7 +590,7 @@ class TheDOPOHardestGameTest {
     @Test
     void lifeSourceShouldBeInvisibleAfterCollectionAndReappearOnDeath() {
         level.addPlayer(redPlayer);
-        LifeSource life = new LifeSource(100, 100, 20, 20, "pink");
+        LifeSource life = new LifeSource(100, 100, 20, 20, "pink", "Player1");
         life.onCollect(redPlayer);
         assertFalse(life.isVisible(), "LifeSource must be invisible after collection");
         assertFalse(life.shouldBeRemoved(), "LifeSource stays in list to allow reset on death");
@@ -621,6 +631,412 @@ class TheDOPOHardestGameTest {
         p1.onPlayerContact(p2, level);
         assertFalse(c1.isCollected());
         assertFalse(c2.isCollected());
+    }
+
+    // =================== 13. Facade getters with a loaded level ===================
+
+    @Test
+    void facadeGettersShouldReportLevelStateAfterStartGame() {
+        game.setGameMode(GameMode.PLAYER);
+        game.startGame(1);
+        assertEquals(1, game.getLevelNumber());
+        assertNotNull(game.getCurrentLevel());
+        assertTrue(game.getTotalCoins() >= 0);
+        assertEquals(0, game.getCollectedCoins());
+        assertFalse(game.getPlayers().isEmpty());
+        assertFalse(game.getDrawCommands().isEmpty());
+        assertFalse(game.isLevelComplete());
+        assertNull(game.getLevelWinner());
+        assertNotNull(game.getBackgroundColor());
+        assertNotNull(game.getLevelsWon());
+    }
+
+    @Test
+    void facadePlayerGettersShouldReturnZeroAtStart() {
+        game.setGameMode(GameMode.PLAYER);
+        game.startGame(1);
+        assertEquals(0, game.getPlayerDeaths(0));
+        assertEquals(0, game.getPlayerCoins(0));
+        assertEquals(0, game.getPlayerLifetimeCoins(0));
+        assertTrue(game.getPlayerTotalCoins(0) >= 0);
+        assertTrue(game.getRemainingTime() > 0);
+    }
+
+    @Test
+    void facadeGettersShouldBeSafeWithoutLevel() {
+        TheDOPOHardestGame g = new TheDOPOHardestGame();
+        assertEquals(0, g.getLevelNumber());
+        assertEquals(0, g.getTotalCoins());
+        assertEquals(0, g.getCollectedCoins());
+        assertEquals(0, g.getPlayerDeaths(0));
+        assertEquals(0, g.getPlayerCoins(0));
+        assertEquals(0, g.getPlayerLifetimeCoins(0));
+        assertEquals(0, g.getPlayerTotalCoins(0));
+        assertEquals(0.0, g.getRemainingTime(), 0.001);
+        assertTrue(g.getPlayers().isEmpty());
+        assertTrue(g.getDrawCommands().isEmpty());
+        assertFalse(g.isLevelComplete());
+        assertNull(g.getLevelWinner());
+        assertFalse(g.isPaused());
+        assertNotNull(g.getBackgroundColor());
+    }
+
+    @Test
+    void facadeOutOfRangePlayerIndexShouldReturnZero() {
+        game.setGameMode(GameMode.PLAYER);
+        game.startGame(1);
+        assertEquals(0, game.getPlayerDeaths(99));
+        assertEquals(0, game.getPlayerCoins(-1));
+        assertEquals(0, game.getPlayerLifetimeCoins(50));
+        assertEquals(0, game.getPlayerTotalCoins(50));
+    }
+
+    @Test
+    void updateShouldAdvanceLevelTime() {
+        game.setGameMode(GameMode.PLAYER);
+        game.startGame(1);
+        double before = game.getRemainingTime();
+        game.update();
+        assertTrue(game.getRemainingTime() <= before);
+    }
+
+    @Test
+    void movePlayerWhilePausedShouldNotMove() {
+        game.setGameMode(GameMode.PLAYER);
+        game.startGame(1);
+        Player p = game.getPlayers().get(0);
+        game.togglePause();
+        double sx = p.getX(), sy = p.getY();
+        game.movePlayer(0, 1, 0);
+        assertEquals(sx, p.getX(), 0.001);
+        assertEquals(sy, p.getY(), 0.001);
+    }
+
+    @Test
+    void movePlayerWithInvalidIndexShouldBeSafe() {
+        game.setGameMode(GameMode.PLAYER);
+        game.startGame(1);
+        game.movePlayer(99, 1, 0);   // no exception
+        game.movePlayer(0, 1, 0);
+        assertFalse(game.getPlayers().isEmpty());
+    }
+
+    @Test
+    void togglePauseShouldFlipFacadePauseState() {
+        game.setGameMode(GameMode.PLAYER);
+        game.startGame(1);
+        assertFalse(game.isPaused());
+        game.togglePause();
+        assertTrue(game.isPaused());
+        game.togglePause();
+        assertFalse(game.isPaused());
+    }
+
+    // =================== 14. Level selector ===================
+
+    @Test
+    void getAvailableLevelCountShouldCountModeLevels() {
+        game.setGameMode(GameMode.PLAYER);
+        assertTrue(game.getAvailableLevelCount() >= 3);
+        game.setGameMode(GameMode.PvsP);
+        assertTrue(game.getAvailableLevelCount() >= 2);
+    }
+
+    @Test
+    void startGameAtSpecificLevelShouldLoadThatLevel() {
+        game.setGameMode(GameMode.PLAYER);
+        game.startGame(2);
+        assertEquals(2, game.getLevelNumber());
+    }
+
+    // =================== 15. Persistence (text format) ===================
+
+    @Test
+    void saveAndLoadShouldPreservePlayerStats(@TempDir Path tmp) throws Exception {
+        game.setGameMode(GameMode.PLAYER);
+        game.setPlayerType("Player1", "blue");
+        game.startGame(1);
+        game.getPlayers().get(0).die(game.getCurrentLevel());
+        game.getPlayers().get(0).die(game.getCurrentLevel());
+        File save = tmp.resolve("s.dat").toFile();
+        game.guardarPartida(save);
+
+        TheDOPOHardestGame loaded = new TheDOPOHardestGame();
+        loaded.abrirPartida(save);
+        assertEquals(2, loaded.getPlayerDeaths(0));
+        assertEquals("blue", loaded.getPlayers().get(0).getTypeName());
+        assertEquals(GameMode.PLAYER, loaded.getGameMode());
+    }
+
+    @Test
+    void saveAndLoadShouldPreserveBorderColor(@TempDir Path tmp) throws Exception {
+        game.setGameMode(GameMode.PLAYER);
+        game.setPlayerBorderColor("Player1", Color.CYAN);
+        game.startGame(1);
+        File save = tmp.resolve("s.dat").toFile();
+        game.guardarPartida(save);
+
+        TheDOPOHardestGame loaded = new TheDOPOHardestGame();
+        loaded.abrirPartida(save);
+        assertEquals(Color.CYAN, loaded.getPlayers().get(0).getBorderColor());
+    }
+
+    @Test
+    void importarNivelShouldLoadLevelFromFile(@TempDir Path tmp) throws Exception {
+        File f = writeLevel(tmp, "NUMBER=7\nTIME=30\n");
+        game.importarNivel(f);
+        assertNotNull(game.getCurrentLevel());
+        assertEquals(7, game.getLevelNumber());
+    }
+
+    // =================== 16. Player type / border configuration ===================
+
+    @Test
+    void setPlayerTypeShouldDetermineCreatedPlayerType() {
+        game.setGameMode(GameMode.PLAYER);
+        game.setPlayerType("Player1", "green");
+        game.startGame(1);
+        assertEquals("green", game.getPlayers().get(0).getTypeName());
+    }
+
+    @Test
+    void setPlayerBorderColorShouldApplyToCreatedPlayer() {
+        game.setGameMode(GameMode.PLAYER);
+        game.setPlayerBorderColor("Player1", Color.MAGENTA);
+        game.startGame(1);
+        assertEquals(Color.MAGENTA, game.getPlayers().get(0).getBorderColor());
+    }
+
+    @Test
+    void playerCreateFactoryShouldBuildCorrectSubtype() {
+        assertEquals("blue",  Player.create("blue",  "P", 0, 0).getTypeName());
+        assertEquals("green", Player.create("green", "P", 0, 0).getTypeName());
+        assertEquals("red",   Player.create("red",   "P", 0, 0).getTypeName());
+        assertEquals("red",   Player.create("unknown", "P", 0, 0).getTypeName());
+    }
+
+    // =================== 17. PvsM machine mode ===================
+
+    @Test
+    void pvsmModeShouldMakePlayer2AMachine() {
+        game.setGameMode(GameMode.PvsM);
+        game.startGame(1);
+        Player machine = null;
+        for (Player p : game.getPlayers()) {
+            if (p.getName().equals("Player2")) machine = p;
+        }
+        assertNotNull(machine);
+        assertTrue(machine.isMachine());
+    }
+
+    @Test
+    void pvsmModeShouldDisableTimer() {
+        game.setGameMode(GameMode.PvsM);
+        game.startGame(1);
+        assertFalse(game.getCurrentLevel().hasTimer());
+    }
+
+    @Test
+    void playerWithoutStrategyShouldNotBeMachine() {
+        RedPlayer p = new RedPlayer("P", 400, 240);
+        assertFalse(p.isMachine());
+        p.setStrategy(new RandomStrategy());
+        assertTrue(p.isMachine());
+    }
+
+    @Test
+    void automateWithoutStrategyShouldBeNoOp() {
+        RedPlayer p = new RedPlayer("P", 400, 240);
+        level.addPlayer(p);
+        double x = p.getX(), y = p.getY();
+        p.automate(level);
+        assertEquals(x, p.getX(), 0.001);
+        assertEquals(y, p.getY(), 0.001);
+    }
+
+    @Test
+    void randomStrategyShouldMoveThePlayer() {
+        RedPlayer p = new RedPlayer("P", 400, 240);
+        level.addPlayer(p);
+        p.setStrategy(new RandomStrategy());
+        double sx = p.getX(), sy = p.getY();
+        for (int i = 0; i < 20; i++) p.automate(level);
+        assertTrue(p.getX() != sx || p.getY() != sy, "Machine should move from its start position");
+    }
+
+    @Test
+    void updateLevelShouldAutomateMachinePlayers() {
+        RedPlayer p = new RedPlayer("P", 400, 240);
+        p.setStrategy(new RandomStrategy());
+        level.addPlayer(p);
+        double sx = p.getX(), sy = p.getY();
+        for (int i = 0; i < 20; i++) level.updateLevel();
+        assertTrue(p.getX() != sx || p.getY() != sy);
+    }
+
+    // =================== 18. Pause logic on Level ===================
+
+    @Test
+    void levelTogglePauseShouldFlipState() {
+        Level l = new Level(1, 1000, map);
+        assertFalse(l.isPaused());
+        l.togglePause();
+        assertTrue(l.isPaused());
+    }
+
+    @Test
+    void pausedLevelShouldNotAdvanceTime() {
+        Level l = new Level(1, 1000, map);
+        l.togglePause();
+        int t = l.getGameTime();
+        l.updateLevel();
+        assertEquals(t, l.getGameTime(), "Paused level must not advance time");
+    }
+
+    // =================== 19. Diagonal movement normalization ===================
+
+    @Test
+    void diagonalMoveShouldBeNormalizedToSpeed() {
+        level.addPlayer(redPlayer);
+        double sx = redPlayer.getX(), sy = redPlayer.getY();
+        redPlayer.move(1, 1, level);
+        double dx = redPlayer.getX() - sx;
+        double dy = redPlayer.getY() - sy;
+        double magnitude = Math.sqrt(dx * dx + dy * dy);
+        assertEquals(redPlayer.getSpeed(), magnitude, 0.001,
+            "Diagonal movement must be normalized to one speed unit");
+    }
+
+    // =================== 20. GameMap background color ===================
+
+    @Test
+    void gameMapShouldHaveDefaultBackgroundColor() {
+        GameMap m = new GameMap(800, 500);
+        assertEquals(GameConstants.COLOR_BOARD, m.getBackgroundColor());
+    }
+
+    @Test
+    void gameMapBackgroundColorShouldBeSettable() {
+        GameMap m = new GameMap(800, 500);
+        m.setBackgroundColor(Color.RED);
+        assertEquals(Color.RED, m.getBackgroundColor());
+    }
+
+    // =================== 21. SkinBehavior factory and checkpoint skin ===================
+
+    @Test
+    void skinBehaviorFactoryShouldBuildRequestedSkin() {
+        RedPlayer p = new RedPlayer("P", 0, 0);
+        SkinBehavior.of("blue").apply(p);
+        assertEquals(30.0, p.getWidth(), 0.001);
+        assertEquals(Color.BLUE, SkinBehavior.of("blue").getDisplayColor());
+    }
+
+    @Test
+    void skinBehaviorFactoryShouldFallBackToDefault() {
+        assertNotNull(SkinBehavior.of(null));
+        assertNotNull(SkinBehavior.of("nonexistent"));
+    }
+
+    @Test
+    void deathWithCheckpointShouldRestoreLastSkin() {
+        SkinCoin blue = new SkinCoin(0, 0, 15, 15, "blue", "Player1");
+        level.addCoin(blue);
+        level.addPlayer(redPlayer);
+        blue.onCollect(redPlayer);
+        assertEquals(Color.BLUE, redPlayer.getDisplayColor());
+        redPlayer.markCheckpoint(300, 300);
+        redPlayer.die(level);
+        assertEquals(Color.BLUE, redPlayer.getDisplayColor(),
+            "Death with checkpoint keeps the last collected skin");
+    }
+
+    @Test
+    void deathWithoutCheckpointShouldRevertToDefaultSkin() {
+        SkinCoin blue = new SkinCoin(0, 0, 15, 15, "blue", "Player1");
+        level.addCoin(blue);
+        level.addPlayer(redPlayer);
+        blue.onCollect(redPlayer);
+        redPlayer.die(level);
+        assertEquals(Color.RED, redPlayer.getDisplayColor(),
+            "Death without checkpoint reverts to the default skin");
+    }
+
+    // =================== 22. LifeSource ownership ===================
+
+    @Test
+    void lifeSourceShouldNotBeCollectedByNonOwner() {
+        LifeSource life = new LifeSource(100, 100, 20, 20, "pink", "Player1");
+        BluePlayer notOwner = new BluePlayer("Player2", 0, 0);
+        life.onCollect(notOwner);
+        assertEquals(0, notOwner.getExtraLives());
+        assertTrue(life.isVisible(), "LifeSource must remain available");
+    }
+
+    @Test
+    void lifeSourceShouldReappearOnOwnerDeath() {
+        LifeSource life = new LifeSource(100, 100, 20, 20, "pink", "Player1");
+        level.addStaticElement(life);
+        level.addPlayer(redPlayer);
+        life.onCollect(redPlayer);
+        assertFalse(life.isVisible());
+        redPlayer.die(level);
+        assertTrue(life.isVisible(), "Owner's LifeSource reappears on death");
+    }
+
+    @Test
+    void lifeSourceShouldNotReappearOnOtherPlayerDeath() {
+        LifeSource life = new LifeSource(100, 100, 20, 20, "pink", "Player1");
+        level.addStaticElement(life);
+        Player p1 = new RedPlayer("Player1", 50, 240);
+        Player p2 = new BluePlayer("Player2", 100, 240);
+        level.addPlayer(p1);
+        level.addPlayer(p2);
+        life.onCollect(p1);
+        p2.die(level);
+        assertFalse(life.isVisible(), "Another player's death must not reset it");
+    }
+
+    @Test
+    void lifeSourceExtraFileParamsShouldIncludeOwner() {
+        LifeSource life = new LifeSource(0, 0, 20, 20, "pink", "Player2");
+        assertTrue(life.extraFileParams().contains("owner=Player2"));
+    }
+
+    @Test
+    void unownedStaticElementShouldReturnNullOwner() {
+        SolidWall wall = new SolidWall(0, 0, 10, 10, "black");
+        assertNull(wall.getOwnerName());
+    }
+
+    // =================== 23. Player-player collision inside zones ===================
+
+    @Test
+    void playerCollisionInsideZoneShouldNotKill() {
+        InitialZone zone = new InitialZone(0, 0, 800, 500, "Player1");
+        level.addZone("initial_Player1", zone);
+        Player p1 = new RedPlayer("Player1", 100, 100);
+        Player p2 = new BluePlayer("Player2", 100, 100);
+        level.addPlayer(p1);
+        level.addPlayer(p2);
+        int d1 = p1.getDeaths();
+        p1.onPlayerContact(p2, level);
+        assertEquals(d1, p1.getDeaths(), "Players must not kill each other inside a zone");
+    }
+
+    // =================== 24. Misc coverage ===================
+
+    @Test
+    void gameConstantsShouldExposeColorsAndSizes() {
+        assertNotNull(GameConstants.COLOR_BOMB);
+        assertNotNull(GameConstants.COLOR_COIN);
+        assertEquals(20.0, GameConstants.MIN_PLAYER_SIZE, 0.001);
+    }
+
+    @Test
+    void playerToDrawCommandShouldNotBeNull() {
+        assertNotNull(redPlayer.toDrawCommand());
+        assertNotNull(bluePlayer.toDrawCommand());
     }
 
     // =================== Helpers ===================
