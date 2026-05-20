@@ -48,25 +48,38 @@ BOMB x=530,y=410,width=20,height=20
 BOMB x=530,y=430,width=20,height=20
 BOMB x=530,y=450,width=20,height=20
 
-LIFESOURCE x=390,y=235,width=20,height=20
+LIFESOURCE x=370,y=235,width=20,height=20
+LIFESOURCE x=410,y=235,width=20,height=20
 
-COIN x=120,y=92,width=15,height=15,type=blue
-COIN x=630,y=92,width=15,height=15,type=red
-COIN x=180,y=392,width=15,height=15,type=green
+COIN x=120,y=65,width=15,height=15,type=blue,owner=Player1
+COIN x=630,y=115,width=15,height=15,type=blue,owner=Player2
 
-COIN x=195,y=92,width=12,height=12,type=yellow
-COIN x=335,y=92,width=12,height=12,type=yellow
-COIN x=475,y=92,width=12,height=12,type=yellow
+COIN x=720,y=240,width=15,height=15,type=red,owner=Player1
+COIN x=68,y=240,width=15,height=15,type=red,owner=Player2
 
-COIN x=234,y=244,width=12,height=12,type=yellow
-COIN x=574,y=244,width=12,height=12,type=yellow
-COIN x=68,y=240,width=12,height=12,type=yellow
+COIN x=180,y=405,width=15,height=15,type=green,owner=Player1
+COIN x=600,y=405,width=15,height=15,type=green,owner=Player2
 
-COIN x=325,y=392,width=12,height=12,type=yellow
-COIN x=475,y=392,width=12,height=12,type=yellow
-COIN x=610,y=392,width=12,height=12,type=yellow
+COIN x=195,y=65,width=12,height=12,type=yellow,owner=Player1
+COIN x=195,y=115,width=12,height=12,type=yellow,owner=Player2
+COIN x=335,y=115,width=12,height=12,type=yellow,owner=Player1
+COIN x=335,y=65,width=12,height=12,type=yellow,owner=Player2
+COIN x=475,y=65,width=12,height=12,type=yellow,owner=Player1
+COIN x=475,y=115,width=12,height=12,type=yellow,owner=Player2
+
+COIN x=234,y=220,width=12,height=12,type=yellow,owner=Player1
+COIN x=234,y=260,width=12,height=12,type=yellow,owner=Player2
+COIN x=574,y=260,width=12,height=12,type=yellow,owner=Player1
+COIN x=574,y=220,width=12,height=12,type=yellow,owner=Player2
+
+COIN x=325,y=385,width=12,height=12,type=yellow,owner=Player1
+COIN x=325,y=405,width=12,height=12,type=yellow,owner=Player2
+COIN x=475,y=405,width=12,height=12,type=yellow,owner=Player1
+COIN x=475,y=385,width=12,height=12,type=yellow,owner=Player2
 
 
 INITIAL_ZONE x=30,y=30,width=70,height=140,owner=Player1
+INITIAL_ZONE x=680,y=325,width=90,height=145,owner=Player2
 INTERMEDIATE_ZONE x=370,y=175,width=60,height=145
 FINAL_ZONE x=680,y=325,width=90,height=145,owner=Player1
+FINAL_ZONE x=30,y=30,width=70,height=140,owner=Player2
