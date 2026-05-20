@@ -553,7 +553,6 @@ public class TheDOPOHardestGameGUI extends JFrame {
         panelInfo.add(muertes, BorderLayout.EAST);
 
         tablero = new BoardPanel();
-        tablero.setGame(juego);
 
         JPanel panelSur = new JPanel(new BorderLayout());
         panelSur.setBackground(Color.BLACK);
@@ -932,7 +931,9 @@ public class TheDOPOHardestGameGUI extends JFrame {
                 cardLayout.show(panel, PANEL_INICIO);
             }
         }
-        tablero.refresh();
+        if (juego != null && juego.getCurrentLevel() != null) {
+            tablero.updateGraphics(juego.getDrawCommands(), juego.getBackgroundColor());
+        }
     }
 
     private void mostrarResultadoPvsP() {
