@@ -32,10 +32,12 @@ public class TheDOPOHardestGameGUI extends JFrame {
     private JButton btnModePlayer, btnModePvsP, btnModePvsM;
     private JButton btnSkinRojo, btnSkinAzul, btnSkinVerde;
     private JPanel filaBorde1, filaBorde2;
+    private JLabel labelBorde2;
     private JButton[] borde1Botones;
     private JButton[] borde2Botones;
     private JButton btnJugarSeleccion, btnVolverSeleccion;
     private JPanel filaLevel;
+    private PlayerPreviewPanel playerPreview;
     private int selectedLevel = 1;
     private GameMode selectedMode = GameMode.PLAYER;
     private String selectedSkin = "red";
@@ -365,13 +367,18 @@ public class TheDOPOHardestGameGUI extends JFrame {
     private void prepareElementsPanelExp() {
         panelExp = createGradientPanel(new BorderLayout());
 
-        descripcion = new JLabel("<html><div style='text-align: justify; width: 400px'>"
-            + "Eres el cuadrado <font color='red'><b>rojo</b></font>. "
-            + "Evita los circulos <font color='blue'><b>azules</b></font> y recolecta las "
-            + "monedas <font color='#DAA520'><b>amarillas</b></font>. "
-            + "Una vez recolectadas todas las monedas, ve hacia la "
-            + "zona <font color='green'><b>verde</b></font> antes de que se acabe el tiempo para completar el nivel. "
-            + "Algunos niveles tienen mas de una zona verde, estas zonas son check points. "
+        descripcion = new JLabel("<html><div style='text-align: justify; width: 450px'>"
+            + "Eres un cuadrado. Escoge tu tipo: "
+            + "<font color='red'><b>rojo</b></font> (velocidad normal), "
+            + "<font color='blue'><b>azul</b></font> (1.5x mas rapido y grande) o "
+            + "<font color='green'><b>verde</b></font> (absorbe el primer golpe pero pierde velocidad). "
+            + "Evita los circulos <font color='#2828C8'><b>azules</b></font>: los hay normales, acelerados y patrulleros. "
+            + "Recolecta todas las monedas <font color='#DAA520'><b>doradas</b></font> "
+            + "y llega a la zona <font color='#3CA03C'><b>verde</b></font> antes de que se acabe el tiempo. "
+            + "Las zonas <font color='#90EE90'><b>verde claro</b></font> son checkpoints: al morir respawneas ahi. "
+            + "Los ovalos <font color='#FF69B4'><b>rosas</b></font> dan una vida extra. "
+            + "Los ovalos <font color='#A020F0'><b>purpura</b></font> son bombas, explotan al contacto. "
+            + "En modo <b>PvsP</b> dos jugadores compiten sin limite de tiempo: el primero en llegar gana."
             + "</div></html>");
         descripcion.setFont(new Font("Arial", Font.PLAIN, 20));
         descripcion.setHorizontalAlignment(SwingConstants.CENTER);
@@ -457,7 +464,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
         // Fila de borde P2 (visible solo en PvsP/PvsM)
         filaBorde2 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         filaBorde2.setOpaque(false);
-        JLabel labelBorde2 = new JLabel("Borde P2:  ");
+        labelBorde2 = new JLabel("Borde P2:  ");
         labelBorde2.setFont(new Font("Arial", Font.BOLD, 16));
         filaBorde2.add(labelBorde2);
         borde2Botones = new JButton[BORDER_NAMES.length];
@@ -480,7 +487,24 @@ public class TheDOPOHardestGameGUI extends JFrame {
         centro.add(filaBorde1);
         centro.add(filaBorde2);
         centro.add(filaLevel);
-        panelSeleccion.add(centro, BorderLayout.CENTER);
+
+        // Preview panel a la derecha
+        playerPreview = new PlayerPreviewPanel();
+        JPanel previewWrapper = new JPanel(new BorderLayout());
+        previewWrapper.setOpaque(false);
+        previewWrapper.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 40));
+        JLabel previewLabel = new JLabel("Tu personaje", SwingConstants.CENTER);
+        previewLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        previewLabel.setForeground(new Color(30, 80, 180));
+        previewWrapper.add(previewLabel, BorderLayout.NORTH);
+        previewWrapper.add(playerPreview, BorderLayout.CENTER);
+
+        JPanel split = new JPanel(new BorderLayout());
+        split.setOpaque(false);
+        split.add(centro, BorderLayout.CENTER);
+        split.add(previewWrapper, BorderLayout.EAST);
+
+        panelSeleccion.add(split, BorderLayout.CENTER);
 
         // Botones de navegación
         JPanel filaBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
@@ -594,6 +618,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
             filaBorde2.setVisible(false);
             refreshBorderButtonStates();
             refreshLevelButtons();
+            updatePreview();
         });
         btnModePvsP.addActionListener(e -> {
             selectedMode = GameMode.PvsP;
@@ -603,6 +628,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
             ensureBordersDiffer();
             refreshBorderButtonStates();
             refreshLevelButtons();
+            updatePreview();
         });
         btnModePvsM.addActionListener(e -> {
             selectedMode = GameMode.PvsM;
@@ -612,6 +638,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
             ensureBordersDiffer();
             refreshBorderButtonStates();
             refreshLevelButtons();
+            updatePreview();
         });
 
         for (int i = 0; i < BORDER_NAMES.length; i++) {
@@ -624,6 +651,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
                     }
                 }
                 refreshBorderButtonStates();
+                updatePreview();
             });
             borde2Botones[i].addActionListener(e -> {
                 selectedBorder2 = BORDER_COLORS[idx];
@@ -633,20 +661,24 @@ public class TheDOPOHardestGameGUI extends JFrame {
                     }
                 }
                 refreshBorderButtonStates();
+                updatePreview();
             });
         }
 
         btnSkinRojo.addActionListener(e -> {
             selectedSkin = "red";
             highlightButton(btnSkinRojo, btnSkinAzul, btnSkinVerde);
+            updatePreview();
         });
         btnSkinAzul.addActionListener(e -> {
             selectedSkin = "blue";
             highlightButton(btnSkinAzul, btnSkinRojo, btnSkinVerde);
+            updatePreview();
         });
         btnSkinVerde.addActionListener(e -> {
             selectedSkin = "green";
             highlightButton(btnSkinVerde, btnSkinRojo, btnSkinAzul);
+            updatePreview();
         });
 
         btnJugarSeleccion.addActionListener(e -> {
@@ -664,6 +696,19 @@ public class TheDOPOHardestGameGUI extends JFrame {
         });
 
         refreshLevelButtons();
+        updatePreview();
+    }
+
+    private void updatePreview() {
+        boolean two = selectedMode == GameMode.PvsP || selectedMode == GameMode.PvsM;
+        boolean isMachine = selectedMode == GameMode.PvsM;
+        playerPreview.setSkin1(selectedSkin);
+        playerPreview.setBorder1(selectedBorder1);
+        playerPreview.setSkin2(selectedSkin);
+        playerPreview.setBorder2(selectedBorder2);
+        playerPreview.setShowTwo(two);
+        playerPreview.setLabel2(isMachine ? "MAQUINA" : "P2");
+        labelBorde2.setText(isMachine ? "Borde Maquina:  " : "Borde P2:  ");
     }
 
     private void refreshLevelButtons() {
@@ -848,20 +893,22 @@ public class TheDOPOHardestGameGUI extends JFrame {
 
     public void refresh() {
         if (juego.getCurrentLevel() != null) {
-            boolean pvsp = juego.getGameMode() == GameMode.PvsP;
-            if (pvsp) {
-                muertes.setText("P1: " + juego.getPlayerDeaths(0) + " muertes  |  P2: " + juego.getPlayerDeaths(1) + " muertes");
+            GameMode mode = juego.getGameMode();
+            boolean twoPlayers = mode == GameMode.PvsP || mode == GameMode.PvsM;
+            String label2 = mode == GameMode.PvsM ? "MAQ" : "P2";
+            if (twoPlayers) {
+                muertes.setText("P1: " + juego.getPlayerDeaths(0) + " muertes  |  " + label2 + ": " + juego.getPlayerDeaths(1) + " muertes");
             } else {
                 muertes.setText("MUERTES: " + juego.getPlayerDeaths(0));
             }
-            if (pvsp) {
+            if (twoPlayers) {
                 monedas.setText("P1: " + juego.getPlayerCoins(0) + "/" + juego.getPlayerTotalCoins(0)
-                    + "  |  P2: " + juego.getPlayerCoins(1) + "/" + juego.getPlayerTotalCoins(1));
+                    + "  |  " + label2 + ": " + juego.getPlayerCoins(1) + "/" + juego.getPlayerTotalCoins(1));
             } else {
                 monedas.setText("Monedas: " + juego.getPlayerCoins(0) + "/" + juego.getPlayerTotalCoins(0));
             }
             niveles.setText("Nivel: " + juego.getLevelNumber());
-            tiempo.setText(pvsp ? "" : "Tiempo: " + String.format("%.0f", juego.getRemainingTime()));
+            tiempo.setText(twoPlayers ? "" : "Tiempo: " + String.format("%.0f", juego.getRemainingTime()));
 
             if (juego.isLevelComplete()) {
                 boolean hasNext = juego.hasNextLevel();
@@ -870,7 +917,7 @@ public class TheDOPOHardestGameGUI extends JFrame {
                     gameLoop.stop();
                     keysDownPlayer1.clear();
                     keysDownPlayer2.clear();
-                    if (pvsp) {
+                    if (twoPlayers) {
                         mostrarResultadoPvsP();
                     } else {
                         JOptionPane.showMessageDialog(this, "¡HAS GANADO EL JUEGO!");
@@ -935,16 +982,73 @@ public class TheDOPOHardestGameGUI extends JFrame {
     }
 
     private void highlightButton(JButton selected, JButton... others) {
-        selected.setBackground(new Color(30, 80, 180));
-        selected.setForeground(Color.WHITE);
-        selected.setOpaque(true);
-        selected.setBorderPainted(false);
+        selected.putClientProperty("flat-selected", Boolean.TRUE);
+        selected.repaint();
         for (JButton b : others) {
-            b.setBackground(UIManager.getColor("Button.background"));
-            b.setForeground(Color.BLACK);
-            b.setOpaque(false);
-            b.setBorderPainted(true);
+            b.putClientProperty("flat-selected", Boolean.FALSE);
+            b.repaint();
         }
+    }
+
+    private static Color contrastText(Color bg) {
+        int brightness = (bg.getRed() * 299 + bg.getGreen() * 587 + bg.getBlue() * 114) / 1000;
+        return brightness > 150 ? Color.BLACK : Color.WHITE;
+    }
+
+    private JButton createFlatButton(String text, Color hoverColor) {
+        JButton btn = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+                int w = getWidth(), h = getHeight();
+                boolean selected = Boolean.TRUE.equals(getClientProperty("flat-selected"));
+                boolean hover = getModel().isRollover() && isEnabled();
+
+                Color bg;
+                Color fg;
+                int borderW;
+                if (selected) {
+                    bg = hoverColor;
+                    fg = contrastText(hoverColor);
+                    borderW = 4;
+                } else if (hover) {
+                    bg = hoverColor;
+                    fg = contrastText(hoverColor);
+                    borderW = 2;
+                } else {
+                    bg = Color.WHITE;
+                    fg = Color.BLACK;
+                    borderW = 2;
+                }
+
+                g2.setColor(bg);
+                g2.fillRect(0, 0, w, h);
+
+                g2.setColor(Color.BLACK);
+                g2.setStroke(new BasicStroke(borderW));
+                g2.drawRect(borderW / 2, borderW / 2, w - borderW, h - borderW);
+
+                g2.setFont(getFont());
+                g2.setColor(fg);
+                FontMetrics fm = g2.getFontMetrics();
+                int tx = (w - fm.stringWidth(getText())) / 2;
+                int ty = (h - fm.getHeight()) / 2 + fm.getAscent();
+                g2.drawString(getText(), tx, ty);
+
+                g2.dispose();
+            }
+        };
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setFocusPainted(false);
+        btn.setOpaque(false);
+        btn.setFont(new Font("Arial", Font.BOLD, 16));
+        btn.setMargin(new Insets(8, 16, 8, 16));
+        btn.putClientProperty("flat-selected", Boolean.FALSE);
+        return btn;
     }
 
     private void exit() {
