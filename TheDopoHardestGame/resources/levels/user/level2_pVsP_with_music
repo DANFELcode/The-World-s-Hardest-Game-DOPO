@@ -1,0 +1,10 @@
+mode=PvsM
+level=2
+player.Player1.type=green
+player.Player1.deaths=0
+player.Player1.lifetime=0
+player.Player1.borderColor=-16777216
+player.Player2.type=green
+player.Player2.deaths=0
+player.Player2.lifetime=0
+player.Player2.borderColor=-16711681

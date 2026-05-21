@@ -8,6 +8,7 @@ import java.awt.event.*;
 public class TheDOPOHardestGameGUI extends JFrame implements MainView {
 
     private TheDOPOHardestGame juego;
+    private final MusicPlayer musicPlayer = new MusicPlayer();
     private JMenuBar menuBar;
     private JMenu opciones, archivo;
     private JMenuItem nuevaPartida, pausar, salir, reiniciar;
@@ -39,6 +40,7 @@ public class TheDOPOHardestGameGUI extends JFrame implements MainView {
         gameLoop = new GameLoop(this);
 
         pack();
+        this.setResizable(false);
         this.setLocationRelativeTo(null);
     }
 
@@ -252,6 +254,83 @@ public class TheDOPOHardestGameGUI extends JFrame implements MainView {
     @Override
     public void onPausaCambiada() {
         pausar.setText(juego.isPaused() ? "Reanudar" : "Pausar");
+    }
+
+    @Override
+    public void abrirConfiguracion() {
+        JDialog dialog = new JDialog(this, "Configuración", true);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.getRootPane().setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+
+        // --- Música ---
+        JPanel musicPanel = new JPanel();
+        musicPanel.setLayout(new BoxLayout(musicPanel, BoxLayout.Y_AXIS));
+        musicPanel.setBorder(BorderFactory.createTitledBorder("Música"));
+
+        ButtonGroup trackGroup = new ButtonGroup();
+        JRadioButton[] trackButtons = new JRadioButton[MusicPlayer.TRACK_NAMES.length];
+        for (int i = 0; i < MusicPlayer.TRACK_NAMES.length; i++) {
+            trackButtons[i] = new JRadioButton(MusicPlayer.TRACK_NAMES[i]);
+            trackButtons[i].setSelected(i == musicPlayer.getCurrentTrack());
+            trackGroup.add(trackButtons[i]);
+            musicPanel.add(trackButtons[i]);
+        }
+
+        musicPanel.add(Box.createVerticalStrut(8));
+
+        JPanel volPanel = new JPanel(new BorderLayout(8, 0));
+        volPanel.setOpaque(false);
+        volPanel.add(new JLabel("Volumen:"), BorderLayout.WEST);
+        JSlider volSlider = new JSlider(0, 100, Math.round(musicPlayer.getVolume() * 100));
+        volSlider.setMajorTickSpacing(25);
+        volSlider.setPaintTicks(true);
+        volSlider.setPaintLabels(true);
+        volPanel.add(volSlider, BorderLayout.CENTER);
+        musicPanel.add(volPanel);
+
+        musicPanel.add(Box.createVerticalStrut(6));
+        JCheckBox muteBox = new JCheckBox("Silenciar", musicPlayer.isMuted());
+        musicPanel.add(muteBox);
+
+        // --- Gráficos ---
+        JPanel grafPanel = new JPanel();
+        grafPanel.setLayout(new BoxLayout(grafPanel, BoxLayout.Y_AXIS));
+        grafPanel.setBorder(BorderFactory.createTitledBorder("Gráficos"));
+        JCheckBox effectsBox = new JCheckBox("Efectos visuales (explosiones, golpes)",
+            panelJuego.isEffectsEnabled());
+        grafPanel.add(effectsBox);
+
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.add(musicPanel);
+        centerPanel.add(Box.createVerticalStrut(8));
+        centerPanel.add(grafPanel);
+
+        // --- Botones ---
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton guardar = new JButton("Guardar");
+        JButton cancelar = new JButton("Cancelar");
+
+        guardar.addActionListener(e -> {
+            for (int i = 0; i < trackButtons.length; i++) {
+                if (trackButtons[i].isSelected()) { musicPlayer.setTrack(i); break; }
+            }
+            musicPlayer.setVolume(volSlider.getValue() / 100f);
+            musicPlayer.setMuted(muteBox.isSelected());
+            musicPlayer.saveConfig();
+            panelJuego.setEffectsEnabled(effectsBox.isSelected());
+            dialog.dispose();
+        });
+        cancelar.addActionListener(e -> dialog.dispose());
+
+        btnPanel.add(cancelar);
+        btnPanel.add(guardar);
+
+        dialog.add(centerPanel, BorderLayout.CENTER);
+        dialog.add(btnPanel, BorderLayout.SOUTH);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 
     private void exit() {

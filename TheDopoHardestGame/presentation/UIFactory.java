@@ -5,8 +5,10 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 /**
@@ -178,6 +180,187 @@ public final class UIFactory {
         btn.setMargin(new Insets(8, 16, 8, 16));
         btn.putClientProperty("flat-selected", Boolean.FALSE);
         return btn;
+    }
+
+    /**
+     * Creates a modern minimalist "pill" button. White by default; when its
+     * {@code flat-selected} client property is true it fills with the accent
+     * color. Used as a toggle-style selector.
+     * @param text the button label
+     * @param accent the fill color when selected
+     * @return the styled pill button
+     */
+    public static JButton createPillButton(String text, Color accent) {
+        JButton btn = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+                int w = getWidth(), h = getHeight(), arc = h;
+                boolean selected = Boolean.TRUE.equals(getClientProperty("flat-selected"));
+                boolean hover = getModel().isRollover() && isEnabled();
+
+                Color fill, textColor, border;
+                if (selected) {
+                    fill = accent;
+                    textColor = contrastText(accent);
+                    border = accent;
+                } else if (hover) {
+                    fill = brighten(accent, 0.84f);
+                    textColor = new Color(55, 60, 75);
+                    border = brighten(accent, 0.45f);
+                } else {
+                    fill = new Color(255, 255, 255, 235);
+                    textColor = new Color(70, 75, 90);
+                    border = new Color(198, 203, 218);
+                }
+
+                g2.setColor(fill);
+                g2.fillRoundRect(1, 1, w - 2, h - 2, arc, arc);
+                g2.setColor(border);
+                g2.setStroke(new BasicStroke(1.5f));
+                g2.drawRoundRect(1, 1, w - 3, h - 3, arc, arc);
+
+                g2.setFont(getFont());
+                g2.setColor(textColor);
+                FontMetrics fm = g2.getFontMetrics();
+                int tx = (w - fm.stringWidth(getText())) / 2;
+                int ty = (h - fm.getHeight()) / 2 + fm.getAscent();
+                g2.drawString(getText(), tx, ty);
+
+                g2.dispose();
+            }
+        };
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setFocusPainted(false);
+        btn.setOpaque(false);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+        TextLayout layout = new TextLayout(text, btn.getFont(), frc);
+        int textWidth = (int) Math.ceil(layout.getBounds().getWidth());
+        btn.setPreferredSize(new Dimension(Math.max(48, textWidth + 34), 38));
+        btn.putClientProperty("flat-selected", Boolean.FALSE);
+        return btn;
+    }
+
+    /**
+     * Creates a round color-swatch button for picking a border color. Shows a
+     * filled circle of {@code fill}; a blue ring marks the {@code flat-selected}
+     * state and a disabled button is dimmed.
+     * @param fill the swatch color
+     * @return the styled circular button
+     */
+    public static JButton createColorButton(Color fill) {
+        JButton btn = new JButton() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int w = getWidth(), h = getHeight();
+                int d = Math.min(w, h) - 12;
+                int x = (w - d) / 2, y = (h - d) / 2;
+                boolean selected = Boolean.TRUE.equals(getClientProperty("flat-selected"));
+                boolean hover = getModel().isRollover() && isEnabled();
+
+                if (selected) {
+                    g2.setColor(new Color(40, 110, 230));
+                    g2.fillOval(x - 5, y - 5, d + 10, d + 10);
+                } else if (hover) {
+                    g2.setColor(new Color(165, 188, 228));
+                    g2.fillOval(x - 4, y - 4, d + 8, d + 8);
+                }
+
+                Composite old = g2.getComposite();
+                if (!isEnabled()) {
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+                }
+                g2.setColor(fill);
+                g2.fillOval(x, y, d, d);
+                g2.setColor(new Color(90, 92, 105));
+                g2.setStroke(new BasicStroke(1.5f));
+                g2.drawOval(x, y, d, d);
+                g2.setComposite(old);
+
+                g2.dispose();
+            }
+        };
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setFocusPainted(false);
+        btn.setOpaque(false);
+        btn.setPreferredSize(new Dimension(46, 46));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.putClientProperty("flat-selected", Boolean.FALSE);
+        return btn;
+    }
+
+    /**
+     * Creates a section title rendered with a flat styled look: a glossy
+     * vertical gradient, a thin dark outline and a top sheen.
+     * @param text the title text
+     * @param baseColor the base fill color
+     * @return a non-opaque component that paints the title centered
+     */
+    public static JComponent createStyledTitle(String text, Color baseColor) {
+        return new JComponent() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
+                int w = getWidth(), h = getHeight();
+                Font font = new Font("Arial Black", Font.BOLD, 34);
+                FontRenderContext frc = g2.getFontRenderContext();
+                TextLayout layout = new TextLayout(text, font, frc);
+                Rectangle2D bounds = layout.getBounds();
+
+                double x = w / 2.0 - bounds.getCenterX();
+                LineMetrics lm = font.getLineMetrics("Ay", frc);
+                double y = h / 2.0 + (lm.getAscent() - lm.getDescent()) / 2.0;
+
+                Shape shape = layout.getOutline(AffineTransform.getTranslateInstance(x, y));
+                Rectangle2D sb = shape.getBounds2D();
+
+                // Dark outline.
+                g2.setColor(new Color(20, 20, 35));
+                g2.setStroke(new BasicStroke(5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.draw(shape);
+
+                // Glossy vertical gradient fill.
+                GradientPaint grad = new GradientPaint(
+                    0, (float) sb.getMinY(), brighten(baseColor, 0.45f),
+                    0, (float) sb.getMaxY(), baseColor.darker());
+                g2.setPaint(grad);
+                g2.fill(shape);
+
+                // Top sheen clipped to the glyphs.
+                Area sheen = new Area(shape);
+                sheen.intersect(new Area(new Rectangle2D.Double(
+                    sb.getX(), sb.getMinY(), sb.getWidth(), sb.getHeight() * 0.5)));
+                g2.setPaint(new GradientPaint(
+                    0, (float) sb.getMinY(), new Color(255, 255, 255, 150),
+                    0, (float) (sb.getMinY() + sb.getHeight() * 0.5), new Color(255, 255, 255, 0)));
+                g2.fill(sheen);
+
+                g2.dispose();
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                FontRenderContext frc = new FontRenderContext(null, true, true);
+                TextLayout layout = new TextLayout(text, new Font("Arial Black", Font.BOLD, 34), frc);
+                Rectangle2D b = layout.getBounds();
+                return new Dimension((int) Math.ceil(b.getWidth()) + 50,
+                                     (int) Math.ceil(b.getHeight()) + 34);
+            }
+        };
     }
 
     /** Returns a lighter version of the color, blended toward white by {@code amount} (0..1). */

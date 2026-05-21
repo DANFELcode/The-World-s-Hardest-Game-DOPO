@@ -12,8 +12,12 @@ import javax.swing.*;
  */
 public class SeleccionPanel extends GradientPanel {
 
-    private static final String[] BORDER_NAMES = {"NEGRO", "BLANCO", "AMARILLO", "CYAN", "MAGENTA"};
-    private static final Color[] BORDER_COLORS = {Color.BLACK, Color.WHITE, Color.YELLOW, Color.CYAN, Color.MAGENTA};
+    private static final Color[] BORDER_COLORS =
+        {Color.BLACK, Color.WHITE, Color.YELLOW, Color.CYAN, Color.MAGENTA};
+    private static final Color ACCENT     = new Color(40, 110, 230);
+    private static final Color SKIN_RED   = new Color(220, 55, 55);
+    private static final Color SKIN_BLUE  = new Color(55, 90, 220);
+    private static final Color SKIN_GREEN = new Color(0, 150, 0);
 
     private final TheDOPOHardestGame juego;
     private final MainView host;
@@ -23,8 +27,8 @@ public class SeleccionPanel extends GradientPanel {
     private JButton btnJugar, btnVolver;
     private JButton[] borde1Botones;
     private JButton[] borde2Botones;
-    private JPanel filaBorde2;
-    private JPanel filaLevel;
+    private JPanel borde2Controls;
+    private JPanel levelControls;
     private JLabel labelBorde2;
     private PlayerPreviewPanel playerPreview;
 
@@ -52,118 +56,102 @@ public class SeleccionPanel extends GradientPanel {
     }
 
     private void construirUI() {
-        JLabel titulo = new JLabel("Seleccione el modo de juego");
-        titulo.setFont(new Font("Arial", Font.BOLD, 28));
-        titulo.setForeground(new Color(30, 80, 180));
-        titulo.setHorizontalAlignment(SwingConstants.CENTER);
-        titulo.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
+        JComponent titulo = UIFactory.createStyledTitle(
+            "Seleccione el modo de juego", new Color(245, 246, 255));
+        titulo.setBorder(BorderFactory.createEmptyBorder(14, 0, 6, 0));
         add(titulo, BorderLayout.NORTH);
 
-        JPanel centro = new JPanel(new GridLayout(5, 1, 0, 10));
+        // --- Controles, en una rejilla con etiquetas alineadas ---
+        JPanel centro = new JPanel(new GridBagLayout());
         centro.setOpaque(false);
-        centro.setBorder(BorderFactory.createEmptyBorder(10, 60, 10, 60));
+        centro.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 14));
+        // Reserve room for all 5 rows (incl. the optional Borde P2 row) so the
+        // window packs large enough and toggling that row never compresses the layout.
+        centro.setPreferredSize(new Dimension(680, 330));
 
-        // Fila de modos
-        JPanel filaModos = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        filaModos.setOpaque(false);
-        JLabel labelModo = new JLabel("Modo:  ");
-        labelModo.setFont(new Font("Arial", Font.BOLD, 16));
-        btnModePlayer = new JButton("PLAYER");
-        btnModePvsP   = new JButton("PvsP");
-        btnModePvsM   = new JButton("PvsM");
-        for (JButton b : new JButton[]{btnModePlayer, btnModePvsP, btnModePvsM}) {
-            b.setFont(new Font("Arial", Font.BOLD, 16));
-        }
-        filaModos.add(labelModo);
-        filaModos.add(btnModePlayer);
-        filaModos.add(btnModePvsP);
-        filaModos.add(btnModePvsM);
+        btnModePlayer = UIFactory.createPillButton("PLAYER", ACCENT);
+        btnModePvsP   = UIFactory.createPillButton("PvsP", ACCENT);
+        btnModePvsM   = UIFactory.createPillButton("PvsM", ACCENT);
 
-        // Fila de skins
-        JPanel filaSkins = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        filaSkins.setOpaque(false);
-        JLabel labelSkin = new JLabel("Skin:  ");
-        labelSkin.setFont(new Font("Arial", Font.BOLD, 16));
-        btnSkinRojo  = new JButton("ROJO");
-        btnSkinAzul  = new JButton("AZUL");
-        btnSkinVerde = new JButton("VERDE");
-        btnSkinRojo.setForeground(Color.RED);
-        btnSkinAzul.setForeground(Color.BLUE);
-        btnSkinVerde.setForeground(new Color(0, 150, 0));
-        for (JButton b : new JButton[]{btnSkinRojo, btnSkinAzul, btnSkinVerde}) {
-            b.setFont(new Font("Arial", Font.BOLD, 16));
-        }
-        filaSkins.add(labelSkin);
-        filaSkins.add(btnSkinRojo);
-        filaSkins.add(btnSkinAzul);
-        filaSkins.add(btnSkinVerde);
+        btnSkinRojo  = UIFactory.createPillButton("Blinky (Rojo)", SKIN_RED);
+        btnSkinAzul  = UIFactory.createPillButton("Inky (Azul)", SKIN_BLUE);
+        btnSkinVerde = UIFactory.createPillButton("Clyde (Verde)", SKIN_GREEN);
 
-        // Fila de borde P1
-        JPanel filaBorde1 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        filaBorde1.setOpaque(false);
-        JLabel labelBorde1 = new JLabel("Borde P1:  ");
-        labelBorde1.setFont(new Font("Arial", Font.BOLD, 16));
-        filaBorde1.add(labelBorde1);
-        borde1Botones = new JButton[BORDER_NAMES.length];
-        for (int i = 0; i < BORDER_NAMES.length; i++) {
-            borde1Botones[i] = new JButton(BORDER_NAMES[i]);
-            borde1Botones[i].setFont(new Font("Arial", Font.BOLD, 14));
-            filaBorde1.add(borde1Botones[i]);
+        borde1Botones = new JButton[BORDER_COLORS.length];
+        borde2Botones = new JButton[BORDER_COLORS.length];
+        JPanel borde1Controls = fila();
+        borde2Controls = fila();
+        for (int i = 0; i < BORDER_COLORS.length; i++) {
+            borde1Botones[i] = UIFactory.createColorButton(BORDER_COLORS[i]);
+            borde2Botones[i] = UIFactory.createColorButton(BORDER_COLORS[i]);
+            borde1Controls.add(borde1Botones[i]);
+            borde2Controls.add(borde2Botones[i]);
         }
 
-        // Fila de borde P2 (visible solo en PvsP/PvsM)
-        filaBorde2 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        filaBorde2.setOpaque(false);
-        labelBorde2 = new JLabel("Borde P2:  ");
-        labelBorde2.setFont(new Font("Arial", Font.BOLD, 16));
-        filaBorde2.add(labelBorde2);
-        borde2Botones = new JButton[BORDER_NAMES.length];
-        for (int i = 0; i < BORDER_NAMES.length; i++) {
-            borde2Botones[i] = new JButton(BORDER_NAMES[i]);
-            borde2Botones[i].setFont(new Font("Arial", Font.BOLD, 14));
-            filaBorde2.add(borde2Botones[i]);
-        }
-        filaBorde2.setVisible(false);
+        levelControls = fila();
+        labelBorde2 = rowLabel("Borde P2:");
 
-        // Fila de niveles
-        filaLevel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        filaLevel.setOpaque(false);
-        JLabel labelLevel = new JLabel("Nivel:  ");
-        labelLevel.setFont(new Font("Arial", Font.BOLD, 16));
-        filaLevel.add(labelLevel);
+        GridBagConstraints gc = new GridBagConstraints();
+        gc.insets = new Insets(6, 8, 6, 10);
+        addRow(centro, gc, 0, rowLabel("Modo:"),
+            fila(btnModePlayer, btnModePvsP, btnModePvsM));
+        addRow(centro, gc, 1, rowLabel("Skin:"),
+            fila(btnSkinRojo, btnSkinAzul, btnSkinVerde));
+        addRow(centro, gc, 2, rowLabel("Borde P1:"), borde1Controls);
+        addRow(centro, gc, 3, labelBorde2, borde2Controls);
+        addRow(centro, gc, 4, rowLabel("Nivel:"), levelControls);
 
-        centro.add(filaModos);
-        centro.add(filaSkins);
-        centro.add(filaBorde1);
-        centro.add(filaBorde2);
-        centro.add(filaLevel);
+        labelBorde2.setVisible(false);
+        borde2Controls.setVisible(false);
 
-        // Preview panel a la derecha
+        // --- Preview del personaje sobre el fondo del tablero ---
         playerPreview = new PlayerPreviewPanel();
         JPanel previewWrapper = new JPanel(new BorderLayout());
         previewWrapper.setOpaque(false);
-        previewWrapper.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 40));
-        JLabel previewLabel = new JLabel("Tu personaje", SwingConstants.CENTER);
-        previewLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        previewLabel.setForeground(new Color(30, 80, 180));
-        previewWrapper.add(previewLabel, BorderLayout.NORTH);
+        previewWrapper.setBorder(BorderFactory.createEmptyBorder(12, 6, 12, 12));
         previewWrapper.add(playerPreview, BorderLayout.CENTER);
 
         JPanel split = new JPanel(new BorderLayout());
         split.setOpaque(false);
         split.add(centro, BorderLayout.CENTER);
         split.add(previewWrapper, BorderLayout.EAST);
-
         add(split, BorderLayout.CENTER);
 
-        // Botones de navegación
-        JPanel filaBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
+        JPanel filaBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 16));
         filaBotones.setOpaque(false);
         btnVolver = UIFactory.createStyledButton("VOLVER", new Color(0x9A, 0x4B, 0xC1));
-        btnJugar = UIFactory.createStyledButton("JUGAR", new Color(0xEB, 0x55, 0x55));
+        btnJugar  = UIFactory.createStyledButton("JUGAR", new Color(0xEB, 0x55, 0x55));
         filaBotones.add(btnVolver);
         filaBotones.add(btnJugar);
         add(filaBotones, BorderLayout.SOUTH);
+    }
+
+    /** Builds a left-aligned flow row holding the given controls. */
+    private JPanel fila(JComponent... comps) {
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 4));
+        p.setOpaque(false);
+        for (JComponent c : comps) p.add(c);
+        return p;
+    }
+
+    private JLabel rowLabel(String text) {
+        JLabel l = new JLabel(text);
+        l.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        l.setForeground(new Color(45, 50, 70));
+        return l;
+    }
+
+    /** Adds a [label | controls] row to the GridBag grid. */
+    private void addRow(JPanel grid, GridBagConstraints gc, int row, JComponent label, JComponent controls) {
+        gc.gridy = row;
+        gc.gridx = 0;
+        gc.anchor = GridBagConstraints.EAST;
+        gc.weightx = 0;
+        grid.add(label, gc);
+        gc.gridx = 1;
+        gc.anchor = GridBagConstraints.WEST;
+        gc.weightx = 1;
+        grid.add(controls, gc);
     }
 
     private void wireAcciones() {
@@ -173,7 +161,7 @@ public class SeleccionPanel extends GradientPanel {
             selectedMode = GameMode.PLAYER;
             selectedLevel = 1;
             highlightButton(btnModePlayer, btnModePvsP, btnModePvsM);
-            filaBorde2.setVisible(false);
+            setBorde2Visible(false);
             refreshBorderButtonStates();
             refreshLevelButtons();
             updatePreview();
@@ -182,7 +170,7 @@ public class SeleccionPanel extends GradientPanel {
             selectedMode = GameMode.PvsP;
             selectedLevel = 1;
             highlightButton(btnModePvsP, btnModePlayer, btnModePvsM);
-            filaBorde2.setVisible(true);
+            setBorde2Visible(true);
             ensureBordersDiffer();
             refreshBorderButtonStates();
             refreshLevelButtons();
@@ -192,14 +180,14 @@ public class SeleccionPanel extends GradientPanel {
             selectedMode = GameMode.PvsM;
             selectedLevel = 1;
             highlightButton(btnModePvsM, btnModePlayer, btnModePvsP);
-            filaBorde2.setVisible(true);
+            setBorde2Visible(true);
             ensureBordersDiffer();
             refreshBorderButtonStates();
             refreshLevelButtons();
             updatePreview();
         });
 
-        for (int i = 0; i < BORDER_NAMES.length; i++) {
+        for (int i = 0; i < BORDER_COLORS.length; i++) {
             final int idx = i;
             borde1Botones[i].addActionListener(e -> {
                 selectedBorder1 = BORDER_COLORS[idx];
@@ -252,6 +240,11 @@ public class SeleccionPanel extends GradientPanel {
         });
     }
 
+    private void setBorde2Visible(boolean visible) {
+        labelBorde2.setVisible(visible);
+        borde2Controls.setVisible(visible);
+    }
+
     private void updatePreview() {
         boolean two = selectedMode == GameMode.PvsP || selectedMode == GameMode.PvsM;
         boolean isMachine = selectedMode == GameMode.PvsM;
@@ -261,28 +254,26 @@ public class SeleccionPanel extends GradientPanel {
         playerPreview.setBorder2(selectedBorder2);
         playerPreview.setShowTwo(two);
         playerPreview.setLabel2(isMachine ? "MAQUINA" : "P2");
-        labelBorde2.setText(isMachine ? "Borde Maquina:  " : "Borde P2:  ");
+        labelBorde2.setText(isMachine ? "Borde Maquina:" : "Borde P2:");
     }
 
     private void refreshLevelButtons() {
-        // Remove old level buttons (keep the label at index 0)
-        while (filaLevel.getComponentCount() > 1) filaLevel.remove(1);
+        levelControls.removeAll();
         juego.setGameMode(selectedMode);
         int count = juego.getAvailableLevelCount();
+        if (selectedLevel > count) selectedLevel = 1;
         for (int i = 1; i <= count; i++) {
             final int lvl = i;
-            JButton btn = new JButton(String.valueOf(i));
-            btn.setFont(new Font("Arial", Font.BOLD, 16));
-            if (lvl == selectedLevel) btn.setBackground(new Color(0xEB, 0x55, 0x55));
+            JButton btn = UIFactory.createPillButton(String.valueOf(i), ACCENT);
+            if (lvl == selectedLevel) btn.putClientProperty("flat-selected", Boolean.TRUE);
             btn.addActionListener(e -> {
                 selectedLevel = lvl;
                 refreshLevelButtons();
             });
-            filaLevel.add(btn);
+            levelControls.add(btn);
         }
-        if (selectedLevel > count) selectedLevel = 1;
-        filaLevel.revalidate();
-        filaLevel.repaint();
+        levelControls.revalidate();
+        levelControls.repaint();
     }
 
     private void ensureBordersDiffer() {
@@ -297,28 +288,19 @@ public class SeleccionPanel extends GradientPanel {
         boolean twoPlayers = selectedMode != GameMode.PLAYER;
         for (int i = 0; i < BORDER_COLORS.length; i++) {
             Color c = BORDER_COLORS[i];
-            applyBorderButtonStyle(borde1Botones[i], c,
-                c.equals(selectedBorder1),
-                twoPlayers && c.equals(selectedBorder2));
-            applyBorderButtonStyle(borde2Botones[i], c,
-                c.equals(selectedBorder2),
-                twoPlayers && c.equals(selectedBorder1));
+            applyBorderButtonStyle(borde1Botones[i],
+                c.equals(selectedBorder1), twoPlayers && c.equals(selectedBorder2));
+            applyBorderButtonStyle(borde2Botones[i],
+                c.equals(selectedBorder2), twoPlayers && c.equals(selectedBorder1));
         }
         revalidate();
         repaint();
     }
 
-    private void applyBorderButtonStyle(JButton b, Color borderColor, boolean selectedHere, boolean takenByOther) {
-        b.setBackground(borderColor);
-        b.setForeground(borderColor.equals(Color.BLACK) ? Color.WHITE : Color.BLACK);
-        b.setOpaque(true);
-        b.setBorderPainted(true);
-        if (selectedHere) {
-            b.setBorder(BorderFactory.createLineBorder(new Color(30, 80, 180), 4));
-        } else {
-            b.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-        }
+    private void applyBorderButtonStyle(JButton b, boolean selectedHere, boolean takenByOther) {
+        b.putClientProperty("flat-selected", selectedHere ? Boolean.TRUE : Boolean.FALSE);
         b.setEnabled(!takenByOther);
+        b.repaint();
     }
 
     private void highlightButton(JButton selected, JButton... others) {

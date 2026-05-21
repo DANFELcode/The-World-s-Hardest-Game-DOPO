@@ -281,6 +281,12 @@ public class TheDOPOHardestGame {
         return currentLevel.getWinner();
     }
 
+    /** Returns all bomb explosion centers recorded since the last call, then clears the list. */
+    public List<double[]> drainExplosions() {
+        if (currentLevel == null) return new ArrayList<>();
+        return currentLevel.drainExplosions();
+    }
+
     public List<DrawCommand> getDrawCommands() {
         List<DrawCommand> commands = new ArrayList<>();
         if (currentLevel == null) return commands;

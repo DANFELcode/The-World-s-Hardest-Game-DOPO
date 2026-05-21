@@ -24,4 +24,7 @@ public interface MainView {
 
     /** Notifies that the pause state changed, so the menu label can update. */
     void onPausaCambiada();
+
+    /** Opens the configuration dialog (music track, volume, mute). */
+    void abrirConfiguracion();
 }

@@ -24,7 +24,14 @@ public class Bomb extends StaticElement implements Lethal {
     public void onDestroy(Player player, Level level) {
         if (!exploded) {
             this.exploded = true;
+            double cx = getX() + getWidth() / 2;
+            double cy = getY() + getHeight() / 2;
+            level.recordExplosion(cx, cy);
+            int deathsBefore = player.getDeaths();
             player.onHit(level);
+            if (player.getDeaths() == deathsBefore) {
+                player.knockbackFrom(cx, cy, level);
+            }
         }
     }
 
@@ -43,7 +50,7 @@ public class Bomb extends StaticElement implements Lethal {
 
     @Override
     public DrawCommand toDrawCommand() {
-        return new DrawCommand(getDisplayColor(), (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(), DrawCommand.Shape.OVAL);
+        return new DrawCommand(getDisplayColor(), (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(), DrawCommand.Shape.BOMB);
     }
 
     /** An exploded bomb stays in the level but turns invisible, so it can be restored on respawn. */

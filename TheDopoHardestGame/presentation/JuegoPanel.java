@@ -2,11 +2,14 @@ package presentation;
 
 import domain.GameMode;
 import domain.TheDOPOHardestGame;
+import dto.DrawCommand;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
@@ -30,6 +33,9 @@ public class JuegoPanel extends JPanel {
 
     private final Set<Integer> keysDownPlayer1 = new HashSet<>();
     private final Set<Integer> keysDownPlayer2 = new HashSet<>();
+
+    private final int[] prevDeaths = {0, 0};
+    private final List<DrawCommand> prevPlayerCmds = new ArrayList<>();
 
     /** Arrow keys drive player 2; everything else drives player 1. */
     private static final Set<Integer> PVP_KEYS = new HashSet<>(Arrays.asList(
@@ -123,7 +129,29 @@ public class JuegoPanel extends JPanel {
         updatePlayer(0, keysDownPlayer1, KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D);
         if (juego.getGameMode() == GameMode.PvsP)
             updatePlayer(1, keysDownPlayer2, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT);
+
+        // Snapshot player positions before the tick so effects appear at the death location.
+        prevPlayerCmds.clear();
+        for (DrawCommand cmd : juego.getDrawCommands())
+            if (cmd.shape == DrawCommand.Shape.PLAYER) prevPlayerCmds.add(cmd);
+
         juego.update();
+        tablero.tickEffects();
+
+        // Detect player deaths and trigger a hit-ring effect at the pre-death position.
+        int trackedPlayers = Math.min(prevDeaths.length, prevPlayerCmds.size());
+        for (int i = 0; i < trackedPlayers; i++) {
+            int deaths = juego.getPlayerDeaths(i);
+            if (deaths > prevDeaths[i]) {
+                DrawCommand dc = prevPlayerCmds.get(i);
+                tablero.addEnemyHitEffect(dc.x + dc.width / 2, dc.y + dc.height / 2);
+                prevDeaths[i] = deaths;
+            }
+        }
+
+        // Drain bomb explosions and trigger the fireball effect at each bomb center.
+        for (double[] pos : juego.drainExplosions())
+            tablero.addExplosionEffect((int) pos[0], (int) pos[1]);
     }
 
     private void updatePlayer(int index, Set<Integer> keys, int up, int down, int left, int right) {
@@ -170,6 +198,7 @@ public class JuegoPanel extends JPanel {
                 mostrarDialogoFin("¡Tiempo agotado!");
             }
         }
+        tablero.setPaused(juego.isPaused());
         tablero.updateGraphics(juego.getDrawCommands(), juego.getBackgroundColor());
     }
 
@@ -203,6 +232,12 @@ public class JuegoPanel extends JPanel {
             host.mostrarInicio();
         }
     }
+
+    /** Enables or disables death/explosion visual effects. */
+    public void setEffectsEnabled(boolean enabled) { tablero.setEffectsEnabled(enabled); }
+
+    /** @return whether death/explosion visual effects are enabled. */
+    public boolean isEffectsEnabled() { return tablero.isEffectsEnabled(); }
 
     /** Clears all queued key presses for both players. */
     public void clearKeys() {

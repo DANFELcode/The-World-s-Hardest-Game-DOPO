@@ -41,6 +41,7 @@ public class InicioPanel extends GradientPanel {
         JButton playGame = UIFactory.createStyledButton("JUGAR", new Color(0xEB, 0x55, 0x55));
         JButton settings = UIFactory.createStyledButton("CONFIGURACIÓN", new Color(0x4C, 0xC1, 0x6D));
         playGame.addActionListener(e -> host.mostrarExplicacion());
+        settings.addActionListener(e -> host.abrirConfiguracion());
 
         panelBotones.add(playGame);
         panelBotones.add(settings);

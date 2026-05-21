@@ -28,7 +28,7 @@ public class Level {
     private ArrayList<StaticElement> staticElements;
     private HashMap<String, Zone> zones;
     private ArrayList<Interactable> interactables;
-    
+    private ArrayList<double[]> recentExplosions = new ArrayList<>();
 
     public Level(int number, int gameTimeInTicks, GameMap map) {
         this.number = number;
@@ -45,6 +45,18 @@ public class Level {
 
     public void togglePause() { isPaused = !isPaused; }
     public boolean isPaused() { return isPaused; }
+
+    /** Records a bomb explosion center so the presentation layer can render the effect. */
+    public void recordExplosion(double cx, double cy) {
+        recentExplosions.add(new double[]{cx, cy});
+    }
+
+    /** Returns all recorded explosion positions since the last call, then clears the list. */
+    public List<double[]> drainExplosions() {
+        List<double[]> drained = new ArrayList<>(recentExplosions);
+        recentExplosions.clear();
+        return drained;
+    }
 
     public void updateLevel() {
         if (isPaused) return;

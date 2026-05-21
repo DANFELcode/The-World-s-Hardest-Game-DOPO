@@ -200,7 +200,7 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     public DrawCommand toDrawCommand() {
         Color outer = (extraLives > 0) ? GameConstants.COLOR_LIFESOURCE : null; //define el color de outer
         return new DrawCommand(getDisplayColor(), (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(),
-                DrawCommand.Shape.RECT, borderColor, outer); //crea objeto de transferencia
+                DrawCommand.Shape.PLAYER, borderColor, outer); //crea objeto de transferencia
     }
 
     /**
@@ -279,6 +279,25 @@ public abstract class Player extends MovableElement implements Drawable, Interac
      * @return the number of times this player has died
      */
     public int getDeaths() { return deaths; }
+
+    /**
+     * Pushes this player away from the given source point by a fixed distance.
+     * Called when the player survives a bomb blast (absorbed by GreenSkin or extraLife).
+     * @param srcX x-coordinate of the blast center
+     * @param srcY y-coordinate of the blast center
+     */
+    public void knockbackFrom(double srcX, double srcY, Level level) {
+        double dx = (getX() + getWidth() / 2) - srcX;
+        double dy = (getY() + getHeight() / 2) - srcY;
+        double dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 1) { dx = 1; dy = 0; dist = 1; }
+        double force = UNIT * 8;
+        double newX = getX() + (dx / dist) * force;
+        double newY = getY() + (dy / dist) * force;
+        if (level.isWalkable(newX, newY, getWidth(), getHeight())) {
+            setPosition(newX, newY);
+        }
+    }
 
     /**
      * @return the player's name identifier

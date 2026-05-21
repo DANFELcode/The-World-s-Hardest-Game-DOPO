@@ -56,23 +56,8 @@ public class TheDOPOHardestGameAcceptanceTest {
 
         game = new TheDOPOHardestGame();
         game.setGameMode(mode);
-        game.importarNivel(file); // Carga el currentLevel en el Engine
+        game.importarNivel(file); // Carga el currentLevel y crea los jugadores en el Engine
         level = game.getCurrentLevel();
-
-        // Replicar la inyección de jugadores en las coordenadas de la Zona Inicial
-        for (java.util.Map.Entry<String, Zone> entry : level.getZones().entrySet()) {
-            if (entry.getKey().startsWith("initial_")) {
-                String owner = entry.getKey().replace("initial_", "");
-                Player p = Player.create("red", owner, entry.getValue().getX(), entry.getValue().getY());
-                level.addPlayer(p);
-
-                for (Coin c : level.getCoins()) {
-                    if (owner.equals(c.getOwnerName())) {
-                        c.setOwnerPlayer(p);
-                    }
-                }
-            }
-        }
 
         // Crear la Ventana de Observación para la simulación
         frame = new JFrame("DOPO Visual Test - " + filename);
@@ -165,11 +150,20 @@ public class TheDOPOHardestGameAcceptanceTest {
         assertEquals(initialDeaths + 1, player.getDeaths(), "El jugador debió morir al tocar la bomba");
         assertEquals(initialX, player.getX(), "El jugador debió regresar al respawn original tras la muerte");
 
-        // --- PRUEBA B: Enemigo colisiona con la segunda bomba ---
-        // (Como el enemigo no tiene método genérico walkTo para moverse en X/Y libres, lo teletransportamos visiblemente)
-        enemy.setPosition(bomb2.getX(), bomb2.getY());
-        level.updateLevel();
-        panel.updateGraphics(game.getDrawCommands(), game.getBackgroundColor());
+        // --- PRUEBA B: El enemigo se acerca gradualmente a la segunda bomba ---
+        // Se interpola la posición paso a paso (en vez de teletransportar) para que
+        // el espectador vea al enemigo viajar hasta la bomba y explotar.
+        double startX = enemy.getX(), startY = enemy.getY();
+        double endX = bomb2.getX(), endY = bomb2.getY();
+        int steps = 45;
+        for (int i = 1; i <= steps; i++) {
+            double t = i / (double) steps;
+            enemy.setPosition(startX + (endX - startX) * t, startY + (endY - startY) * t);
+            level.updateLevel();
+            panel.updateGraphics(game.getDrawCommands(), game.getBackgroundColor());
+            Thread.sleep(16);
+            if (enemy.isDead() || !level.getEnemies().contains(enemy)) break;
+        }
         Thread.sleep(800);
 
         assertTrue(enemy.isDead() || !level.getEnemies().contains(enemy), "El enemigo debió morir al chocar con la bomba");
