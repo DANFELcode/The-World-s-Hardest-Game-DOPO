@@ -16,8 +16,12 @@ public class SkinCoin extends Coin {
         boolean wasUncollected = !isCollected();
         super.onCollect(player);
         if (wasUncollected && isCollected()) {
-            player.restoreSkin();
-            player.changeSkin(SkinBehavior.of(skinType));
+            // If the player already has this skin type, do not replace it — preserves internal
+            // state such as GreenSkin's weakened flag. Only update the lastSkin record.
+            if (!skinType.equals(player.getCurrentSkinType())) {
+                player.restoreSkin();
+                player.changeSkin(SkinBehavior.of(skinType));
+            }
             player.setLastSkin(skinType);
         }
     }

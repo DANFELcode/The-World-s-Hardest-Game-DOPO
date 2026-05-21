@@ -46,9 +46,17 @@ public class Bomb extends StaticElement implements Lethal {
         return new DrawCommand(getDisplayColor(), (int)getX(), (int)getY(), (int)getWidth(), (int)getHeight(), DrawCommand.Shape.OVAL);
     }
 
+    /** An exploded bomb stays in the level but turns invisible, so it can be restored on respawn. */
     @Override
-    public boolean shouldBeRemoved() { return exploded; }
+    public boolean isVisible() { return !exploded; }
 
+    /** Never removed: the bomb is kept so {@link #reset()} can bring it back. */
+    @Override
+    public boolean shouldBeRemoved() { return false; }
+
+    /** Restores the bomb to its unexploded state (called when a player respawns). */
+    @Override
+    public void reset() { exploded = false; }
 
     @Override
     public String getFileType() { return "BOMB"; }

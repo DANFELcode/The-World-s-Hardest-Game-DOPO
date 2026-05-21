@@ -11,8 +11,8 @@ import java.awt.Color;
 public class Enemy extends MovableElement implements Lethal, Interactable, Drawable {
 
     private MovementStrategy movement;
-    private boolean isDead;
-    private Player lastVictim;
+    private boolean isDead; //guarda el atributo porque la muerte es une stado permanente
+    private Player lastVictim; //guarda su ultima victima para evitar colisionar con ella hasta que separen fisicamente
 
     public Enemy(double x, double y, double width, double height, MovementStrategy movement) {
         super(x, y, width, height, 1.0);
@@ -27,13 +27,14 @@ public class Enemy extends MovableElement implements Lethal, Interactable, Drawa
         this.isDead = true;
     }
 
+    
     public boolean isDead() {
         return isDead;
     }
 
     @Override
     public void onDestroy(Player player, Level level) {
-        player.onHit(level);
+        player.onHit(level); //cada jugador sabe como morirse
     }
 
     @Override
@@ -45,7 +46,7 @@ public class Enemy extends MovableElement implements Lethal, Interactable, Drawa
     }
 
     @Override
-    public boolean shouldRemove() { return isDead; }
+    public boolean shouldRemove() { return isDead; } //llamado por level.updateLevel
 
     public void move(Level level) {
         movement.move(this, level);
@@ -54,7 +55,7 @@ public class Enemy extends MovableElement implements Lethal, Interactable, Drawa
         }
     }
 
-    public MovementStrategy getMovement() { return movement; }
+    public MovementStrategy getMovement() { return movement; } //lo usa exportar
 
     public Color getDisplayColor() {
         return GameConstants.COLOR_ENEMY;

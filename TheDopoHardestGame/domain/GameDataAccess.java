@@ -40,7 +40,7 @@ public class GameDataAccess {
 
     /** Returns how many level files exist for the given mode. */
     public int getLevelCount(GameMode mode) {
-        String subfolder = mode == GameMode.PvsP ? "pvsp/" : "player/";
+        String subfolder = (mode == GameMode.PLAYER) ? "player/" : "pvsp/";
         int count = 0;
         while (new File(LEVELS_PATH + subfolder + "level" + (count + 1) + ".txt").exists()) {
             count++;
@@ -322,7 +322,7 @@ public class GameDataAccess {
     public void exportarNivel(Level level, File file) throws GameException {
         try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
             writer.println("NUMBER=" + level.getNumber());
-            writer.println("TIME=" + (level.getGameTime() / (double) TICKS_PER_SECOND));
+            writer.println("TIME=" + (level.getInitialGameTime() / (double) TICKS_PER_SECOND));
             for (StaticElement e : level.getStaticElements()) {
                 writer.println(e.getFileType() + " x=" + e.getX() + ",y=" + e.getY()
                         + ",width=" + e.getWidth() + ",height=" + e.getHeight()

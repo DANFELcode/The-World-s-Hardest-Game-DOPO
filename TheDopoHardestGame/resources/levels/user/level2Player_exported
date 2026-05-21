@@ -1,0 +1,36 @@
+NUMBER=2
+TIME=120.0
+WALL x=25.0,y=190.0,width=5.0,height=120.0
+WALL x=770.0,y=190.0,width=5.0,height=120.0
+WALL x=25.0,y=190.0,width=260.0,height=5.0
+WALL x=25.0,y=305.0,width=260.0,height=5.0
+WALL x=515.0,y=190.0,width=260.0,height=5.0
+WALL x=515.0,y=305.0,width=260.0,height=5.0
+WALL x=280.0,y=25.0,width=5.0,height=170.0
+WALL x=280.0,y=305.0,width=5.0,height=170.0
+WALL x=515.0,y=25.0,width=5.0,height=170.0
+WALL x=515.0,y=305.0,width=5.0,height=170.0
+WALL x=280.0,y=25.0,width=240.0,height=5.0
+WALL x=280.0,y=470.0,width=240.0,height=5.0
+BOMB x=300.0,y=235.0,width=20.0,height=20.0
+BOMB x=480.0,y=235.0,width=20.0,height=20.0
+ENEMY x=100.0,y=267.29999999999995,width=20.0,height=20.0,movement=accelerated,direction=VERTICAL,sign=1
+ENEMY x=170.0,y=212.69999999999993,width=20.0,height=20.0,movement=accelerated,direction=VERTICAL,sign=-1
+ENEMY x=240.0,y=267.29999999999995,width=20.0,height=20.0,movement=accelerated,direction=VERTICAL,sign=1
+ENEMY x=540.0,y=267.29999999999995,width=20.0,height=20.0,movement=accelerated,direction=VERTICAL,sign=1
+ENEMY x=610.0,y=212.69999999999993,width=20.0,height=20.0,movement=accelerated,direction=VERTICAL,sign=-1
+ENEMY x=680.0,y=267.29999999999995,width=20.0,height=20.0,movement=accelerated,direction=VERTICAL,sign=1
+ENEMY x=352.00000000000045,y=120.0,width=20.0,height=20.0,movement=patrol,route=350.0:40.0|430.0:40.0|430.0:120.0|350.0:120.0
+ENEMY x=427.99999999999955,y=360.0,width=20.0,height=20.0,movement=patrol,route=430.0:440.0|350.0:440.0|350.0:360.0|430.0:360.0
+ENEMY x=413.40000000000003,y=165.0,width=20.0,height=20.0,movement=accelerated,direction=HORIZONTAL,sign=1
+ENEMY x=366.59999999999997,y=315.0,width=20.0,height=20.0,movement=accelerated,direction=HORIZONTAL,sign=-1
+COIN x=135.0,y=245.0,width=12.0,height=12.0,type=yellow,owner=Player1
+COIN x=205.0,y=245.0,width=12.0,height=12.0,type=yellow,owner=Player1
+COIN x=575.0,y=245.0,width=12.0,height=12.0,type=yellow,owner=Player1
+COIN x=645.0,y=245.0,width=12.0,height=12.0,type=yellow,owner=Player1
+COIN x=392.0,y=82.0,width=15.0,height=15.0,type=yellow,owner=Player1
+COIN x=392.0,y=402.0,width=15.0,height=15.0,type=yellow,owner=Player1
+COIN x=392.0,y=242.0,width=15.0,height=15.0,type=green,owner=Player1
+INITIAL_ZONE x=30.0,y=195.0,width=60.0,height=110.0,owner=Player1
+FINAL_ZONE x=710.0,y=195.0,width=60.0,height=110.0,owner=Player1
+INTERMEDIATE_ZONE x=370.0,y=195.0,width=60.0,height=110.0

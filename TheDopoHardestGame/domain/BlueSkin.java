@@ -24,4 +24,7 @@ public class BlueSkin implements SkinBehavior {
     public Color getDisplayColor() {
         return Color.BLUE;
     }
+
+    @Override
+    public String getSkinType() { return "blue"; }
 }

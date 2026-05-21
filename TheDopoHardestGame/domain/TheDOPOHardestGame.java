@@ -4,6 +4,7 @@ import dto.DrawCommand;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,6 +151,8 @@ public class TheDOPOHardestGame {
         Level level = dataAccess.loadLevelAbsolute(file);
         this.currentLevel = level;
         this.currentLevelNumber = level.getNumber();
+        applyModeRules(currentLevel);
+        createPlayers();
     }
 
     public void setGameMode(GameMode mode) {
@@ -268,8 +271,9 @@ public class TheDOPOHardestGame {
         return currentLevel.getGameTime() / (double) GameDataAccess.TICKS_PER_SECOND;
     }
     
+    /** @return an unmodifiable view of the levels-won counts per player. */
     public Map<String, Integer> getLevelsWon(){
-    	return levelsWon;
+    	return Collections.unmodifiableMap(levelsWon);
     }
     
     public Player getLevelWinner() {
@@ -302,8 +306,7 @@ public class TheDOPOHardestGame {
 
     /** Returns true if there is a next level available for the current game mode. */
     public boolean hasNextLevel() {
-
-        return dataAccess.loadLevel("level" + (currentLevelNumber + 1) + ".txt", currentGameMode) != null;
+        return currentLevelNumber + 1 <= dataAccess.getLevelCount(currentGameMode);
     }
 
     /**
@@ -316,7 +319,11 @@ public class TheDOPOHardestGame {
             p.addToLifetime(currentLevel.getCoinsCollectedCountBy(p));
         }
         currentLevelNumber++;
-        Level next = dataAccess.loadLevel("level" + currentLevelNumber + ".txt", currentGameMode);
+        // Only attempt the load when the file exists, so probing past the last
+        // level does not construct (and auto-log) a LevelIOException.
+        Level next = (currentLevelNumber <= dataAccess.getLevelCount(currentGameMode))
+                ? dataAccess.loadLevel("level" + currentLevelNumber + ".txt", currentGameMode)
+                : null;
         Player winner = currentLevel.getWinner();
         if (winner != null) {
             levelsWon.merge(winner.getName(), 1, Integer::sum);

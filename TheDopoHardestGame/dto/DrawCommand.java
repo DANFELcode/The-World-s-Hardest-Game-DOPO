@@ -8,7 +8,7 @@ import java.awt.Color;
  */
 public class DrawCommand {
 
-    public enum Shape { RECT, OVAL }
+    public enum Shape { RECT, OVAL, WALL }
 
     public final Color color;
     public final int x, y, width, height;

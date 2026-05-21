@@ -1,7 +1,10 @@
 package domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a game level. <br>
@@ -13,6 +16,8 @@ public class Level {
     private int number;
     /** Remaining time in ticks. Presentation translates to seconds for display. */
     private int gameTime;
+    /** Original time in ticks as loaded from file. Never decreases. */
+    private int initialGameTime;
     private boolean hasTimer = true;
     private boolean isPaused = false;
     private Player winner;
@@ -28,6 +33,7 @@ public class Level {
     public Level(int number, int gameTimeInTicks, GameMap map) {
         this.number = number;
         this.gameTime = gameTimeInTicks;
+        this.initialGameTime = gameTimeInTicks;
         this.map = map;
         this.players = new ArrayList<Player>();
         this.enemies = new ArrayList<Enemy>();
@@ -66,17 +72,33 @@ public class Level {
         }
     }
 
-    /** Applies death-penalty rules: resets the dying player's owned coins and collectibles. */
-    public void onPlayerDeath(Player player) {
-        boolean noCheckpoint = !player.hasCheckpoint();
+    /**
+     * Marks all currently-collected coins owned by the given player as protected by checkpoint.
+     * Called when a player reaches an IntermediateZone. Only coins collected up to this point
+     * are preserved on future deaths; coins collected after this point still reset.
+     * @param player the player that reached the checkpoint
+     */
+    public void protectCollectedCoins(Player player) {
         String name = player.getName();
         for (Coin coin : coins) {
-            if (name.equals(coin.getOwnerName()) && (noCheckpoint || coin.resetsOnAnyDeath())) {
+            if (name.equals(coin.getOwnerName()) && coin.isCollected()) {
+                coin.protectByCheckpoint();
+            }
+        }
+    }
+
+    /** Applies death-penalty rules: resets the dying player's owned coins and collectibles. */
+    public void onPlayerDeath(Player player) {
+        String name = player.getName();
+        for (Coin coin : coins) {
+            if (name.equals(coin.getOwnerName()) && (!coin.isProtectedByCheckpoint() || coin.resetsOnAnyDeath())) {
                 coin.reset();
             }
         }
         for (StaticElement element : staticElements) {
-            if (name.equals(element.getOwnerName())) {
+            String owner = element.getOwnerName();
+            // Reset the dying player's owned elements, and unowned shared hazards (bombs).
+            if (owner == null || owner.equals(name)) {
                 element.reset();
             }
         }
@@ -110,6 +132,9 @@ public class Level {
 
     /** Returns remaining time in ticks. Presentation should translate to seconds. */
     public int getGameTime() { return gameTime; }
+
+    /** Returns the original time in ticks as set when the level was loaded. Never decreases. */
+    public int getInitialGameTime() { return initialGameTime; }
 
     public boolean isLevelComplete() {
         return hasWinner();
@@ -202,13 +227,22 @@ public class Level {
     public int getNumber() { return number; }
     public Player getWinner() {return winner;}
     public GameMap getMap() { return map; }
-    public ArrayList<Player> getPlayers() { return players; }
-    public ArrayList<Enemy> getEnemies() { return enemies; }
     public void setMap(GameMap map) { this.map = map; }
 
-    public ArrayList<Coin> getCoins() { return coins; }
-    public ArrayList<StaticElement> getStaticElements() { return staticElements; }
-    public HashMap<String, Zone> getZones() { return zones; }
+    /** @return an unmodifiable view of the players; mutate via addPlayer. */
+    public List<Player> getPlayers() { return Collections.unmodifiableList(players); }
+
+    /** @return an unmodifiable view of the enemies; mutate via addEnemy. */
+    public List<Enemy> getEnemies() { return Collections.unmodifiableList(enemies); }
+
+    /** @return an unmodifiable view of the coins; mutate via addCoin. */
+    public List<Coin> getCoins() { return Collections.unmodifiableList(coins); }
+
+    /** @return an unmodifiable view of the static elements; mutate via addStaticElement. */
+    public List<StaticElement> getStaticElements() { return Collections.unmodifiableList(staticElements); }
+
+    /** @return an unmodifiable view of the zones; mutate via addZone. */
+    public Map<String, Zone> getZones() { return Collections.unmodifiableMap(zones); }
 
 
 }

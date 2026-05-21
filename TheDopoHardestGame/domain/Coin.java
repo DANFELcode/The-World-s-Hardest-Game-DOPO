@@ -11,6 +11,7 @@ import java.awt.Color;
 public class Coin extends StaticElement implements Collectible {
 
     private boolean collected;
+    private boolean protectedByCheckpoint;
     private String ownerName;
     private Player ownerPlayer;
 
@@ -20,6 +21,7 @@ public class Coin extends StaticElement implements Collectible {
     public Coin(double x, double y, double width, double height, String color, String ownerName) {
         super(x, y, width, height, color);
         this.collected = false;
+        this.protectedByCheckpoint = false;
         this.ownerName = ownerName;
     }
 
@@ -55,6 +57,22 @@ public class Coin extends StaticElement implements Collectible {
 
     public void reset() {
         this.collected = false;
+        this.protectedByCheckpoint = false;
+    }
+
+    /**
+     * Marks this coin as protected by a checkpoint. Protected coins are not reset on death,
+     * unless {@link #resetsOnAnyDeath()} returns true.
+     */
+    public void protectByCheckpoint() {
+        this.protectedByCheckpoint = true;
+    }
+
+    /**
+     * @return true if this coin was collected before the player's checkpoint was reached
+     */
+    public boolean isProtectedByCheckpoint() {
+        return protectedByCheckpoint;
     }
 
     /** Whether this coin resets on player death even when the player has a checkpoint. */

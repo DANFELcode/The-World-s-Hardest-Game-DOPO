@@ -8,7 +8,11 @@ public interface SkinBehavior extends Serializable {
     void onHit(Player player, Level level);
     Color getDisplayColor();
 
+    /** Returns the type identifier for this skin (e.g. "red", "blue", "green"). */
+    String getSkinType();
+
     /** Factory: builds a fresh skin instance for the given type identifier. */
+    //retorna un tipo de skin dependiendo de el tipo de skin que tenga
     static SkinBehavior of(String type) {
         if (type == null) return new DefaultSkin();
         switch (type.toLowerCase()) {

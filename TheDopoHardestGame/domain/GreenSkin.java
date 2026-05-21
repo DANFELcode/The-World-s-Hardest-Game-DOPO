@@ -31,4 +31,7 @@ public class GreenSkin implements SkinBehavior {
     public Color getDisplayColor() {
         return isWeakened ? GameConstants.COLOR_GREEN_WEAKENED : GameConstants.COLOR_GREEN_NORMAL;
     }
+
+    @Override
+    public String getSkinType() { return "green"; }
 }

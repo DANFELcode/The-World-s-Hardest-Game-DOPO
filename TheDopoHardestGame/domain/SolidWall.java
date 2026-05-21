@@ -1,5 +1,7 @@
 package domain;
 
+import dto.DrawCommand;
+
 /**
  * Represents a solid wall in the game. Blocks movement of all entities. <br>
  * <b>(x, y, width, height, color)</b> <br>
@@ -26,5 +28,16 @@ public class SolidWall extends StaticElement {
     @Override
     public boolean isBlocking() {
         return true;
+    }
+
+    /**
+     * Converts the wall to a draw command tagged with the WALL shape, so the
+     * presentation layer can identify walls (e.g. to bound the decorative grid).
+     * @return a DrawCommand with the WALL shape
+     */
+    @Override
+    public DrawCommand toDrawCommand() {
+        return new DrawCommand(getDisplayColor(), (int) getX(), (int) getY(),
+                (int) getWidth(), (int) getHeight(), DrawCommand.Shape.WALL);
     }
 }

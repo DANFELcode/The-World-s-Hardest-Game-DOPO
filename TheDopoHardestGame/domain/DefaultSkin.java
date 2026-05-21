@@ -23,4 +23,7 @@ public class DefaultSkin implements SkinBehavior {
     public Color getDisplayColor() {
         return Color.RED;
     }
+
+    @Override
+    public String getSkinType() { return "red"; }
 }

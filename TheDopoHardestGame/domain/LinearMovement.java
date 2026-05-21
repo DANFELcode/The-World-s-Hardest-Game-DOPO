@@ -7,16 +7,18 @@ package domain;
  */
 public class LinearMovement implements MovementStrategy {
 
-    private Direction direction;
-    private int sign;
-    private final double speedInUnits;
-
+    private Direction direction; //horizontal o vertical el enemigo si tiene dirección fija
+    private int sign; //1 o -1
+    private final double speedInUnits; //1.0 o 2.0 para acelerado
+    
     private LinearMovement(Direction direction, int sign, double speedInUnits) {
         this.direction = direction;
         this.sign = sign;
         this.speedInUnits = speedInUnits;
     }
 
+    //factory methods(remplazan al constructor)
+    //estaticos porque no necesitamos una isntancia previa para crearlos
     /** Basic linear movement — 1x velocity. */
     public static LinearMovement basic(Direction direction, int sign) {
         return new LinearMovement(direction, sign, 1.0*ENEMY_UNIT);
@@ -36,7 +38,8 @@ public class LinearMovement implements MovementStrategy {
     public void move(Enemy enemy, Level level) {
         double currentX = enemy.getX();
         double currentY = enemy.getY();
-        double delta = sign * speedInUnits * MovableElement.UNIT;
+        double delta = sign * speedInUnits * MovableElement.UNIT; //si sign = 1 y el enemigo va horizontal se mueve a la derecha
+        //si sign = 1 y el enemigo va vertical se mueve hacia arriba
 
         switch (direction) {
             case VERTICAL:
@@ -44,7 +47,7 @@ public class LinearMovement implements MovementStrategy {
                 if (level.isWalkable(currentX, newY, enemy.getWidth(), enemy.getHeight())) {
                     enemy.setPosition(currentX, newY);
                 } else {
-                    sign *= -1;
+                    sign *= -1; //si no es caminable quiere decir que hay una pared o esta fuera de los limites
                 }
                 break;
             case HORIZONTAL:

@@ -15,6 +15,7 @@ public abstract class MovableElement {
     private double speed;
 
     /** Domain calibration: how much an entity moves per tick when its speed multiplier is 1.0. */
+    // Unidad del juego
     protected static final double UNIT = 3.0;
 
     /**
@@ -32,6 +33,33 @@ public abstract class MovableElement {
         this.height = height;
         this.speed = speed;
     }
+    
+    //getters se usan amplicamente porque 
+    //toda colisión, movimiento, renderizado, persistencia y tests necesitan leer posición/tamaño/velocidad.
+    /**
+     * @return the current horizontal position
+     */
+    public double getX() { return x; }
+
+    /**
+     * @return the current vertical position
+     */
+    public double getY() { return y; }
+
+    /**
+     * @return the element width
+     */
+    public double getWidth() { return width; }
+
+    /**
+     * @return the element height
+     */
+    public double getHeight() { return height; }
+
+    /**
+     * @return the movement speed
+     */
+    public double getSpeed() { return speed; }
 
     /**
      * Updates the position of the element.
@@ -43,25 +71,40 @@ public abstract class MovableElement {
         this.y = newY;
     }
     
+    /**
+     * Returns the rectangular collision area occupied by this element.
+     * @return a rectangle at the element's current position with its width and height
+     */
     public Rectangle2D getAreaColision() {
         return new Rectangle2D.Double(x, y, width, height);
     }
 
+    /**
+     * Updates the movement speed. Values not greater than 0 are ignored to preserve the class invariant.
+     * @param speed new movement speed
+     */
+    //lo usan las skins para cambiar de velocidad a player
     protected void setSpeed(double speed) {
         if (speed > 0) this.speed = speed;
     }
 
+    /**
+     * Updates the element width. Values not greater than 0 are ignored to preserve the class invariant.
+     * @param width new element width
+     */
+    //lo usan las skins para cambiar de tamaño a player
+    
     protected void setWidth(double width) {
         if (width > 0) this.width = width;
     }
 
+    /**
+     * Updates the element height. Values not greater than 0 are ignored to preserve the class invariant.
+     * @param height new element height
+     */
     protected void setHeight(double height) {
         if (height > 0) this.height = height;
     }
 
-    public double getX() { return x; }
-    public double getY() { return y; }
-    public double getWidth() { return width; }
-    public double getHeight() { return height; }
-    public double getSpeed() { return speed; }
+
 }
