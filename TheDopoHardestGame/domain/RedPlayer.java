@@ -1,5 +1,9 @@
 package domain;
 
+/**
+ * Standard red player with 1x speed and 20x20 size. Uses DefaultSkin as base behavior. <br>
+ * <b>Inv:</b> speed > 0 and width > 0 and height > 0
+ */
 public class RedPlayer extends Player {
 
     public RedPlayer(String name, double x, double y) {

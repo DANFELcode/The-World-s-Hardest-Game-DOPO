@@ -2,6 +2,11 @@ package domain;
 
 import java.awt.Color;
 
+/**
+ * Coin that, when collected by its owner, changes the player's active skin
+ * to the type encoded in its color (e.g. "blue", "green", "red"). <br>
+ * <b>Inv:</b> skinType in {"red", "blue", "green"}
+ */
 public class SkinCoin extends Coin {
 
     private final String skinType;

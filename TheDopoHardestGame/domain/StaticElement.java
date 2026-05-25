@@ -54,6 +54,8 @@ public abstract class StaticElement implements Interactable, Drawable {
     public boolean shouldBeRemoved() { return false; }
     public boolean isBlocking() { return false; }
     public boolean isVisible() { return true; }
+    /** True si pisar este elemento es mortal para el jugador (usado por la IA para evitarlo). */
+    public boolean isHazardous() { return false; }
     public void reset() { }
     /** Owner of this element, or null if unowned (walls, bombs). */
     public String getOwnerName() { return null; }

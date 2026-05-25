@@ -24,6 +24,7 @@ public class TheDOPOHardestGame {
     private Map<String, Integer> levelsWon;
     private Map<String, String> playerTypes;
     private Map<String, java.awt.Color> playerBorderColors;
+    private String machineStrategy = "random"; // tipo de IA para Player2 en PvsM: "random" o "expert"
 
     public TheDOPOHardestGame() {
         this.currentGameMode = GameMode.PLAYER;
@@ -60,7 +61,7 @@ public class TheDOPOHardestGame {
                 String type = playerTypes.getOrDefault(owner, "red");
                 Player player = Player.create(type, owner, zone.getX(), zone.getY());
                 boolean isMachine = currentGameMode == GameMode.PvsM && "Player2".equals(owner);
-                if (isMachine) player.setStrategy(new RandomStrategy());
+                if (isMachine) player.setStrategy(GameStrategy.of(machineStrategy));
                 java.awt.Color border = playerBorderColors.get(owner);
                 if (border != null) player.setBorderColor(border);
                 currentLevel.addPlayer(player);
@@ -86,6 +87,13 @@ public class TheDOPOHardestGame {
         this.playerBorderColors.put(owner, color);
     }
 
+    /** Selects the AI strategy used by Player2 in PvsM mode. Accepts "random" or "expert". */
+    public void setMachineStrategy(String type) {
+        if (type != null) this.machineStrategy = type;
+    }
+
+    public String getMachineStrategy() { return machineStrategy; }
+
 	public void guardarPartida(File file) throws GameException {
 
         dataAccess.guardarPartida(this, file);
@@ -95,37 +103,44 @@ public class TheDOPOHardestGame {
 
         Map<String, String> data = dataAccess.abrirPartida(file);
 
-        String modeStr = data.get("mode");
-        currentGameMode = modeStr != null ? GameMode.valueOf(modeStr) : GameMode.PLAYER;
-
-        String levelStr = data.get("level");
-        currentLevelNumber = levelStr != null ? Integer.parseInt(levelStr) : 1;
-
         playerTypes = new HashMap<>();
         levelsWon = new HashMap<>();
         playerBorderColors = new HashMap<>();
         Map<String, Integer> savedDeaths = new HashMap<>();
         Map<String, Integer> savedLifetimes = new HashMap<>();
 
-        for (Map.Entry<String, String> entry : data.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (key.startsWith("player.") && key.endsWith(".type")) {
-                String owner = key.substring("player.".length(), key.length() - ".type".length());
-                playerTypes.put(owner, value);
-            } else if (key.startsWith("player.") && key.endsWith(".deaths")) {
-                String owner = key.substring("player.".length(), key.length() - ".deaths".length());
-                savedDeaths.put(owner, Integer.parseInt(value));
-            } else if (key.startsWith("player.") && key.endsWith(".lifetime")) {
-                String owner = key.substring("player.".length(), key.length() - ".lifetime".length());
-                savedLifetimes.put(owner, Integer.parseInt(value));
-            } else if (key.startsWith("player.") && key.endsWith(".borderColor")) {
-                String owner = key.substring("player.".length(), key.length() - ".borderColor".length());
-                playerBorderColors.put(owner, new java.awt.Color(Integer.parseInt(value)));
-            } else if (key.startsWith("levelsWon.")) {
-                String owner = key.substring("levelsWon.".length());
-                levelsWon.put(owner, Integer.parseInt(value));
+        try {
+            String modeStr = data.get("mode");
+            currentGameMode = modeStr != null ? GameMode.valueOf(modeStr) : GameMode.PLAYER;
+
+            String levelStr = data.get("level");
+            currentLevelNumber = levelStr != null ? Integer.parseInt(levelStr) : 1;
+
+            String strategyStr = data.get("machineStrategy");
+            if (strategyStr != null) machineStrategy = strategyStr;
+
+            for (Map.Entry<String, String> entry : data.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                if (key.startsWith("player.") && key.endsWith(".type")) {
+                    String owner = key.substring("player.".length(), key.length() - ".type".length());
+                    playerTypes.put(owner, value);
+                } else if (key.startsWith("player.") && key.endsWith(".deaths")) {
+                    String owner = key.substring("player.".length(), key.length() - ".deaths".length());
+                    savedDeaths.put(owner, Integer.parseInt(value));
+                } else if (key.startsWith("player.") && key.endsWith(".lifetime")) {
+                    String owner = key.substring("player.".length(), key.length() - ".lifetime".length());
+                    savedLifetimes.put(owner, Integer.parseInt(value));
+                } else if (key.startsWith("player.") && key.endsWith(".borderColor")) {
+                    String owner = key.substring("player.".length(), key.length() - ".borderColor".length());
+                    playerBorderColors.put(owner, new java.awt.Color(Integer.parseInt(value)));
+                } else if (key.startsWith("levelsWon.")) {
+                    String owner = key.substring("levelsWon.".length());
+                    levelsWon.put(owner, Integer.parseInt(value));
+                }
             }
+        } catch (IllegalArgumentException e) {
+            throw new PersistenceException("open", "Archivo de partida corrupto: " + e.getMessage());
         }
 
         currentLevel = dataAccess.loadLevel("level" + currentLevelNumber + ".txt", currentGameMode);

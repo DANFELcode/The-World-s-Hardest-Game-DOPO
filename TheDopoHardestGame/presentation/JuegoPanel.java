@@ -15,6 +15,12 @@ import java.util.Set;
 import javax.swing.*;
 
 /**
+ * Game view: hosts the BoardPanel and the HUD (deaths, coins, timer, winner).
+ * Captures keyboard input and translates it into player movement on each tick.
+ * Also handles the level-complete dialog and post-victory options.
+ */
+
+/**
  * Game view: the board, the HUD (level / coins / deaths / time), the MENU
  * button and keyboard input for both players. Driven each tick by the
  * GameLoop through {@link #update()} and {@link #refresh()}.
@@ -185,7 +191,15 @@ public class JuegoPanel extends JPanel {
 
             if (juego.isLevelComplete()) {
                 boolean hasNext = juego.hasNextLevel();
-                juego.advanceLevel();
+                try {
+                    juego.advanceLevel();
+                } catch (Exception e) {
+                    host.detenerLoop();
+                    clearKeys();
+                    JOptionPane.showMessageDialog(this, "Error al avanzar de nivel: " + e.getMessage());
+                    host.mostrarInicio();
+                    return;
+                }
                 if (!hasNext) {
                     host.detenerLoop();
                     clearKeys();
@@ -218,19 +232,52 @@ public class JuegoPanel extends JPanel {
     }
 
     private void mostrarDialogoFin(String mensaje) {
-        String[] opciones = {"Nueva Partida", "Menú", "Salir"};
-        int opcion = JOptionPane.showOptionDialog(
-            this, mensaje, "Fin del juego",
-            JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
-            null, opciones, opciones[0]);
-        if (opcion == 0) {
+        Window owner = SwingUtilities.getWindowAncestor(this);
+        JDialog dialog = new JDialog(owner, "Fin del juego", Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setUndecorated(true);
+
+        JPanel content = UIFactory.createGradientPanel(new BorderLayout(0, 20));
+        content.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(40, 40, 60), 2),
+            BorderFactory.createEmptyBorder(28, 36, 24, 36)));
+
+        JPanel msgWrap = new JPanel(new GridBagLayout());
+        msgWrap.setOpaque(false);
+        JLabel msgLabel = new JLabel("<html><div style='text-align:center;'>"
+            + mensaje.replace("\n", "<br>") + "</div></html>", SwingConstants.CENTER);
+        msgLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        msgLabel.setForeground(new Color(35, 40, 60));
+        msgWrap.add(msgLabel);
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 14, 0));
+        btnPanel.setOpaque(false);
+
+        JButton btnNueva = UIFactory.createPillButton("Nueva Partida", new Color(46, 184, 110));
+        JButton btnMenu  = UIFactory.createPillButton("Menú",          new Color(58, 130, 230));
+        JButton btnSalir = UIFactory.createPillButton("Salir",         new Color(220, 70, 80));
+
+        btnNueva.addActionListener(e -> {
+            dialog.dispose();
             juego.startGame(1);
             host.iniciarJuego();
-        } else if (opcion == 2) {
-            System.exit(0);
-        } else {
+        });
+        btnMenu.addActionListener(e -> {
+            dialog.dispose();
             host.mostrarInicio();
-        }
+        });
+        btnSalir.addActionListener(e -> System.exit(0));
+
+        btnPanel.add(btnNueva);
+        btnPanel.add(btnMenu);
+        btnPanel.add(btnSalir);
+
+        content.add(msgWrap,  BorderLayout.CENTER);
+        content.add(btnPanel, BorderLayout.SOUTH);
+
+        dialog.setContentPane(content);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 
     /** Enables or disables death/explosion visual effects. */

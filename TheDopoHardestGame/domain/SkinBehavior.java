@@ -3,6 +3,10 @@ package domain;
 import java.awt.Color;
 import java.io.Serializable;
 
+/**
+ * Define como se comporta una skin: stats, reaccion al golpe y color.
+ * Cada Player tiene su skin por defecto y puede cambiarla recogiendo SkinCoins.
+ */
 public interface SkinBehavior extends Serializable {
     void apply(Player player);
     void onHit(Player player, Level level);

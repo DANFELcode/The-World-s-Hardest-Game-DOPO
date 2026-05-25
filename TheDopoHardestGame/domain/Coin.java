@@ -8,7 +8,7 @@ import java.awt.Color;
  * <b>(x, y, width, height, collected)</b> <br>
  * <b>Inv:</b> width > 0 and height > 0
  */
-public class Coin extends StaticElement implements Collectible {
+public abstract class Coin extends StaticElement implements Collectible {
 
     private boolean collected;
     private boolean protectedByCheckpoint;
@@ -33,8 +33,12 @@ public class Coin extends StaticElement implements Collectible {
         if (!collected && player.getName().equals(ownerName)) {
             this.collected = true;
             player.collectCoin();
+            applyEffect(player);
         }
     }
+
+    // Efecto extra al recoger, vacío por defecto. Las subclases lo redefinen.
+    protected void applyEffect(Player player) { }
 
     @Override
     public String getOwnerName() { return ownerName; }
@@ -79,11 +83,9 @@ public class Coin extends StaticElement implements Collectible {
     public boolean resetsOnAnyDeath() { return false; }
 
     /** Returns the coin's type identifier used in level files (e.g. "yellow", "blue"). */
-    public String getCoinType() { return "yellow"; }
-    
-    public Color getDisplayColor() {
-        return GameConstants.COLOR_COIN;
-    }
+    public abstract String getCoinType();
+
+    public abstract Color getDisplayColor();
 
     @Override
     public DrawCommand toDrawCommand() {

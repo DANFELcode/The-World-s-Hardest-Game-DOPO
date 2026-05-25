@@ -3,20 +3,18 @@ import dto.DrawCommand;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
-import java.io.Serializable;
 
 /**
  * Represents a specific area within the level map. <br>
- * <b>(x, y, width, height, visited)</b> <br>
+ * <b>(x, y, width, height)</b> <br>
  * <b>Inv:</b> width > 0 and height > 0
  */
-public abstract class Zone implements Interactable, Drawable, Serializable {
+public abstract class Zone implements Interactable, Drawable {
 
     protected double x;
     protected double y;
     protected double width;
     protected double height;
-    private boolean visited;
 
     /**
      * Creates a zone at the given position and size.
@@ -30,34 +28,16 @@ public abstract class Zone implements Interactable, Drawable, Serializable {
         this.y = y;
         this.width = width;
         this.height = height;
-        this.visited = false;
     }
 
     public abstract Color getDisplayColor();
 
     /**
-     * Hook invoked when a player intersects this zone. Default behaviour: mark the zone as visited.
-     * Subclasses can override to add custom behaviour.
+     * Hook invoked when a player intersects this zone.
+     * Subclasses override to add custom behaviour (checkpoint, victory check, etc).
      * @param player the player entering the zone
      */
-    public void onPlayerEnter(Player player) {
-        visit();
-    }
-
-    /**
-     * Marks the zone as visited.
-     */
-    public void visit() {
-        this.visited = true;
-    }
-
-    /**
-     * Returns whether this zone has been visited by a player.
-     * @return true if the zone has been visited
-     */
-    public boolean isVisited() {
-        return visited;
-    }
+    public void onPlayerEnter(Player player) { }
 
     @Override
     public void onPlayerContact(Player player, Level level) {
@@ -78,6 +58,5 @@ public abstract class Zone implements Interactable, Drawable, Serializable {
     public double getY() { return y; }
     public double getWidth() { return width; }
     public double getHeight() { return height; }
-
 
 }

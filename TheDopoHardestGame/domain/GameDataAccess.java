@@ -213,7 +213,7 @@ public class GameDataAccess {
         if ("blue".equals(skinType) || "green".equals(skinType) || "red".equals(skinType)) {
             return new SkinCoin(x, y, w, h, skinType, owner);
         }
-        return new Coin(x, y, w, h, skinType, owner);
+        return new YellowCoin(x, y, w, h, skinType, owner);
     }
 
     private Enemy createEnemy(String filePath, GameMap map, Map<String, String> p) throws LevelFormatException {
@@ -298,6 +298,7 @@ public class GameDataAccess {
             for (Map.Entry<String, Integer> entry : game.getLevelsWon().entrySet()) {
                 writer.println("levelsWon." + entry.getKey() + "=" + entry.getValue());
             }
+            writer.println("machineStrategy=" + game.getMachineStrategy());
         } catch (IOException e) {
             throw new PersistenceException("save", "Error al guardar la partida: " + e.getMessage());
         }
@@ -352,7 +353,7 @@ public class GameDataAccess {
                             + ",width=" + z.getWidth() + ",height=" + z.getHeight()
                             + ",owner=" + key.substring("final_".length());
                 } else {
-                    line = key.toUpperCase() + "_ZONE x=" + z.getX() + ",y=" + z.getY()
+                    line = "INTERMEDIATE_ZONE x=" + z.getX() + ",y=" + z.getY()
                             + ",width=" + z.getWidth() + ",height=" + z.getHeight();
                 }
                 writer.println(line);

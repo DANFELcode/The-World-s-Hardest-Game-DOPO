@@ -2,6 +2,11 @@ package domain;
 
 import java.awt.Color;
 
+/**
+ * Skin for the green player: absorbs the first hit by becoming weakened (0.7x speed).
+ * Dies on the second hit. <br>
+ * <b>Inv:</b> isWeakened in {true, false}
+ */
 public class GreenSkin implements SkinBehavior {
 
     private static final double SPEED = 1.0 * MovableElement.UNIT;

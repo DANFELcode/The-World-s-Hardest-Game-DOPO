@@ -2,6 +2,10 @@ package domain;
 
 import java.awt.Color;
 
+/**
+ * Skin for the blue player: 1.5x speed and 30x30 size. Dies on the first hit. <br>
+ * <b>Inv:</b> speed > 0 and size > 0
+ */
 public class BlueSkin implements SkinBehavior {
 
     private static final double SPEED = 1.5 * MovableElement.UNIT;

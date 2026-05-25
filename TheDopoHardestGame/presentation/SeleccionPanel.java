@@ -24,12 +24,15 @@ public class SeleccionPanel extends GradientPanel {
 
     private JButton btnModePlayer, btnModePvsP, btnModePvsM;
     private JButton btnSkinRojo, btnSkinAzul, btnSkinVerde;
+    private JButton btnStrategyRandom, btnStrategyExpert;
     private JButton btnJugar, btnVolver;
     private JButton[] borde1Botones;
     private JButton[] borde2Botones;
     private JPanel borde2Controls;
     private JPanel levelControls;
+    private JPanel strategyControls;
     private JLabel labelBorde2;
+    private JLabel labelStrategy;
     private PlayerPreviewPanel playerPreview;
 
     private int selectedLevel = 1;
@@ -37,6 +40,7 @@ public class SeleccionPanel extends GradientPanel {
     private String selectedSkin = "red";
     private Color selectedBorder1 = Color.BLACK;
     private Color selectedBorder2 = Color.WHITE;
+    private String selectedStrategy = "random";
 
     /**
      * @param juego the game facade
@@ -50,6 +54,7 @@ public class SeleccionPanel extends GradientPanel {
         wireAcciones();
         highlightButton(btnModePlayer, btnModePvsP, btnModePvsM);
         highlightButton(btnSkinRojo, btnSkinAzul, btnSkinVerde);
+        highlightButton(btnStrategyRandom, btnStrategyExpert);
         refreshBorderButtonStates();
         refreshLevelButtons();
         updatePreview();
@@ -67,7 +72,7 @@ public class SeleccionPanel extends GradientPanel {
         centro.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 14));
         // Reserve room for all 5 rows (incl. the optional Borde P2 row) so the
         // window packs large enough and toggling that row never compresses the layout.
-        centro.setPreferredSize(new Dimension(680, 330));
+        centro.setPreferredSize(new Dimension(680, 440));
 
         btnModePlayer = UIFactory.createPillButton("PLAYER", ACCENT);
         btnModePvsP   = UIFactory.createPillButton("PvsP", ACCENT);
@@ -76,6 +81,9 @@ public class SeleccionPanel extends GradientPanel {
         btnSkinRojo  = UIFactory.createPillButton("Blinky (Rojo)", SKIN_RED);
         btnSkinAzul  = UIFactory.createPillButton("Inky (Azul)", SKIN_BLUE);
         btnSkinVerde = UIFactory.createPillButton("Clyde (Verde)", SKIN_GREEN);
+
+        btnStrategyRandom = UIFactory.createPillButton("Aleatoria", ACCENT);
+        btnStrategyExpert = UIFactory.createPillButton("Experta", ACCENT);
 
         borde1Botones = new JButton[BORDER_COLORS.length];
         borde2Botones = new JButton[BORDER_COLORS.length];
@@ -89,7 +97,9 @@ public class SeleccionPanel extends GradientPanel {
         }
 
         levelControls = fila();
+        strategyControls = fila(btnStrategyRandom, btnStrategyExpert);
         labelBorde2 = rowLabel("Borde P2:");
+        labelStrategy = rowLabel("IA Maquina:");
 
         GridBagConstraints gc = new GridBagConstraints();
         gc.insets = new Insets(6, 8, 6, 10);
@@ -99,10 +109,13 @@ public class SeleccionPanel extends GradientPanel {
             fila(btnSkinRojo, btnSkinAzul, btnSkinVerde));
         addRow(centro, gc, 2, rowLabel("Borde P1:"), borde1Controls);
         addRow(centro, gc, 3, labelBorde2, borde2Controls);
-        addRow(centro, gc, 4, rowLabel("Nivel:"), levelControls);
+        addRow(centro, gc, 4, labelStrategy, strategyControls);
+        addRow(centro, gc, 5, rowLabel("Nivel:"), levelControls);
 
         labelBorde2.setVisible(false);
         borde2Controls.setVisible(false);
+        labelStrategy.setVisible(false);
+        strategyControls.setVisible(false);
 
         // --- Preview del personaje sobre el fondo del tablero ---
         playerPreview = new PlayerPreviewPanel();
@@ -162,6 +175,7 @@ public class SeleccionPanel extends GradientPanel {
             selectedLevel = 1;
             highlightButton(btnModePlayer, btnModePvsP, btnModePvsM);
             setBorde2Visible(false);
+            setStrategyVisible(false);
             refreshBorderButtonStates();
             refreshLevelButtons();
             updatePreview();
@@ -171,6 +185,7 @@ public class SeleccionPanel extends GradientPanel {
             selectedLevel = 1;
             highlightButton(btnModePvsP, btnModePlayer, btnModePvsM);
             setBorde2Visible(true);
+            setStrategyVisible(false);
             ensureBordersDiffer();
             refreshBorderButtonStates();
             refreshLevelButtons();
@@ -181,10 +196,20 @@ public class SeleccionPanel extends GradientPanel {
             selectedLevel = 1;
             highlightButton(btnModePvsM, btnModePlayer, btnModePvsP);
             setBorde2Visible(true);
+            setStrategyVisible(true);
             ensureBordersDiffer();
             refreshBorderButtonStates();
             refreshLevelButtons();
             updatePreview();
+        });
+
+        btnStrategyRandom.addActionListener(e -> {
+            selectedStrategy = "random";
+            highlightButton(btnStrategyRandom, btnStrategyExpert);
+        });
+        btnStrategyExpert.addActionListener(e -> {
+            selectedStrategy = "expert";
+            highlightButton(btnStrategyExpert, btnStrategyRandom);
         });
 
         for (int i = 0; i < BORDER_COLORS.length; i++) {
@@ -235,6 +260,9 @@ public class SeleccionPanel extends GradientPanel {
                 juego.setPlayerType("Player2", selectedSkin);
                 juego.setPlayerBorderColor("Player2", selectedBorder2);
             }
+            if (selectedMode == GameMode.PvsM) {
+                juego.setMachineStrategy(selectedStrategy);
+            }
             juego.startGame(selectedLevel);
             host.iniciarJuego();
         });
@@ -243,6 +271,11 @@ public class SeleccionPanel extends GradientPanel {
     private void setBorde2Visible(boolean visible) {
         labelBorde2.setVisible(visible);
         borde2Controls.setVisible(visible);
+    }
+
+    private void setStrategyVisible(boolean visible) {
+        labelStrategy.setVisible(visible);
+        strategyControls.setVisible(visible);
     }
 
     private void updatePreview() {

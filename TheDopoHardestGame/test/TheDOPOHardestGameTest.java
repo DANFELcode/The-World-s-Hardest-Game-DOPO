@@ -169,7 +169,7 @@ class TheDOPOHardestGameTest {
 
     @Test
     void playerDeathShouldResetOwnedCoinsWhenNoCheckpoint() {
-        Coin coin = new Coin(200, 240, 12, 12, "yellow", "Player1");
+        Coin coin = new YellowCoin(200, 240, 12, 12, "yellow", "Player1");
         level.addCoin(coin);
         level.addPlayer(redPlayer);
         coin.setOwnerPlayer(redPlayer);
@@ -181,12 +181,13 @@ class TheDOPOHardestGameTest {
 
     @Test
     void playerDeathShouldNotResetCoinsWithCheckpoint() {
-        Coin coin = new Coin(200, 240, 12, 12, "yellow", "Player1");
+        Coin coin = new YellowCoin(200, 240, 12, 12, "yellow", "Player1");
         level.addCoin(coin);
         level.addPlayer(redPlayer);
         coin.setOwnerPlayer(redPlayer);
         coin.onCollect(redPlayer);
         redPlayer.markCheckpoint(300, 300);
+        level.protectCollectedCoins(redPlayer);
         redPlayer.die(level);
         assertTrue(coin.isCollected(), "Normal coin should survive death after checkpoint");
     }
@@ -210,6 +211,7 @@ class TheDOPOHardestGameTest {
         skinCoin.setOwnerPlayer(redPlayer);
         skinCoin.onCollect(redPlayer);
         redPlayer.markCheckpoint(300, 300);
+        level.protectCollectedCoins(redPlayer);
         redPlayer.die(level);
         assertTrue(skinCoin.isCollected(), "SkinCoin must stay collected after death with checkpoint");
     }
@@ -295,7 +297,7 @@ class TheDOPOHardestGameTest {
 
     @Test
     void coinShouldOnlyBeCollectedByOwner() {
-        Coin coin = new Coin(0, 0, 10, 10, "yellow", "Player1");
+        Coin coin = new YellowCoin(0, 0, 10, 10, "yellow", "Player1");
         RedPlayer other = new RedPlayer("Player2", 0, 0);
         coin.onCollect(other);
         assertFalse(coin.isCollected());
@@ -305,7 +307,7 @@ class TheDOPOHardestGameTest {
 
     @Test
     void coinShouldNotBeCollectedTwiceWithoutReset() {
-        Coin coin = new Coin(0, 0, 10, 10, "yellow", "Player1");
+        Coin coin = new YellowCoin(0, 0, 10, 10, "yellow", "Player1");
         coin.onCollect(redPlayer);
         coin.onCollect(redPlayer);
         // second call no-op (still collected, no side effects beyond first)
@@ -314,9 +316,9 @@ class TheDOPOHardestGameTest {
 
     @Test
     void isCoinsCollectedByShouldReturnTrueWhenAllOwnedCollected() {
-        Coin c1 = new Coin(0, 0, 10, 10, "yellow", "Player1");
-        Coin c2 = new Coin(0, 20, 10, 10, "yellow", "Player1");
-        Coin foreign = new Coin(0, 40, 10, 10, "yellow", "Player2");
+        Coin c1 = new YellowCoin(0, 0, 10, 10, "yellow", "Player1");
+        Coin c2 = new YellowCoin(0, 20, 10, 10, "yellow", "Player1");
+        Coin foreign = new YellowCoin(0, 40, 10, 10, "yellow", "Player2");
         level.addCoin(c1);
         level.addCoin(c2);
         level.addCoin(foreign);
@@ -327,7 +329,7 @@ class TheDOPOHardestGameTest {
 
     @Test
     void coinResetShouldReopenCollection() {
-        Coin coin = new Coin(0, 0, 10, 10, "yellow", "Player1");
+        Coin coin = new YellowCoin(0, 0, 10, 10, "yellow", "Player1");
         coin.onCollect(redPlayer);
         coin.reset();
         assertFalse(coin.isCollected());
@@ -362,7 +364,7 @@ class TheDOPOHardestGameTest {
     @Test
     void finalZoneShouldNotSetWinnerWithoutAllCoins() {
         FinalZone zone = new FinalZone(700, 200, 50, 50, "Player1");
-        Coin coin = new Coin(0, 0, 10, 10, "yellow", "Player1");
+        Coin coin = new YellowCoin(0, 0, 10, 10, "yellow", "Player1");
         level.addCoin(coin);
         level.addPlayer(redPlayer);
         zone.onPlayerContact(redPlayer, level);
@@ -562,10 +564,12 @@ class TheDOPOHardestGameTest {
     }
 
     @Test
-    void bombShouldBeRemovedAfterExplosion() {
+    void bombShouldTurnInvisibleAfterExplosion() {
         Bomb bomb = new Bomb(100, 100, 20, 20);
         bomb.onContact(redPlayer, level);
-        assertTrue(bomb.shouldBeRemoved());
+        assertFalse(bomb.shouldBeRemoved(), "An exploded bomb is kept so it can regenerate on respawn");
+        assertFalse(bomb.isVisible(), "An exploded bomb turns invisible");
+        assertTrue(bomb.hasExploded());
     }
 
     @Test
@@ -619,8 +623,8 @@ class TheDOPOHardestGameTest {
     void playerCollisionShouldResetCoinsOfBothPlayers() {
         Player p1 = new RedPlayer("Player1", 100, 100);
         Player p2 = new BluePlayer("Player2", 100, 100);
-        Coin c1 = new Coin(0, 0, 10, 10, "yellow", "Player1");
-        Coin c2 = new Coin(0, 0, 10, 10, "yellow", "Player2");
+        Coin c1 = new YellowCoin(0, 0, 10, 10, "yellow", "Player1");
+        Coin c2 = new YellowCoin(0, 0, 10, 10, "yellow", "Player2");
         level.addCoin(c1);
         level.addCoin(c2);
         level.addPlayer(p1);

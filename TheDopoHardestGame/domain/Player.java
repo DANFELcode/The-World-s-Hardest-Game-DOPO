@@ -18,9 +18,10 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     protected double spawnY;
     // atributo para saber si el jugador ha llegado a la zona intermedia
     // para saber si aparece en el checkpoint original o en la zona intermedia   
-    private boolean hasCheckpoint;  
+    private boolean hasCheckpoint;
     protected SkinBehavior currentSkin;
     private String lastSkinType; // ultima skin recolectada, por defecto se inicia null asi que no hay necesidad de ponerla en el constructor
+    private String checkpointSkinType; // snapshot de la ultima skin al cruzar la zona intermedia
     protected int extraLives = 0; // se inicializa antes por seguridad
     protected Color borderColor = Color.BLACK;
     private GameStrategy strategy; // null = controlado por humano
@@ -71,6 +72,7 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     public void markCheckpoint(double x, double y) {
         setSpawnPoint(x, y);
         this.hasCheckpoint = true;
+        this.checkpointSkinType = this.lastSkinType; // snapshot de la skin al cruzar el checkpoint
     }
 
     /**
@@ -87,6 +89,7 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     // lo llama la fachada al iniciar un nuevo nivel
     public void resetCheckpoint() {
     	hasCheckpoint = false;
+    	checkpointSkinType = null;
     }
 
     // es necesario normalizar el movimiento porque el jugador no puede avanzar mas rapido diagonalmente 
@@ -117,9 +120,9 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     public void die(Level level) {
         this.deaths++;
         this.setPosition(spawnX, spawnY);
-        if (hasCheckpoint && lastSkinType != null) {
-            // With a checkpoint, keep the last collected skin (fresh instance, no stale state).
-            changeSkin(SkinBehavior.of(lastSkinType)); //cambia la skin a la ultima guardada llama a SkinBehavior
+        if (hasCheckpoint && checkpointSkinType != null) {
+            // Con checkpoint, restaura la skin que tenia AL CRUZAR el checkpoint (snapshot), no la actual.
+            changeSkin(SkinBehavior.of(checkpointSkinType));
         } else {
             restoreSkin();
             lastSkinType = null;

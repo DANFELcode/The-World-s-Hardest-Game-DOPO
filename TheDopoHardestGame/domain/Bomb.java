@@ -57,6 +57,9 @@ public class Bomb extends StaticElement implements Lethal {
     @Override
     public boolean isVisible() { return !exploded; }
 
+    @Override
+    public boolean isHazardous() { return !exploded; }
+
     /** Never removed: the bomb is kept so {@link #reset()} can bring it back. */
     @Override
     public boolean shouldBeRemoved() { return false; }

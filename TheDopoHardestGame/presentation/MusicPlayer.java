@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 import javax.sound.sampled.*;
+import javax.swing.Timer;
 
 /**
  * Handles background music: loads WAV tracks, loops them, and exposes
@@ -29,10 +30,26 @@ public class MusicPlayer {
     private int currentTrack = 0;
     private float volume = 0.5f;   // linear 0.0–1.0
     private boolean muted = false;
+    private boolean userStopped = false;
+    private Timer watchdog;
 
-    /** Creates the player with default settings and starts the first track. */
+    /** Creates the player, restores persisted settings, and starts the configured track. */
     public MusicPlayer() {
+        loadConfig();
         loadAndPlay(currentTrack);
+        startWatchdog();
+    }
+
+    //en windows el clip se cae solo despues de un rato, lo revivimos cada 2s
+    private void startWatchdog() {
+        watchdog = new Timer(2000, e -> {
+            if (userStopped) return;
+            if (clip == null || !clip.isOpen() || !clip.isRunning()) {
+                stopClip();
+                loadAndPlay(currentTrack);
+            }
+        });
+        watchdog.start();
     }
 
     /** Switches to the given track index (0-based). No-op if already playing it. */
@@ -57,7 +74,11 @@ public class MusicPlayer {
     }
 
     /** Stops playback and releases the audio resource. */
-    public void stop() { stopClip(); }
+    public void stop() {
+        userStopped = true;
+        if (watchdog != null) watchdog.stop();
+        stopClip();
+    }
 
     public int getCurrentTrack() { return currentTrack; }
     public float getVolume()     { return volume; }
@@ -78,7 +99,7 @@ public class MusicPlayer {
         }
     }
 
-    // -------------------------------------------------------------------------
+ 
 
     private void loadConfig() {
         try {
@@ -104,6 +125,14 @@ public class MusicPlayer {
             clip = AudioSystem.getClip();
             clip.open(ais);
             applyVolume();
+            //refuerzo del watchdog: si el clip se detiene reiniciamos el loop
+            clip.addLineListener(event -> {
+                if (event.getType() == LineEvent.Type.STOP
+                        && clip != null && clip.isOpen()) {
+                    clip.setFramePosition(0);
+                    clip.loop(Clip.LOOP_CONTINUOUSLY);
+                }
+            });
             clip.loop(Clip.LOOP_CONTINUOUSLY);
         } catch (Exception e) {
             clip = null;

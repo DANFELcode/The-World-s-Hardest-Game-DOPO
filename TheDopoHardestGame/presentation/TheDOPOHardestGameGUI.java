@@ -5,6 +5,11 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 
+/**
+ * Main window: assembles the menu bar, the CardLayout and the four view panels
+ * (start, explanation, selection, game). Implements MainView so the panels can
+ * delegate navigation back to the window without depending on its concrete class.
+ */
 public class TheDOPOHardestGameGUI extends JFrame implements MainView {
 
     private TheDOPOHardestGame juego;

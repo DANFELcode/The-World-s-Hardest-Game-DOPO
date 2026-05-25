@@ -160,13 +160,6 @@ public class Level {
         return false;
     }
 
-    public boolean isCoinsCollected() {
-        for (Coin coin : coins) {
-            if (!coin.isCollected()) return false;
-        }
-        return true;
-    }
-
     /** Returns true if all coins owned by this player have been collected. */
     public boolean isCoinsCollectedBy(Player player) {
         String name = player.getName();

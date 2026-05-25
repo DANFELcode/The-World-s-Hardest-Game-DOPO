@@ -1,5 +1,6 @@
 package presentation;
 
+import domain.GameDataAccess;
 import javax.swing.Timer;
 
 /**
@@ -10,12 +11,11 @@ import javax.swing.Timer;
  */
 public class GameLoop {
 
-    private static final int TICKS_PER_SECOND = 60;
-    private static final double SECONDS_PER_TICK = 1.0 / TICKS_PER_SECOND;
+    private static final double SECONDS_PER_TICK = 1.0 / GameDataAccess.TICKS_PER_SECOND;
     private static final int MAX_TICKS_PER_FRAME = 5; // spiral-of-death cap
 
     /** Visual frame poll rate. Doesn't affect game speed — only smoothness of rendering. */
-    private static final int FRAME_DELAY_MS = 1000 / TICKS_PER_SECOND;
+    private static final int FRAME_DELAY_MS = 1000 / GameDataAccess.TICKS_PER_SECOND;
 
     private final Timer timer;
     private final TheDOPOHardestGameGUI gui;
