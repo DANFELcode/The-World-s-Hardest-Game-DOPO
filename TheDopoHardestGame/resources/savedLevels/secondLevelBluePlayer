@@ -1,7 +1,0 @@
-mode=PLAYER
-level=2
-player.Player1.type=blue
-player.Player1.deaths=1
-player.Player1.lifetime=0
-player.Player1.borderColor=-16777216
-levelsWon.Player1=1

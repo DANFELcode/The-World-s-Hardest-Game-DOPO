@@ -1,9 +1,0 @@
-mode=PvsP
-level=2
-player.Player1.type=red
-player.Player1.deaths=2
-player.Player1.lifetime=2
-player.Player2.type=red
-player.Player2.deaths=0
-player.Player2.lifetime=0
-levelsWon.Player1=1
