@@ -1,0 +1,11 @@
+mode=PvsM
+level=2
+player.Player1.type=red
+player.Player1.deaths=abc
+player.Player1.lifetime=0
+player.Player1.borderColor=-16777216
+player.Player2.type=red
+player.Player2.des=10
+player.Player2.lifetime=0
+player.Player2.borderColor=-1
+machineStrategy=expert
