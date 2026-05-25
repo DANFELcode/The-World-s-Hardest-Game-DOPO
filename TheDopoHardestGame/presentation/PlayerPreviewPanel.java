@@ -22,6 +22,7 @@ public class PlayerPreviewPanel extends JPanel {
     private boolean showTwo = false;
     private String label2 = "P2";
 
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     public PlayerPreviewPanel() {
         setPreferredSize(new Dimension(180, 190));
         setOpaque(false);

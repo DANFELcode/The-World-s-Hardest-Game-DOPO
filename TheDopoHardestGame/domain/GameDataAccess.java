@@ -3,16 +3,15 @@ package domain;
 import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GameDataAccess {
+public final class GameDataAccess {
     private static final String LEVELS_PATH = "resources/levels/";
     /** Conversion factor: how many ticks the level file's "TIME=N seconds" maps to. Must match the GameLoop tick rate. */
     public static final int TICKS_PER_SECOND = 60;
@@ -65,7 +64,7 @@ public class GameDataAccess {
         GameMap map = new GameMap(800, 500);
         List<String> elementLines = new ArrayList<>();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -285,7 +284,7 @@ public class GameDataAccess {
     }
 
     public void guardarPartida(TheDOPOHardestGame game, File file) throws GameException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(file.toPath()))) {
             writer.println("mode=" + game.getGameMode().name());
             writer.println("level=" + game.getCurrentLevelNumber());
             for (Player p : game.getPlayers()) {
@@ -306,7 +305,7 @@ public class GameDataAccess {
 
     public Map<String, String> abrirPartida(File file) throws GameException {
         Map<String, String> data = new HashMap<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -321,7 +320,7 @@ public class GameDataAccess {
     }
 
     public void exportarNivel(Level level, File file) throws GameException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(file.toPath()))) {
             writer.println("NUMBER=" + level.getNumber());
             writer.println("TIME=" + (level.getInitialGameTime() / (double) TICKS_PER_SECOND));
             for (StaticElement e : level.getStaticElements()) {

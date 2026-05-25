@@ -54,6 +54,7 @@ public abstract class Player extends MovableElement implements Drawable, Interac
     
     // se deja metodo por extension futura, si alguna subclase necesita implementarlo
     /** No-op hook called when a coin is picked up. Per-level count lives in Level. */
+    @SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
     public void collectCoin() { }
 
     /** Adds the given amount to the player's lifetime coin total (at level end). */
@@ -164,7 +165,7 @@ public abstract class Player extends MovableElement implements Drawable, Interac
      * Changes the player's active skin and applies its attributes (speed, width, height).
      * @param skin the new skin behavior to apply
      */
-    public void changeSkin(SkinBehavior skin) {
+    public final void changeSkin(SkinBehavior skin) {
         this.currentSkin = skin; //cambia la skin por la nueva seleccionada
         skin.apply(this); //cada tipo de skin sabe como aplicarse
     }

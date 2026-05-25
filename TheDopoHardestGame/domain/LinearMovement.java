@@ -5,7 +5,7 @@ package domain;
  * <b>(direction, sign)</b> <br>
  * <b>Inv:</b> sign == 1 or sign == -1
  */
-public class LinearMovement implements MovementStrategy {
+public final class LinearMovement implements MovementStrategy {
 
     private Direction direction; //horizontal o vertical el enemigo si tiene dirección fija
     private int sign; //1 o -1

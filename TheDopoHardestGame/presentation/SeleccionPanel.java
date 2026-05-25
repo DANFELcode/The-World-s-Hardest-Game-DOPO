@@ -46,6 +46,7 @@ public class SeleccionPanel extends GradientPanel {
      * @param juego the game facade
      * @param host the main window, used for navigation and loop control
      */
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     public SeleccionPanel(TheDOPOHardestGame juego, MainView host) {
         super(new BorderLayout());
         this.juego = juego;

@@ -2,8 +2,7 @@ package presentation;
 
 import domain.GameLogger;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.nio.file.Files;
 import java.util.Properties;
 import javax.sound.sampled.*;
 import javax.swing.Timer;
@@ -91,7 +90,7 @@ public class MusicPlayer {
             props.setProperty("track",  String.valueOf(currentTrack));
             props.setProperty("volume", String.valueOf(volume));
             props.setProperty("muted",  String.valueOf(muted));
-            try (FileOutputStream fos = new FileOutputStream(CONFIG_PATH)) {
+            try (java.io.OutputStream fos = Files.newOutputStream(new File(CONFIG_PATH).toPath())) {
                 props.store(fos, "Music configuration");
             }
         } catch (Exception e) {
@@ -106,7 +105,7 @@ public class MusicPlayer {
             File f = new File(CONFIG_PATH);
             if (!f.exists()) return;
             Properties props = new Properties();
-            try (FileInputStream fis = new FileInputStream(f)) {
+            try (java.io.InputStream fis = Files.newInputStream(f.toPath())) {
                 props.load(fis);
             }
             currentTrack = Integer.parseInt(props.getProperty("track",  "0"));

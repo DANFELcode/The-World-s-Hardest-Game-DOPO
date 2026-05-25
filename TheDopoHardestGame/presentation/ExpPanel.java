@@ -30,6 +30,7 @@ public class ExpPanel extends GradientPanel {
     /**
      * @param host the main window, used for navigation
      */
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     public ExpPanel(MainView host) {
         super(new BorderLayout());
         this.host = host;

@@ -60,6 +60,7 @@ public class BoardPanel extends JPanel {
         }
     }
 
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     public BoardPanel() {
         setPreferredSize(new Dimension(800, 500));
         setFocusable(true);

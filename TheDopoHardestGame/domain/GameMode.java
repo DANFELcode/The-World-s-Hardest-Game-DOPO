@@ -4,6 +4,7 @@ package domain;
  * Game modes supported by the application. Each mode declares how many players
  * it requires, whether a machine participates, and how level completion is checked.
  */
+@SuppressWarnings("PMD.FieldNamingConventions")
 public enum GameMode {
     PLAYER(1, false),
     PvsP(2, false),

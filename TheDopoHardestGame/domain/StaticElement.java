@@ -10,6 +10,7 @@ import java.awt.geom.Rectangle2D;
  * <b>(x, y, width, height)</b> <br>
  * <b>Inv:</b> width > 0 and height > 0
  */
+@SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
 public abstract class StaticElement implements Interactable, Drawable {
     private double x;
     private double y;

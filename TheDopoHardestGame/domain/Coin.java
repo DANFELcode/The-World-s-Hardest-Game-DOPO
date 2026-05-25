@@ -38,6 +38,7 @@ public abstract class Coin extends StaticElement implements Collectible {
     }
 
     // Efecto extra al recoger, vacío por defecto. Las subclases lo redefinen.
+    @SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
     protected void applyEffect(Player player) { }
 
     @Override

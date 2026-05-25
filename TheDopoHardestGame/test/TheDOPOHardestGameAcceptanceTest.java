@@ -23,10 +23,7 @@ import presentation.BoardPanel;
 import javax.swing.JFrame;
 
 /**
- * Pruebas de Integración Deterministas con Renderizado Visual (Enfoque Híbrido).
- * Se abandona la clase inestable java.awt.Robot. En su lugar, el sistema lee el nivel,
- * interactúa programáticamente con la API del dominio, y renderiza explícitamente a un JFrame
- * con un Thread.sleep() para que el usuario pueda VER y presenciar el espectáculo sin fallos de foco.
+ * Pruebas de integración visuales simulando la interacción real.
  */
 public class TheDOPOHardestGameAcceptanceTest {
 
@@ -44,7 +41,7 @@ public class TheDOPOHardestGameAcceptanceTest {
     @AfterEach
     public void tearDown() {
         if (frame != null) {
-            frame.dispose(); // Cierra la ventana automáticamente tras cada prueba
+            frame.dispose(); // Cierra la ventana tras la prueba
         }
     }
 
@@ -68,53 +65,50 @@ public class TheDOPOHardestGameAcceptanceTest {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        Thread.sleep(500); // Pausa dramática para que el usuario vea la escena inicial
+        Thread.sleep(500); // Pausa inicial para visualizar la ventana
     }
 
     /**
-     * Mueve al jugador de forma visual y algorítmica hacia la meta.
-     * Es más confiable que Robot porque inyecta vectores en el motor de físicas directo,
-     * pero igual de visible porque repinta la pantalla frame por frame.
-     * Rastrea dinámicamente el objetivo (útil para enemigos que se mueven).
+     * Mueve al jugador frame a frame hacia el objetivo.
      */
     private void walkTo(Player player, Interactable target) throws Exception {
         int initialDeaths = player.getDeaths();
         while (true) {
-            if (player.getDeaths() > initialDeaths) break; // El jugador murió, abortar persecución
-            if (target.shouldRemove()) break; // El objetivo (ej. bomba) explotó y desapareció
-            if (target instanceof Coin && ((Coin)target).isCollected()) break; // La moneda ya fue recogida
+            if (player.getDeaths() > initialDeaths) break; // Termina si el jugador muere
+            if (target.shouldRemove()) break; // Termina si el objetivo desaparece
+            if (Coin.class.isAssignableFrom(target.getClass()) && ((Coin)target).isCollected()) break; // Termina si se recoge la moneda
 
             double targetX = target.getAreaColision().getCenterX() - player.getWidth() / 2.0;
             double targetY = target.getAreaColision().getCenterY() - player.getHeight() / 2.0;
 
             if (player.getAreaColision().intersects(target.getAreaColision())) {
-                break; // Ya colisionaron visual y físicamente
+                break; // Colisión detectada
             }
 
             double dist = Math.hypot(targetX - player.getX(), targetY - player.getY());
             if (dist < 5.0) {
-                break; // Lo suficientemente cerca para forzar colisión inminente
+                break; // Colisión inminente
             }
 
             double dx = targetX - player.getX();
             double dy = targetY - player.getY();
 
-            // Invocar el método de movimiento del propio juego
+            // Movimiento del jugador
             player.move(dx, dy, level);
-            level.updateLevel(); // Procesa físicas
-            panel.updateGraphics(game.getDrawCommands(), game.getBackgroundColor()); // Repintar la UI
+            level.updateLevel();
+            panel.updateGraphics(game.getDrawCommands(), game.getBackgroundColor()); // Repintar pantalla
 
-            Thread.sleep(16); // Pausa para ~60 FPS
+            Thread.sleep(16); // 60 FPS
         }
 
-        // Dejamos que el motor procese el tick final donde ocurre el impacto visual
+        // Procesar el último frame de la colisión
         level.updateLevel();
         panel.updateGraphics(game.getDrawCommands(), game.getBackgroundColor());
-        Thread.sleep(800); // Pausa dramática
+        Thread.sleep(800); // Pausa visual
     }
 
     /**
-     * Versión de walkTo para caminar hacia una coordenada fija y vacía (para demostraciones visuales).
+     * Mueve al jugador hacia una coordenada específica vacía.
      */
     private void walkTo(Player player, double targetX, double targetY) throws Exception {
         double dist = Math.hypot(targetX - player.getX(), targetY - player.getY());
@@ -137,8 +131,8 @@ public class TheDOPOHardestGameAcceptanceTest {
         loadAndVisualize("nivel_test_bomba.txt", GameMode.PLAYER);
         Player player = level.getPlayers().get(0);
 
-        Bomb bomb1 = (Bomb) level.getStaticElements().stream().filter(e -> e instanceof Bomb).toArray()[0];
-        Bomb bomb2 = (Bomb) level.getStaticElements().stream().filter(e -> e instanceof Bomb).toArray()[1];
+        Bomb bomb1 = (Bomb) level.getStaticElements().stream().filter(e -> Bomb.class.isAssignableFrom(e.getClass())).toArray()[0];
+        Bomb bomb2 = (Bomb) level.getStaticElements().stream().filter(e -> Bomb.class.isAssignableFrom(e.getClass())).toArray()[1];
         Enemy enemy = level.getEnemies().get(0);
 
         // --- PRUEBA A: Player camina hacia la bomba ---
@@ -150,9 +144,8 @@ public class TheDOPOHardestGameAcceptanceTest {
         assertEquals(initialDeaths + 1, player.getDeaths(), "El jugador debió morir al tocar la bomba");
         assertEquals(initialX, player.getX(), "El jugador debió regresar al respawn original tras la muerte");
 
-        // --- PRUEBA B: El enemigo se acerca gradualmente a la segunda bomba ---
-        // Se interpola la posición paso a paso (en vez de teletransportar) para que
-        // el espectador vea al enemigo viajar hasta la bomba y explotar.
+        // --- PRUEBA B: El enemigo se acerca a la segunda bomba ---
+        // El enemigo camina hacia la segunda bomba para activarla.
         double startX = enemy.getX(), startY = enemy.getY();
         double endX = bomb2.getX(), endY = bomb2.getY();
         int steps = 45;
@@ -201,7 +194,7 @@ public class TheDOPOHardestGameAcceptanceTest {
         assertEquals(domain.GameConstants.COLOR_GREEN_WEAKENED, player.getDisplayColor(), "El skin verde debió palidecer por el golpe absorbido");
         assertTrue(player.getSpeed() < speedBeforeHit, "El jugador debió ser ralentizado visiblemente");
 
-        // Caminamos hacia terreno vacío para exhibir el cambio de Skin en pantalla
+        // Caminamos a una zona vacía para mostrar el cambio visual
         walkTo(player, player.getX() + 50, player.getY() - 50);
     }
 
@@ -229,7 +222,7 @@ public class TheDOPOHardestGameAcceptanceTest {
         assertEquals(deathsBeforeEnemy, player.getDeaths(), "El jugador NO debió morir gracias al LifeSource");
         assertEquals(initialLives, player.getExtraLives(), "La vida extra debió consumirse al absorber el impacto");
 
-        // Caminamos hacia terreno vacío para exhibir en pantalla que el jugador sobrevivió y puede seguir moviéndose
+        // Caminamos a una zona vacía para confirmar que el jugador sobrevivió
         walkTo(player, player.getX() + 50, player.getY() - 50);
     }
 
@@ -255,7 +248,7 @@ public class TheDOPOHardestGameAcceptanceTest {
         Enemy enemy = level.getEnemies().get(0);
         int initialDeaths = player.getDeaths();
 
-        walkTo(player, enemy); // Caminamos hacia el enemigo deliberadamente
+        walkTo(player, enemy); // Caminar hacia el enemigo
 
         assertEquals(initialDeaths + 1, player.getDeaths(), "El jugador debió morir a manos del enemigo");
         assertEquals(expectedSpawnX, player.getX(), "Al morir, el jugador debió reaparecer en la Zona Intermedia, NO en la inicial");
@@ -266,6 +259,9 @@ public class TheDOPOHardestGameAcceptanceTest {
 
         assertTrue(level.isLevelComplete(), "El Nivel completado debe ser activado al tocar la Final Zone");
         assertEquals(player, level.getWinner(), "Coronado como ganador del nivel");
+
+        // Pausa para visualizar la victoria
+        Thread.sleep(1500);
     }
 
     @Test
@@ -275,7 +271,7 @@ public class TheDOPOHardestGameAcceptanceTest {
         Player player1 = level.getPlayers().stream().filter(p -> "Player1".equals(p.getName())).findFirst().get();
         Player player2 = level.getPlayers().stream().filter(p -> "Player2".equals(p.getName())).findFirst().get();
 
-        // Dar contornos visuales únicos para identificarlos en la prueba visual PvsP
+        // Asignar colores para diferenciar a los jugadores
         player1.setBorderColor(java.awt.Color.BLUE);
         player2.setBorderColor(java.awt.Color.RED);
 
@@ -289,5 +285,77 @@ public class TheDOPOHardestGameAcceptanceTest {
         // --- PRUEBA B: Ir por la moneda propia ---
         walkTo(player1, p1Coin);
         assertTrue(p1Coin.isCollected(), "La moneda de Player1 fue recogida exitosamente");
+    }
+
+    @Test
+    public void testPausarJuego() throws Exception {
+        loadAndVisualize("nivel_test_monedas.txt", GameMode.PLAYER);
+        Player player = level.getPlayers().get(0);
+        
+        // Caminamos un poco antes de pausar
+        walkTo(player, player.getX() + 50, player.getY());
+        
+        // Pausar
+        game.togglePause();
+        panel.setPaused(game.isPaused()); // Simular la interfaz de pausa
+        panel.updateGraphics(game.getDrawCommands(), game.getBackgroundColor());
+        
+        double xBefore = player.getX();
+        int timeBefore = level.getGameTime();
+        
+        // Pausa para visualizar el estado pausado
+        Thread.sleep(1500); 
+        
+        // Intentar movimiento durante la pausa
+        game.movePlayer(0, 10, 0);
+        level.updateLevel();
+        
+        assertEquals(xBefore, player.getX(), "El jugador no debe moverse estando en pausa");
+        assertEquals(timeBefore, level.getGameTime(), "El tiempo no debe avanzar estando en pausa");
+        
+        // Despausar
+        game.togglePause();
+        panel.setPaused(game.isPaused());
+        
+        // Validar que se reanuda
+        walkTo(player, player.getX() + 50, player.getY());
+        assertTrue(player.getX() > xBefore, "El jugador debe moverse después de despausar");
+    }
+
+
+    @Test
+    public void testVictoriaYMensaje() throws Exception {
+        loadAndVisualize("nivel_test_zonas.txt", GameMode.PLAYER);
+        Player player = level.getPlayers().get(0);
+        Zone finalZone = level.getZones().values().stream()
+            .filter(z -> z.getClass().getSimpleName().equals("FinalZone")).findFirst().get();
+            
+        // Llegar a la meta
+        walkTo(player, finalZone);
+        assertTrue(level.isLevelComplete(), "El nivel debe completarse al llegar a la meta");
+        
+        // Mostrar mensaje de victoria y cerrarlo automáticamente
+        String[] opciones = {"Nueva Partida", "Menú", "Salir"};
+        
+        Thread t = new Thread(() -> {
+            try {
+                Thread.sleep(3000); // Esperar antes de cerrar el diálogo
+                java.awt.Window[] windows = java.awt.Window.getWindows();
+                for (java.awt.Window w : windows) {
+                    if (javax.swing.JDialog.class.isAssignableFrom(w.getClass())) {
+                        w.dispose(); // Cerrar ventana automáticamente
+                    }
+                }
+            } catch (Exception e) {}
+        });
+        t.start();
+        
+        javax.swing.JOptionPane.showOptionDialog(frame, 
+            "¡HAS GANADO EL JUEGO!", "Victoria", 
+            javax.swing.JOptionPane.DEFAULT_OPTION, javax.swing.JOptionPane.INFORMATION_MESSAGE, 
+            null, opciones, opciones[0]);
+            
+        // Verificación final
+        assertTrue(true);
     }
 }

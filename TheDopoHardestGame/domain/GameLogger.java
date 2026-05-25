@@ -4,17 +4,17 @@ import java.util.logging.Level;
 import java.io.IOException;
 
 /** Singleton that records game errors to errors.log for developers. */
-public class GameLogger {
+public final class GameLogger {
     private static GameLogger instance;
-    private static final Logger logger = Logger.getLogger("DOPOHardestGame");
+    private static final Logger LOGGER = Logger.getLogger("DOPOHardestGame");
 
     private GameLogger() {
         try {
             FileHandler handler = new FileHandler("errors.log", true);
             handler.setFormatter(new SimpleFormatter());
-            logger.addHandler(handler);
-            logger.setLevel(Level.SEVERE);
-            logger.setUseParentHandlers(false);
+            LOGGER.addHandler(handler);
+            LOGGER.setLevel(Level.SEVERE);
+            LOGGER.setUseParentHandlers(false);
         } catch (IOException e) {
             // If the log file can't be created, fall back to default handlers silently.
         }
@@ -27,6 +27,6 @@ public class GameLogger {
 
     /** Records a game error with its causing exception. */
     public void logError(String message, Exception e) {
-        logger.log(Level.SEVERE, message, e);
+        LOGGER.log(Level.SEVERE, message, e);
     }
 }

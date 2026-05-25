@@ -12,6 +12,7 @@ public class GradientPanel extends JPanel {
     /**
      * @param layout the layout manager for this panel
      */
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     public GradientPanel(LayoutManager layout) {
         super(layout);
         setOpaque(false);

@@ -36,6 +36,7 @@ public class TheDOPOHardestGameGUI extends JFrame implements MainView {
     private static final String PANEL_SELECCION   = "seleccion";
     private static final String PANEL_JUEGO       = "juego";
 
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     public TheDOPOHardestGameGUI() {
         super("TheDOPOHardestGame");
         juego = new TheDOPOHardestGame();

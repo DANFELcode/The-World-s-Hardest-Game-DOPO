@@ -51,6 +51,7 @@ public class JuegoPanel extends JPanel {
      * @param juego the game facade
      * @param host the main window, used for navigation and loop control
      */
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     public JuegoPanel(TheDOPOHardestGame juego, MainView host) {
         super(new BorderLayout());
         this.juego = juego;

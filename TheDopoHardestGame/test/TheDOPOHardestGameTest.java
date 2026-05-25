@@ -1056,4 +1056,250 @@ class TheDOPOHardestGameTest {
         }
         return f;
     }
+
+    // =================== 17. DrawCommand ===================
+    @Test
+    void testDrawCommandConstructorWithBasicParameters() {
+        dto.DrawCommand cmd = new dto.DrawCommand(Color.RED, 10, 20, 30, 40, dto.DrawCommand.Shape.RECT);
+        assertEquals(Color.RED, cmd.color);
+        assertEquals(10, cmd.x);
+        assertEquals(20, cmd.y);
+        assertEquals(30, cmd.width);
+        assertEquals(40, cmd.height);
+        assertEquals(dto.DrawCommand.Shape.RECT, cmd.shape);
+        assertNull(cmd.borderColor);
+        assertNull(cmd.outerBorderColor);
+    }
+
+    @Test
+    void testDrawCommandConstructorWithBorderColor() {
+        dto.DrawCommand cmd = new dto.DrawCommand(Color.BLUE, 0, 0, 10, 10, dto.DrawCommand.Shape.OVAL, Color.BLACK);
+        assertEquals(Color.BLUE, cmd.color);
+        assertEquals(Color.BLACK, cmd.borderColor);
+        assertNull(cmd.outerBorderColor);
+    }
+
+    @Test
+    void testDrawCommandConstructorWithOuterBorderColor() {
+        dto.DrawCommand cmd = new dto.DrawCommand(Color.GREEN, 5, 5, 15, 15, dto.DrawCommand.Shape.RECT, Color.WHITE, Color.YELLOW);
+        assertEquals(Color.GREEN, cmd.color);
+        assertEquals(Color.WHITE, cmd.borderColor);
+        assertEquals(Color.YELLOW, cmd.outerBorderColor);
+    }
+
+    // =================== 18. Machine ===================
+    @Test
+    void testMachineCreation() {
+        GameStrategy strategy = new RandomStrategy();
+        Machine machine = new Machine("Bot1", 100, 150, 20, 20, 2.5, strategy);
+        
+        assertEquals("Bot1", machine.getName());
+        assertEquals(100.0, machine.getX());
+        assertEquals(150.0, machine.getY());
+        assertEquals(20.0, machine.getWidth());
+        assertEquals(20.0, machine.getHeight());
+        assertEquals(3.0, machine.getSpeed());
+    }
+
+    @Test
+    void testMachineGetTypeName() {
+        Machine machine = new Machine("Bot", 0, 0, 10, 10, 1, new RandomStrategy());
+        assertEquals("machine", machine.getTypeName());
+    }
+
+    @Test
+    void testMachineGetDisplayColor() {
+        Machine machine = new Machine("Bot", 0, 0, 10, 10, 1, new ExpertStrategy());
+        assertEquals(Color.MAGENTA, machine.getDisplayColor());
+    }
+
+    // =================== 19. GameStrategy ===================
+    @Test
+    void testGameStrategyOfWithExpert() {
+        GameStrategy strategy = GameStrategy.of("expert");
+        assertEquals(ExpertStrategy.class, strategy.getClass());
+    }
+
+    @Test
+    void testGameStrategyOfWithRandom() {
+        GameStrategy strategy = GameStrategy.of("random");
+        assertEquals(RandomStrategy.class, strategy.getClass());
+    }
+
+    @Test
+    void testGameStrategyOfWithNullReturnsRandom() {
+        GameStrategy strategy = GameStrategy.of(null);
+        assertEquals(RandomStrategy.class, strategy.getClass());
+    }
+
+    @Test
+    void testGameStrategyOfWithUnknownReturnsRandom() {
+        GameStrategy strategy = GameStrategy.of("unknown_strategy");
+        assertEquals(RandomStrategy.class, strategy.getClass());
+    }
+
+    @Test
+    void testGameStrategyOfIsCaseInsensitive() {
+        GameStrategy strategy = GameStrategy.of("ExPeRt");
+        assertEquals(ExpertStrategy.class, strategy.getClass());
+    }
+
+    // =================== 20. PatrolMovement ===================
+    @Test
+    void testPatrolMovementCreation() {
+        Point2D.Double[] route = { new Point2D.Double(10, 10), new Point2D.Double(20, 10) };
+        PatrolMovement patrol = PatrolMovement.basic(route);
+        assertNotNull(patrol);
+    }
+
+    @Test
+    void testPatrolMovementCreationWithEmptyRouteThrowsException() {
+        Point2D.Double[] route = new Point2D.Double[0];
+        assertThrows(IllegalArgumentException.class, () -> PatrolMovement.basic(route));
+    }
+
+    @Test
+    void testPatrolMovementCreationWithNullRouteThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> PatrolMovement.basic(null));
+    }
+
+    @Test
+    void testPatrolMovementMoveTowardsWaypoint() {
+        Point2D.Double[] route = { new Point2D.Double(50, 50), new Point2D.Double(100, 50) };
+        PatrolMovement patrol = PatrolMovement.basic(route);
+        Enemy enemy = new Enemy(0, 50, 20, 20, patrol);
+        
+        enemy.move(level);
+        assertTrue(enemy.getX() > 0);
+        assertEquals(50.0, enemy.getY(), 0.001);
+    }
+
+    @Test
+    void testPatrolMovementReachWaypointAndCycle() {
+        Point2D.Double[] route = { new Point2D.Double(10, 10), new Point2D.Double(50, 10) };
+        PatrolMovement patrol = PatrolMovement.basic(route);
+        Enemy enemy = new Enemy(8, 10, 20, 20, patrol);
+        
+        for (int i = 0; i < 10; i++) {
+            enemy.move(level);
+        }
+        
+        assertTrue(enemy.getX() > 10.0);
+    }
+
+    @Test
+    void testPatrolMovementToFileParams() {
+        Point2D.Double[] route = { new Point2D.Double(10, 20), new Point2D.Double(30, 40) };
+        PatrolMovement patrol = PatrolMovement.basic(route);
+        String params = patrol.toFileParams();
+        assertEquals("movement=patrol,route=10.0:20.0|30.0:40.0", params);
+    }
+
+    // =================== 21. StaticElement ===================
+    private static class TestStaticElement extends StaticElement {
+        public TestStaticElement(double x, double y, double width, double height, String color) {
+            super(x, y, width, height, color);
+        }
+    }
+
+    @Test
+    void testStaticElementBasicGetters() {
+        StaticElement el = new TestStaticElement(10, 20, 30, 40, "black");
+        assertEquals(10.0, el.getX());
+        assertEquals(20.0, el.getY());
+        assertEquals(30.0, el.getWidth());
+        assertEquals(40.0, el.getHeight());
+        assertEquals("black", el.getColor());
+    }
+
+    @Test
+    void testStaticElementSetters() {
+        StaticElement el = new TestStaticElement(0, 0, 10, 10, "white");
+        el.setX(100);
+        el.setY(200);
+        assertEquals(100.0, el.getX());
+        assertEquals(200.0, el.getY());
+    }
+
+    @Test
+    void testStaticElementGetAreaColision() {
+        StaticElement el = new TestStaticElement(5, 5, 15, 15, "red");
+        java.awt.geom.Rectangle2D rect = el.getAreaColision();
+        assertEquals(5.0, rect.getX());
+        assertEquals(5.0, rect.getY());
+        assertEquals(15.0, rect.getWidth());
+        assertEquals(15.0, rect.getHeight());
+    }
+
+    @Test
+    void testStaticElementDefaultMethods() {
+        StaticElement el = new TestStaticElement(0, 0, 10, 10, "black");
+        assertFalse(el.shouldBeRemoved());
+        assertFalse(el.isBlocking());
+        assertTrue(el.isVisible());
+        assertFalse(el.isHazardous());
+        assertNull(el.getOwnerName());
+        assertEquals("WALL", el.getFileType());
+        assertEquals("", el.extraFileParams());
+        assertEquals(Color.BLACK, el.getDisplayColor());
+    }
+
+    @Test
+    void testStaticElementToDrawCommand() {
+        StaticElement el = new TestStaticElement(1, 2, 3, 4, "black");
+        dto.DrawCommand cmd = el.toDrawCommand();
+        assertEquals(Color.BLACK, cmd.color);
+        assertEquals(1, cmd.x);
+        assertEquals(2, cmd.y);
+        assertEquals(3, cmd.width);
+        assertEquals(4, cmd.height);
+        assertEquals(dto.DrawCommand.Shape.RECT, cmd.shape);
+    }
+
+    // =================== 22. ExpertStrategy ===================
+    @Test
+    void testExpertStrategyExecuteWithNoTargetShouldNotMove() {
+        ExpertStrategy strategy = new ExpertStrategy();
+        Machine machine = new Machine("Bot1", 100, 100, 20, 20, 2.0, strategy);
+        
+        double startX = machine.getX();
+        double startY = machine.getY();
+        
+        strategy.execute(machine, level);
+        
+        assertEquals(startX, machine.getX(), 0.1);
+        assertEquals(startY, machine.getY(), 0.1);
+    }
+
+    @Test
+    void testExpertStrategyExecuteFindsClosestCoinAndMovesTowardsIt() {
+        ExpertStrategy strategy = new ExpertStrategy();
+        Machine machine = new Machine("Bot1", 100, 100, 20, 20, 2.0, strategy);
+        
+        YellowCoin coin = new YellowCoin(150, 100, 10, 10, "yellow", "Bot1");
+        level.addCoin(coin);
+        level.addPlayer(machine);
+
+        double startX = machine.getX();
+        
+        strategy.execute(machine, level);
+        
+        assertTrue(machine.getX() > startX);
+    }
+
+    @Test
+    void testExpertStrategyExecuteGoesToFinalZoneWhenNoCoinsLeft() {
+        ExpertStrategy strategy = new ExpertStrategy();
+        Machine machine = new Machine("Bot1", 100, 100, 20, 20, 2.0, strategy);
+        
+        FinalZone fz = new FinalZone(100, 200, 50, 50, "Bot1");
+        level.addZone("final_Bot1", fz);
+        level.addPlayer(machine);
+
+        double startY = machine.getY();
+        
+        strategy.execute(machine, level);
+        
+        assertTrue(machine.getY() > startY);
+    }
 }

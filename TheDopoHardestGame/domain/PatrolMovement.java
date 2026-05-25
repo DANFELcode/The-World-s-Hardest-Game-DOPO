@@ -7,7 +7,7 @@ import java.awt.geom.Point2D;
  * <b>(route, currentTargetIndex)</b> <br>
  * <b>Inv:</b> route != null and route.length > 0
  */
-public class PatrolMovement implements MovementStrategy {
+public final class PatrolMovement implements MovementStrategy {
     
     private Point2D.Double[] route; //ruta con puntos de referencia
     private int currentTargetIndex; //indice del punto de referencia actual(al que se esta dirigiendo el enemigo)
